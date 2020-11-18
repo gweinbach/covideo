@@ -2,6 +2,6 @@
 
 ### Description
 
-A hands-on lab for me to learn Scala 3/Dotties.
+A hands-on lab to learn Scala 3/Dotty new features.
 
 
