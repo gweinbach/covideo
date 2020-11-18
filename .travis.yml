@@ -1,11 +1,9 @@
-dist: bionic
+dist: trusty
 language: scala
 scala:
    - 3.0.0-M1
 env:
-- JDK=oraclejdk8
 - JDK=openjdk8
-- JDK=openjdk11
 before_script:
   - jdk_switcher use $JDK
 script:
