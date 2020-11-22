@@ -8,10 +8,12 @@ package com.ezoky.ezgames.covideo.component
  * @author gweinbach on 14/11/2020
  * @since 0.1.0
  */
-trait HealthCondition 
+enum HealthCondition {
 
-case object Healthy extends HealthCondition
+  case Healthy extends HealthCondition
 
-case object Sick extends HealthCondition
+  case Sick extends HealthCondition
 
-case object Healed extends HealthCondition
+  case Healed extends HealthCondition
+
+}
