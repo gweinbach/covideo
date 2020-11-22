@@ -1,11 +1,18 @@
-dist: trusty
+dist: focal
 language: scala
 scala:
-   - 3.0.0-M1
+  - 3.0.0-M1
 env:
-- JDK=openjdk8
-before_script:
-  - jdk_switcher use $JDK
+  - JDK=openjdk8
 script:
-- sbt "++ ${TRAVIS_SCALA_VERSION}!" test
+  - sbt "++ ${TRAVIS_SCALA_VERSION}!" test
 # - git diff --exit-code # check scalariform
+cache:
+  directories:
+    - $HOME/.cache/coursier
+    - $HOME/.ivy2/cache
+    - $HOME/.sbt
+before_cache:
+  - rm -fv $HOME/.ivy2/.sbt.ivy.lock
+  - find $HOME/.ivy2/cache -name "ivydata-*.properties" -print -delete
+  - find $HOME/.sbt        -name "*.lock"               -print -delete

@@ -9,23 +9,26 @@ import com.ezoky.ezgames.covideo.Main
 import org.junit.Assert._
 import org.junit.Test
 import Dimension._
+//import org.scalatest.funsuite.AnyFunSuite
 
 class DimensionTest {
+  //class DimensionTest extends AnyFunSuite {
   
   @Test def sizeTest(): Unit = {
+//      test("Size values") {
     val s0 = SizeValue(0)
     assert(s0 == SizeValue.Zero)
 
-    val s1 = SizeValue(10.0)    
+    val s1 = SizeValue(10.0)
     val s2 = SizeValue(-10.0)
     assert(s2 == s1)
-    
-    val s3 = (10.0 size) 
+
+    val s3 = (10.0 size)
     assert(s3 == s1)
-    
   }
 
   @Test def toricPositionTest(): Unit = {
+    //  test("Position values in a Toric Geometry") {
 
     val c00 = PositionValue(0, SizeValue(0), Geometry.Toric)
     assert(c00 == PositionValue.Zero)
@@ -55,17 +58,20 @@ class DimensionTest {
   }
 
   @Test def positionUsingImplicits: Unit = {
+    //  test("Position created using implicit boundaries and geometry") {
     {
       given Geometry = Geometry.Toric
+
       given SizeValue = (10 size)
 
       assert((3 position) == (13 position))
       assert((3 position) == (23 position))
       assert((3 position) == (-3 position))
     }
-    
+
     {
       given Geometry = Geometry.Bounded
+
       given SizeValue = (10 size)
 
       assert((3 position) == (17 position))
@@ -75,26 +81,71 @@ class DimensionTest {
   }
 
   @Test def accelerateRest: Unit = {
+    //  test("Accelerations and Movements") {
     {
-      given Geometry = Geometry.Toric
+      given Geometry = Geometry.Toric 
       {
         given SizeValue = (10 size)
 
-        assert((3 acceleration)(2 speed) == (5 speed))
-        assert((3 acceleration)(2 speed).on(3 position) == (8 position))
+        assert((3 acceleration) (2 movement) == (5 movement))
+        assert((3 acceleration) (2 movement).from(3 position) == (8 position))
       } 
       {
         given SizeValue = (6 size)
 
-        assert((3 acceleration)(2 speed).on(3 position) == (2 position))
+        assert((3 acceleration) (2 movement).from(3 position) == (2 position))
       }
-    } 
+    }
     {
-      given Geometry = Geometry.Bounded 
+      given Geometry = Geometry.Bounded
       {
         given SizeValue = (6 size)
 
-        assert((3 acceleration)(2 speed).on(3 position) == (4 position))
+        assert((3 acceleration) (2 movement).from(3 position) == (4 position))
+      }
+    }
+  }
+
+  @Test def solidTest: Unit = {
+//  test("A Solid has a position and a size") {
+    {
+      given Geometry = Geometry.Toric
+
+      {
+        given SizeValue = (10 size)
+
+        val s1 = Solid(2 position, 5 size)
+        assert(s1.position == (2 size))
+        assert(s1.size == (5 size))
+        assert(s1 == Solid(12 position, 5 size))
+
+        val s2 = Solid(2 position, 12 size)
+        assert(s2.position == (2 position))
+        assert(s2.size == (12 size))
+      }
+    }
+    {
+      given Geometry = Geometry.Bounded
+
+      {
+        given SizeValue = (10 size)
+
+        val s1 = Solid(2 position, 5 size)
+        assert(s1.position == (2 position))
+        assert(s1.size == (5 size))
+        assert(s1 == Solid(18 position, 5 size))
+
+        val s2 = Solid(2 position, 9 size)
+        assert(s2.position == (1 position))
+        assert(s2.size == (9 size))
+
+        val s3 = Solid(2 position, 12 size)
+        assert(s3.position == (0 position))
+        assert(s3.size == (10 size))
+        
+        val s4 = Solid(-3 position, 8 size)
+        assert(s4.position == (2 position))
+        assert(s4.size == (8 size))
       }
     }
   }

@@ -4,7 +4,7 @@
 
 package com.ezoky.ezgames.covideo.component
 
-import com.ezoky.ezgames.covideo.component.Dimension.{Geometry, PositionValue, SizeValue}
+import com.ezoky.ezgames.covideo.component.Dimension._
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Prop.delay
 import org.scalacheck.{Arbitrary, Gen, Prop, Properties}
@@ -17,21 +17,13 @@ class DimensionCheck extends Properties("Dimensions") {
 
   import Prop.forAll
 
-  implicit lazy val GeometryArbitrary: Arbitrary[Geometry] =
+  given Arbitrary[Geometry] =
     Arbitrary(Gen.oneOf(Geometry.Toric, Geometry.Bounded))
 
-  implicit lazy val SizeArbitrary: Arbitrary[SizeValue] =
-    Arbitrary[SizeValue](
-      for {
-        d <- arbitrary[Double]
-      } yield {
-        SizeValue(
-          d
-        )
-      }
-    )
+  given Arbitrary[SizeValue] =
+    Arbitrary[SizeValue](arbitrary[Double].map(SizeValue(_)))
 
-  implicit lazy val PositionArbitrary: Arbitrary[PositionValue] =
+  given Arbitrary[PositionValue] =
     Arbitrary[PositionValue](
       for {
         d <- arbitrary[Double]
@@ -42,6 +34,10 @@ class DimensionCheck extends Properties("Dimensions") {
       }
     )
 
+  given Arbitrary[MovementValue] =
+    Arbitrary[MovementValue](arbitrary[Double].map(MovementValue(_)))
+  
+  
 
   property("Position is always positive and within boundary limits") =
     forAll { (d: Double, boundary: SizeValue, geometry: Geometry) =>
@@ -52,6 +48,16 @@ class DimensionCheck extends Properties("Dimensions") {
   property("Zero sized boundary limits position to Zero") =
     forAll { (d: Double, geometry: Geometry) =>
       PositionValue(d, SizeValue.Zero, geometry) == PositionValue.Zero
+    }
+  
+  property("applying a movement M to A gives a position B implies that M is the movement from A to B") =
+    forAll { (da: Double, db: Double, boundary: SizeValue, geometry: Geometry) =>
+      given SizeValue = boundary
+      given Geometry = geometry
+      
+      val a = da position
+      val b = (db position) // compilation fails without parenthesis
+      MovementValue(a, b) == a.to(b)
     }
 
 }

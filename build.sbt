@@ -5,11 +5,12 @@ ThisBuild / organization := "com.ezoky"
 ThisBuild / licenses := Seq("Apache 2.0 License" -> url("http://www.apache.org/licenses/LICENSE-2.0.html"))
 
 val dottyVersion = "3.0.0-M1"
+//val dottyVersion = "0.27.0-RC1"
 
 ThisBuild / scalacOptions ++= Seq(
 //  "-Yrangepos", // use range positions for syntax trees
   "-language:postfixOps", //  enables postfix operators
-//  "-language:implicitConversions", // enables defining implicit methods and members
+  "-language:implicitConversions", // enables defining implicit methods and members
 //  "-language:existentials", // enables writing existential types
 //  "-language:reflectiveCalls", // enables reflection
 //  "-language:higherKinds", // allow higher kinded types without `import scala.language.higherKinds`
@@ -33,5 +34,5 @@ lazy val root = project
     
     libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % "test",
     libraryDependencies += ("org.scalacheck" %% "scalacheck" % "1.14.3" % "test").withDottyCompat(scalaVersion.value),
-    libraryDependencies += ("org.scalatest" %% "scalatest" % "3.2.0" % "test").withDottyCompat(scalaVersion.value)
+    libraryDependencies += ("org.scalatest" %% "scalatest-funsuite" % "3.2.2" % "test").withDottyCompat(scalaVersion.value)
   )

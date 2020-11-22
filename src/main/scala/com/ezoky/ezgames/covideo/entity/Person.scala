@@ -4,12 +4,12 @@
 
 package com.ezoky.ezgames.covideo.entity
 
-import com.ezoky.ezgames.covideo.component.{HealthCondition, Position}
+import com.ezoky.ezgames.covideo.component.{HealthCondition, Pos}
 
 
 /**
  * @author gweinbach on 14/11/2020
  * @since 0.1.0
  */
-case class Person(position: Position,
+case class Person(position: Pos,
                   healthCondition: HealthCondition)

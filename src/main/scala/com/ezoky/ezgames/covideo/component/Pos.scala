@@ -10,6 +10,6 @@ import Coord._
  * @author gweinbach on 14/11/2020
  * @since 0.1.0
  */
-case class Position(x: XCoord, 
-                    y: YCoord)
+case class Pos(x: XCoord,
+               y: YCoord)
 
