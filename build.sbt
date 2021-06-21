@@ -4,7 +4,7 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 ThisBuild / organization := "com.ezoky"
 ThisBuild / licenses := Seq("Apache 2.0 License" -> url("http://www.apache.org/licenses/LICENSE-2.0.html"))
 
-val dottyVersion = "3.0.0-M1"
+val dottyVersion = "3.0.0-M2"
 //val dottyVersion = "0.27.0-RC1"
 
 ThisBuild / scalacOptions ++= Seq(
