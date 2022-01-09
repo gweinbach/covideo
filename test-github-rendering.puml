@@ -1,7 +1,0 @@
-@startuml Test PlantUML Rendering
-
-left to right direction
-
-Actor --> (Use Case)
-
-@enduml

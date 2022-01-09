@@ -4,14 +4,16 @@
 
 package com.ezoky.ezgames.covideo.system
 
-import com.ezoky.ezgames.covideo.component.{Area, Position3D}
+import com.ezoky.ezgames.covideo.component.{Area, Movement, Position}
 
 /**
  * @author gweinbach on 14/11/2020
  * @since 0.1.0
  */
-case class Move(position: Position3D,
+case class Move(position: Position,
+                movement: Movement,
                 within: Area)
-  extends System[Position3D] {
-  override def evolve: Position3D = ???
+  extends System[Position] {
+  override def evolve: Position =
+    movement.move(position, within)
 }

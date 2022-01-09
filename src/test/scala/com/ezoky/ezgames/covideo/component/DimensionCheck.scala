@@ -4,10 +4,11 @@
 
 package com.ezoky.ezgames.covideo.component
 
-import com.ezoky.ezgames.covideo.component.Dimension._
+import com.ezoky.ezgames.covideo.component.Dimension.*
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Prop.delay
 import org.scalacheck.{Arbitrary, Gen, Prop, Properties}
+import Ordering.Implicits.*
 
 /**
  * @author gweinbach on 17/11/2020
@@ -17,13 +18,16 @@ class DimensionCheck extends Properties("Dimensions") {
 
   import Prop.forAll
 
-  given Arbitrary[Geometry] =
-    Arbitrary(Gen.oneOf(Geometry.Toric, Geometry.Bounded))
+  implicit lazy val DurationArbitrary: Arbitrary[DurationValue] =
+    Arbitrary(Gen.long.map(DurationValue(_)))
 
-  given Arbitrary[SizeValue] =
-    Arbitrary[SizeValue](arbitrary[Double].map(SizeValue(_)))
+  implicit lazy val GeometryArbitrary: Arbitrary[Geometry] =
+    Arbitrary(Gen.oneOf(Geometry.Flat, Geometry.Toric, Geometry.Bounded))
 
-  given Arbitrary[PositionValue] =
+  implicit lazy val SizeArbitrary: Arbitrary[SizeValue] =
+    Arbitrary(Gen.double.map(SizeValue(_)))
+
+  implicit lazy val PositionArbitrary: Arbitrary[PositionValue] =
     Arbitrary[PositionValue](
       for {
         d <- arbitrary[Double]
@@ -34,10 +38,10 @@ class DimensionCheck extends Properties("Dimensions") {
       }
     )
 
-  given Arbitrary[MovementValue] =
-    Arbitrary[MovementValue](arbitrary[Double].map(MovementValue(_)))
-  
-  
+  property("In a Flat Geometry, there is one single available Position") =
+    forAll { (d: Double, boundary: SizeValue) =>
+      PositionValue(d, boundary, Geometry.Flat) == PositionValue.Zero
+    }
 
   property("Position is always positive and within boundary limits") =
     forAll { (d: Double, boundary: SizeValue, geometry: Geometry) =>
@@ -49,15 +53,11 @@ class DimensionCheck extends Properties("Dimensions") {
     forAll { (d: Double, geometry: Geometry) =>
       PositionValue(d, SizeValue.Zero, geometry) == PositionValue.Zero
     }
-  
-  property("applying a movement M to A gives a position B implies that M is the movement from A to B") =
-    forAll { (da: Double, db: Double, boundary: SizeValue, geometry: Geometry) =>
-      given SizeValue = boundary
-      given Geometry = geometry
-      
-      val a = da position
-      val b = (db position) // compilation fails without parenthesis
-      MovementValue(a, b) == a.to(b)
-    }
 
+  property("Position is always smaller than Maximum Position and bigger than Zero") =
+    forAll { (d: Double, boundary: SizeValue, geometry: Geometry) =>
+      val position = PositionValue(d, boundary, geometry)
+      given Geometry = geometry
+      (position >= PositionValue.Zero) && (position <= boundary.maxPosition)
+    }
 }

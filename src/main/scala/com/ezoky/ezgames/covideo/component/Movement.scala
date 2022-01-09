@@ -4,27 +4,37 @@
 
 package com.ezoky.ezgames.covideo.component
 
-import com.ezoky.ezgames.covideo.component.Dimension.MovementValue
-
-import Speed._
-
 /**
  * @author gweinbach on 14/11/2020
  * @since 0.1.0
  */
 case class Movement(xSpeed: XSpeed,
                     ySpeed: YSpeed,
-                    ZSpeed: ZSpeed)
+                    zSpeed: ZSpeed) {
+  def move(position: Position,
+           within: Area): Position =
+    Position(
+      xSpeed.move(position.x, within.width),
+      ySpeed.move(position.y, within.height),
+      zSpeed.move(position.z, within.depth),
+    )
+}
 
-enum Speed(value: MovementValue) {
+object Movement {
 
-  case XSpeed(value: MovementValue)
-    extends Speed(value)
-
-  case YSpeed(value: MovementValue)
-    extends Speed(value)
-
-  case ZSpeed(value: MovementValue)
-    extends Speed(value)
-
+  def Zero: Movement =
+    Movement(
+      XSpeed.Zero,
+      YSpeed.Zero,
+      ZSpeed.Zero
+    )
+    
+  def Random(xRange: SpeedRange,
+             yRange: SpeedRange,
+             zRange: SpeedRange): Movement =
+    Movement(
+      XSpeed.RandomWithin(xRange),
+      YSpeed.RandomWithin(yRange),
+      ZSpeed.RandomWithin(zRange)
+    )
 }
