@@ -1,15 +1,20 @@
 package com.ezoky.ezgames.covideo.system
 
 import com.ezoky.ezgames.covideo.component.{Scene, Sprite}
+import com.ezoky.ezgames.covideo.entity.Game
 
 /**
  * @author gweinbach on 03/01/2022
  * @since 0.2.0
  */
-case class Display[ImageType](scene: Scene[ImageType],
-                              sprites: Set[Sprite[ImageType]])
-  extends System[Scene[ImageType]] {
+trait Display[T]:
+  extension(entity: T) def display: T
 
-  override def evolve: Scene[ImageType] =
-    sprites.foldLeft(scene)((scene, sprite) => scene.withSprite(sprite))
-}
+given Display[Game] with
+  extension (entity: Game)
+    override def display: Game =
+      entity.copy(
+        world = entity.world.copy(
+          scene = entity.world.scene.withSprites(entity.people.map(_.sprite))
+          )
+      )

@@ -24,5 +24,10 @@ project/plugins/project/
 target
 project/project
 
+# VSCode specific
+.vscode/
+.metals/
+.bloop/
+
 .Rproj.user
 .DS_Store

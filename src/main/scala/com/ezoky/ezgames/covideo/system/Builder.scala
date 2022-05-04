@@ -1,6 +1,6 @@
 package com.ezoky.ezgames.covideo.system
 
-import com.ezoky.ezgames.covideo.component.Area
+import com.ezoky.ezgames.covideo.component.{Area, Generated}
 
 /**
  * @author gweinbach on 30/12/2021
@@ -8,6 +8,6 @@ import com.ezoky.ezgames.covideo.component.Area
  */
 trait Builder[T]:
 
-  def build: T
+  def build: Generated[T]
 
 

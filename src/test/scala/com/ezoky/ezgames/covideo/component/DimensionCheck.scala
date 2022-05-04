@@ -54,10 +54,16 @@ class DimensionCheck extends Properties("Dimensions") {
       PositionValue(d, SizeValue.Zero, geometry) == PositionValue.Zero
     }
 
-  property("Position is always smaller than Maximum Position and bigger than Zero") =
+  property("Position is always smaller than Maximum Position and greater or equal than Minimum") =
     forAll { (d: Double, boundary: SizeValue, geometry: Geometry) =>
       val position = PositionValue(d, boundary, geometry)
       given Geometry = geometry
-      (position >= PositionValue.Zero) && (position <= boundary.maxPosition)
+      (position >= boundary.minPosition) && (position <= boundary.maxPosition)
+    }
+
+  property("Min position is Zero") =
+    forAll { (boundary: SizeValue, geometry: Geometry) =>
+      given Geometry = geometry
+      boundary.minPosition == PositionValue.Zero
     }
 }

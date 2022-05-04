@@ -14,11 +14,9 @@ import javax.swing.{ImageIcon, JFrame, JPanel}
  */
 
 
-type ImageType = AWTImage
-
 opaque type Pixel = Int
 
-extension (pixel: Pixel) {
+extension (pixel: Pixel)
   def px: Pixel = pixel
 
   def +(other: Pixel): Pixel =
@@ -33,13 +31,13 @@ extension (pixel: Pixel) {
   def height(using Geometry: Geometry): Height =
     Height(pixel size)
 
-}
 
-case class CurrentScreenAreaBuilder(topMargin: Pixel,
+case class CurrentScreenAreaBuilder(geometry: Geometry,
+                                    topMargin: Pixel,
                                     leftMargin: Pixel,
                                     bottomMargin: Pixel,
-                                    rightMargin: Pixel)(using Geometry)
-  extends Builder[Area] {
+                                    rightMargin: Pixel)
+  extends Builder[Area] :
 
   import java.awt.{GraphicsDevice, GraphicsEnvironment}
 
@@ -47,36 +45,42 @@ case class CurrentScreenAreaBuilder(topMargin: Pixel,
   val screenWidth: Pixel = gd.getDisplayMode.getWidth px
   val screenHeight: Pixel = gd.getDisplayMode.getHeight px
 
-  override def build: Area = Area(
-    (screenWidth - leftMargin - rightMargin).width,
-    (screenHeight - topMargin - bottomMargin).height,
-    Depth.Flat
-  )
-}
+  given Geometry = geometry
+
+  override def build: Generated[Area] =
+    Generated.unit(
+      Area(
+        (screenWidth - leftMargin - rightMargin).width,
+        (screenHeight - topMargin - bottomMargin).height,
+        Depth.Flat
+      )
+    )
+
 
 case class CurrentScreenSceneBuilder(area: Area)
-  extends Builder[Scene[ImageType]] {
-  override def build: Scene[ImageType] = {
+  extends Builder[Scene] :
+
+  override def build: Generated[Scene] =
     val panel = SwingScene().withArea(area)
-    panel
-  }
-}
+    Generated.unit(panel)
+
 
 case class SwingSprite(asset: ImageIcon,
-                       position: Position) extends Sprite[ImageType] {
+                       position: Position)
+  extends Sprite :
 
-  val image: ImageType = asset.getImage
+  override type ImageType = AWTImage
 
-  def moveTo(position: Position): SwingSprite =
+  override val image: ImageType = asset.getImage
+
+  override def moveTo(position: Position): SwingSprite =
     copy(position = position)
-
-}
 
 
 case class SwingScene(area: Option[Area] = None,
-                      sprites: Set[Sprite[ImageType]] = Set.empty,
-                      var displayFrame: DisplayFrame = DisplayFrame())
-  extends Scene[ImageType] {
+                      sprites: Set[Sprite] = Set.empty,
+                      displayFrame: DisplayFrame = DisplayFrame())
+  extends Scene {
 
   EventQueue.invokeLater(() =>
     displayFrame.setVisible(true)
@@ -84,13 +88,15 @@ case class SwingScene(area: Option[Area] = None,
 
   override def withArea(area: Area): SwingScene = {
     val withArea = copy(area = Some(area))
-    withArea.displayFrame = displayFrame.resize(project(area.maxPosition))
+    // side effect, not pure
+    displayFrame.resize(project(area.maxPosition))
     withArea
   }
 
-  override def withSprite(sprite: Sprite[ImageType]): SwingScene = {
+  override def withSprite(sprite: Sprite): SwingScene = {
     val withSprite = copy(sprites = sprites + sprite)
-    withSprite.displayFrame = displayFrame.updateScene(withSprite)
+    // side effect, not pure
+    displayFrame.updateScene(withSprite)
     withSprite
   }
 
@@ -99,8 +105,8 @@ case class SwingScene(area: Option[Area] = None,
 }
 
 
-class DisplayFrame(var frameSize: (Int, Int) = (0,0),
-                   var panel: DisplayPanel = new DisplayPanel())
+private class DisplayFrame(var frameSize: (Int, Int) = (0, 0),
+                           var panel: DisplayPanel = new DisplayPanel())
   extends JFrame {
 
   initUI()
@@ -114,85 +120,114 @@ class DisplayFrame(var frameSize: (Int, Int) = (0,0),
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
   }
 
-  def resize(size: (Int, Int)): DisplayFrame = {
+  def resize(size: (Int, Int)): Unit = {
     setSize(
       size._1,
       size._2
     )
     frameSize = size
     repaint()
-    this
   }
 
-  def updateScene(scene: SwingScene): DisplayFrame = {
+  def updateScene(scene: SwingScene): Unit = {
     panel = panel.updateScene(scene)
     repaint()
-    this
   }
 }
 
-class DisplayPanel(var optScene: Option[SwingScene] = None)
-  extends JPanel {
+private class DisplayPanel(var optScene: Option[SwingScene] = None)
+  extends JPanel :
 
   import java.awt.{Color, Graphics, Graphics2D, Toolkit}
 
   //  setBackground(Color.black);
 
-  override def paintComponent(g: Graphics): Unit = {
+  override def paintComponent(g: Graphics): Unit =
     super.paintComponent(g)
     doDrawing(g)
     Toolkit.getDefaultToolkit.sync()
-  }
 
-  private def doDrawing(g: Graphics): Unit = {
+
+  private def doDrawing(g: Graphics): Unit =
     val g2d = g.asInstanceOf[Graphics2D]
-    for {
+    for
       scene <- optScene.toSet
       sprite <- scene.sprites
-    } yield {
+    yield
       val (positionX, positionY) = scene.project(sprite.position)
-      g2d.drawImage(sprite.image, positionX, positionY, this)
-    }
-  }
+      g2d.drawImage(sprite.image.asInstanceOf[AWTImage], positionX, positionY, this)
 
-  def updateScene(scene: SwingScene): DisplayPanel = {
+
+
+  def updateScene(scene: SwingScene): DisplayPanel =
     optScene = Some(scene)
     this
-  }
-}
 
-case class WorldBuilder()(using Geometry) extends Builder[World[ImageType]] {
-  override def build: World[ImageType] = {
-    val area = CurrentScreenAreaBuilder(50 px, 50 px, 50 px, 50 px).build
-    World(
-      area,
-      CurrentScreenSceneBuilder(area).build
-    )
-  }
-}
 
-case class PersonBuilder(area: Area)(using Geometry) extends Builder[Person[ImageType]] {
-  override def build: Person[ImageType] = {
+case class WorldBuilder(worldConfig: WorldConfig)
+  extends Builder[World] :
 
-    val position = area.randomPosition
-    Person(
+  override def build: Generated[World] =
+
+    for
+      area <- CurrentScreenAreaBuilder(
+        worldConfig.geometry,
+        topMargin = worldConfig.topMargin,
+        leftMargin = worldConfig.leftMargin,
+        bottomMargin = worldConfig.bottomMargin,
+        rightMargin = worldConfig.rightMargin
+      ).build
+      scene <- CurrentScreenSceneBuilder(area).build
+    yield
+      World(
+        area,
+        scene
+      )
+
+
+case class PersonBuilder(area: Area,
+                         personConfig: PersonConfig)
+  extends Builder[Person] :
+
+  override def build: Generated[Person] =
+    for
+      position <- Position.generated(area)
+      speed <- Speed.generated(personConfig.speedRange, personConfig.speedRange, personConfig.speedRange)
+    yield Person(
       position,
-      Movement.Zero,
+      speed,
       Healthy,
       SwingSprite(Assets.SmileySunglasses, position)
     )
-  }
-}
 
-case class GameBuilder()(using Geometry) extends Builder[Game[ImageType]] {
-  override def build: Game[ImageType] = {
-    val world = WorldBuilder().build
-    Game(
-      world,
-      Set.fill(50)(PersonBuilder(world.area).build)
-    )
-  }
-}
+
+case class GameBuilder(gameConfig: GameConfig)
+  extends Builder[Game] :
+
+  override def build: Generated[Game] =
+    for
+      world <- WorldBuilder(gameConfig.worldConfig).build
+      population <- Generated.setOf(PersonBuilder(world.area, gameConfig.personConfig).build)(gameConfig.populationSize)
+    yield
+      Game(
+        world,
+        population
+      )
+
+
+
+case class WorldConfig(geometry: Geometry,
+                       topMargin: Pixel,
+                       leftMargin: Pixel,
+                       bottomMargin: Pixel,
+                       rightMargin: Pixel)
+
+case class PersonConfig(speedRange: SpeedRange)
+
+case class GameConfig(populationSize: Int,
+                      personConfig: PersonConfig,
+                      worldConfig: WorldConfig)
+
 
 //
 //case class ImageBuilder() extends Builder[Sprite[ImageType]] {

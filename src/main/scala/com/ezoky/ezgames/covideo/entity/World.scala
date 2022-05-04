@@ -4,11 +4,11 @@
 
 package com.ezoky.ezgames.covideo.entity
 
-import com.ezoky.ezgames.covideo.component.{Area, Scene}
+import com.ezoky.ezgames.covideo.component.{Area, Scene, Sprite}
 
 /**
  * @author gweinbach on 14/11/2020
  * @since 0.1.0
  */
-case class World[ImageType](area: Area,
-                            scene: Scene[ImageType])
+case class World(area: Area,
+                 scene: Scene)

@@ -12,11 +12,11 @@ import com.ezoky.ezgames.covideo.component.{Height, Width, Depth}
  */
 case class Area(width: Width,
                 height: Height,
-                depth: Depth) {
+                depth: Depth):
 
   def randomPosition: Position =
     Position(width.randomCoord, height.randomCoord, depth.randomCoord)
 
   def maxPosition: Position =
     Position(width.maxCoord, height.maxCoord, depth.maxCoord)
-}
+
