@@ -1,8 +1,8 @@
 package com.ezoky.ezgames.covideo
 
 import com.ezoky.ezgames.covideo.component.Dimension.*
-import com.ezoky.ezgames.covideo.component.Generated.RandomGenerator
-import com.ezoky.ezgames.covideo.component.{Speed, SpeedRange, XSpeed, YSpeed, ZSpeed}
+import com.ezoky.ezgames.covideo.component.RandomGenerator
+import com.ezoky.ezgames.covideo.component.{AccelerationRange, Generated, Generator, Speed, SpeedRange, XSpeed, YSpeed, ZSpeed}
 import com.ezoky.ezgames.covideo.entity.Game
 import com.ezoky.ezgames.covideo.system.swing.*
 
@@ -28,8 +28,11 @@ def unionTypeMethod(sthg: Int | String): String =
 
 object Config:
   val Area: WorldConfig = WorldConfig(Geometry.Bounded, 50 px, 50 px, 50 px, 50 px)
-  val Person: PersonConfig = PersonConfig(SpeedRange(-10.0 speed, 10.0 speed))
-  val Game: GameConfig = GameConfig(50, Person, Area)
+  val Person: PersonConfig = PersonConfig(
+    initialSpeedRange = SpeedRange(-10.0 speed, 10.0 speed), 
+    accelerationRange = AccelerationRange(-0.1 acceleration, 0.1 acceleration)
+  )
+  val Game: GameConfig = GameConfig(1, Person, Area)
 
 
 @main def main: Unit =
@@ -41,14 +44,18 @@ object Config:
 
   val generator = new RandomGenerator()
 
-  val game = GameBuilder(Config.Game).build(generator)._1
-  loop(game)
+  val (game, gen) = GameBuilder(Config.Game).build(generator)
+  loop(game, gen, Config.Game)
 
 
 import com.ezoky.ezgames.covideo.system.given
 
 @tailrec
-def loop(game: Game): Game =
-  loop(game.display.move(within = game.world.area))
+def loop(game: Game,
+         generator: Generator,
+         gameConfig: GameConfig): Unit =
+  val nextGame = game.display.move(within = game.world.area)
+  val (acceleratedGame, nextGen) = Generated.unit(nextGame).accelerate(gameConfig.personConfig.accelerationRange)(generator)
+  loop(acceleratedGame, nextGen, gameConfig)
 
 

@@ -13,6 +13,9 @@ extension [A](generated: Generated[A])
   def flatMap[B](f: A => Generated[B]) =
     Generated.flatMap(generated)(f)
 
+  def get(generator: Generator): A =
+    generated(generator)._1
+
 val GeneratedDouble: Generated[Double] =
   _.generateDouble
 
@@ -50,6 +53,17 @@ object Generated:
       val (a, nextGen) = generated(seed)
       f(a)(nextGen)
 
+  def lift[A, B](f: A => B): Generated[A] => Generated[B] =
+    fa => map(fa)(f)
+    
+  def setT[A](sGen: Set[Generated[A]]): Generated[Set[A]] =
+    (seed: Generator) =>
+      sGen.foldLeft((Set.empty[A], seed)){
+        case ((set, gen), genA) =>
+          val (a, nextGen) = genA(gen)
+          (set + a, nextGen)
+      }
+
   def setOf[A](generated: Generated[A])(size: Int): Generated[Set[A]] =
     (seed: Generator) =>
       (0 until size).foldLeft((Set.empty[A], seed)) {
@@ -67,20 +81,20 @@ object Generated:
       }
 
 
-  class RandomGenerator private(val seed: java.util.Random)
-    extends Generator:
+class RandomGenerator private(val seed: java.util.Random)
+  extends Generator:
 
-    private def this(previous: RandomGenerator) =
-      this(previous.seed)
+  private def this(previous: RandomGenerator) =
+    this(previous.seed)
 
-    def this(seed: Long) =
-      this(new java.util.Random(seed))
+  def this(seed: Long) =
+    this(new java.util.Random(seed))
 
-    def this() =
-      this(new java.util.Random())
+  def this() =
+    this(new java.util.Random())
 
-    override def generateLong: (Long, Generator) =
-      (seed.nextLong(), new RandomGenerator(this))
+  override def generateLong: (Long, Generator) =
+    (seed.nextLong(), new RandomGenerator(this))
 
-    override def generateDouble: (Double, Generator) =
-      (seed.nextDouble(), new RandomGenerator((this)))
+  override def generateDouble: (Double, Generator) =
+    (seed.nextDouble(), new RandomGenerator((this)))

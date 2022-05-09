@@ -192,7 +192,7 @@ case class PersonBuilder(area: Area,
   override def build: Generated[Person] =
     for
       position <- Position.generated(area)
-      speed <- Speed.generated(personConfig.speedRange, personConfig.speedRange, personConfig.speedRange)
+      speed <- Speed.generated(personConfig.initialSpeedRange, personConfig.initialSpeedRange, personConfig.initialSpeedRange)
     yield Person(
       position,
       speed,
@@ -222,7 +222,8 @@ case class WorldConfig(geometry: Geometry,
                        bottomMargin: Pixel,
                        rightMargin: Pixel)
 
-case class PersonConfig(speedRange: SpeedRange)
+case class PersonConfig(initialSpeedRange: SpeedRange,
+                        accelerationRange: AccelerationRange)
 
 case class GameConfig(populationSize: Int,
                       personConfig: PersonConfig,
