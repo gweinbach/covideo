@@ -28,6 +28,7 @@ project/project
 .vscode/
 .metals/
 .bloop/
+project/metals.sbt
 
 .Rproj.user
 .DS_Store
