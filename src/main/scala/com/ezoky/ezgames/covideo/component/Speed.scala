@@ -58,6 +58,14 @@ case class SpeedRange private(min: SpeedValue,
                               max: SpeedValue):
   def generatedSpeedValue: Generated[SpeedValue] =
     SpeedValue.generatedBetween(min, max)
+    
+  def truncate(speedValue: SpeedValue): SpeedValue =
+    if (speedValue < min)
+      min
+    else if (speedValue > max)
+      max
+    else
+      speedValue
 
 object SpeedRange:
 

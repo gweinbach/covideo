@@ -5,7 +5,7 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 ThisBuild / scalacOptions ++= Seq(
   //  "-Yrangepos", // use range positions for syntax trees
   "-language:postfixOps", //  enables postfix operators
-  //  "-language:implicitConversions", // enables defining implicit methods and members
+  "-language:implicitConversions", // enables defining implicit methods and members
   //  "-language:existentials", // enables writing existential types
   //  "-language:reflectiveCalls", // enables reflection
   //  "-language:higherKinds", // allow higher kinded types without `import scala.language.higherKinds`

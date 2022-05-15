@@ -10,3 +10,8 @@ package com.ezoky.ezgames.covideo.entity
  */
 case class Game(world: World,
                 people: Set[Person])
+
+
+case class GameConfig(populationSize: Int,
+                      personConfig: PersonConfig,
+                      worldConfig: WorldConfig)

@@ -66,7 +66,7 @@ object Dimension:
 
 
   extension (sizeValue: SizeValue)
-    
+
     def isNull: Boolean =
       sizeValue == SizeValue.Zero
 
@@ -101,7 +101,7 @@ object Dimension:
         Dimension._Zero
       }
       else if (dimensionValue < Dimension._Zero) {
-        remainder(-dimensionValue)
+        remainder(sizeValue + dimensionValue)
       }
       else {
         dimensionValue % sizeValue

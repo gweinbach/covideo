@@ -4,7 +4,8 @@
 
 package com.ezoky.ezgames.covideo.component
 
-import com.ezoky.ezgames.covideo.component.{Height, Width, Depth}
+import com.ezoky.ezgames.covideo.component.Dimension.*
+import com.ezoky.ezgames.covideo.component.{Depth, Height, Width}
 
 /**
  * @author gweinbach on 14/11/2020
@@ -19,4 +20,3 @@ case class Area(width: Width,
 
   def maxPosition: Position =
     Position(width.maxCoord, height.maxCoord, depth.maxCoord)
-

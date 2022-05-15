@@ -4,7 +4,7 @@
 
 package com.ezoky.ezgames.covideo.entity
 
-import com.ezoky.ezgames.covideo.component.{Acceleration, Area, HealthCondition, Position, Speed, Sprite}
+import com.ezoky.ezgames.covideo.component.{Acceleration, AccelerationRange, Area, HealthCondition, Position, Speed, SpeedRange, Sprite}
 
 
 /**
@@ -13,12 +13,22 @@ import com.ezoky.ezgames.covideo.component.{Acceleration, Area, HealthCondition,
  */
 case class Person(position: Position,
                   speed: Speed,
+                  speedRange: SpeedRange,
+                  acceleration: Acceleration,
+                  accelerationRange: AccelerationRange,
                   healthCondition: HealthCondition,
                   sprite: Sprite):
 
   def move(within: Area): Person =
     val newPosition = speed.move(position, within)
     copy(position = newPosition, sprite = sprite.moveTo(newPosition))
-    
-  def accelerate(acceleration: Acceleration): Person =
-    copy(speed = acceleration.accelerate(speed))
+
+  def accelerate: Person =
+    copy(speed = acceleration.accelerate(speed, speedRange))
+
+  def turn(newAcceleration: Acceleration): Person =
+    copy(acceleration = newAcceleration.truncate(within = accelerationRange))
+
+
+case class PersonConfig(initialSpeedRange: SpeedRange,
+                        accelerationRange: AccelerationRange)
