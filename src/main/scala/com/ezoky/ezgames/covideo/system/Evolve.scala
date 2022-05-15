@@ -1,7 +1,7 @@
 package com.ezoky.ezgames.covideo.system
 
 import com.ezoky.ezgames.covideo.component.*
-import com.ezoky.ezgames.covideo.entity.{Game, Person}
+import com.ezoky.ezgames.covideo.entity.*
 
 trait Evolve[T]:
   extension (entity: Generated[T]) def evolve: Generated[T]
@@ -20,17 +20,8 @@ given Evolve[Person] with
 given (using Evolve[Person]): Evolve[Game] with
   extension (entity: Generated[Game])
     override def evolve: Generated[Game] =
-      entity.flatMap(
-        game =>
-          (seed: Generator) =>
-            val evolvedPeople =
-              game.people.foldLeft((Set.empty[Person], seed)) {
-                case ((setOfPersons, gen), person) =>
-                  val (evolvedPerson, nextGen) = Generated.unit(person).evolve(gen)
-                  (setOfPersons + evolvedPerson, nextGen)
-              }
-            (game.copy(people = evolvedPeople._1), evolvedPeople._2)
-      )
-
-
-
+      for
+        game <- entity
+        evolvedPeople <- Generated.foldSetGen(game.people.values.toSet, _.evolve)
+      yield
+        game.copy(people = Population(evolvedPeople))

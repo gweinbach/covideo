@@ -14,6 +14,7 @@ case class SwingSprite(asset: AWTImage,
 
   override val image: ImageType = asset
 
+  
   override def moveTo(position: Position): SwingSprite =
     copy(
       position = position,

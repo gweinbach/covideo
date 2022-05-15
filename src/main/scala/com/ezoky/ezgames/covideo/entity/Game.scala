@@ -9,7 +9,7 @@ package com.ezoky.ezgames.covideo.entity
  * @since 0.1.0
  */
 case class Game(world: World,
-                people: Set[Person])
+                people: Population[Person])
 
 
 case class GameConfig(populationSize: Int,

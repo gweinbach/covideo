@@ -54,7 +54,7 @@ object Generated:
       f(a)(nextGen)
 
   def lift[A, B](f: A => B): Generated[A] => Generated[B] =
-    fa => map(fa)(f)
+    generatedA => map(generatedA)(f)
     
   def setT[A](sGen: Set[Generated[A]]): Generated[Set[A]] =
     (seed: Generator) =>
@@ -62,6 +62,19 @@ object Generated:
         case ((set, gen), genA) =>
           val (a, nextGen) = genA(gen)
           (set + a, nextGen)
+      }
+
+  def foldSetGen[A, B](set: Set[A],
+                       f: Generated[A] => Generated[B]): Generated[Set[B]] =
+    foldSet(set.map(Generated.unit), f)
+
+  def foldSet[A, B](set: Set[A],
+                    f: A => Generated[B]): Generated[Set[B]] =
+    (seed: Generator) =>
+      set.foldLeft((Set.empty[B], seed)) {
+        case ((setOfB, gen), a) =>
+          val (nextB, nextGen) = f(a)(gen)
+          (setOfB + nextB, nextGen)
       }
 
   def setOf[A](generated: Generated[A])(size: Int): Generated[Set[A]] =

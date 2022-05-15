@@ -15,13 +15,14 @@ trait Scene:
   
   def project(area: Area): SceneDimension
 
-  def withSprite(sprite: Sprite): Scene
+  def withSprite(id: PersonId,
+                 sprite: Sprite): Scene
 
-  def withSprites(sprites: Iterable[Sprite]): Scene =
-    sprites.foldLeft(this)(
-      (scene, sprite) =>
-        scene.withSprite(sprite)
-    )
+  def withSprites(sprites: Population[Sprite]): Scene =
+    sprites.foldLeftF(this) {
+      case (scene, (id, sprite)) =>
+        scene.withSprite(id, sprite)
+    }
 
   def withArea(area: Area): Scene
 

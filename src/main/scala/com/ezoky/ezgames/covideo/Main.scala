@@ -16,18 +16,9 @@ import scala.annotation.tailrec
 
 def msg = s"I was compiled by scala 3 but using scala ${util.Properties.versionNumberString} stdlib :)"
 
-val three: 3 = 3
-
-def intMethod(i: Int): Int =
-  i * three
-
-def unionTypeMethod(sthg: Int | String): String =
-  sthg match
-    case i: Int => (3 * i).toString
-    case s: String => s"Error: $s"
-
-
 @main def main: Unit =
+  println(msg)
+
   val generator = new RandomGenerator()
   val game = GameBuilder(Config.Game).build
 

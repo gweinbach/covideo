@@ -6,6 +6,7 @@ import com.ezoky.ezgames.covideo.entity.*
 import com.ezoky.ezgames.covideo.system.Builder
 
 import java.awt.{Dimension as AWTDimension, EventQueue as AWTEventQueue}
+import java.util.UUID
 import javax.swing.{JFrame, JPanel}
 
 /**
@@ -18,11 +19,11 @@ case class GameBuilder(gameConfig: GameConfig)
   override def build: Generated[Game] =
     for
       world <- WorldBuilder(gameConfig.worldConfig).build
-      population <- Generated.setOf(PersonBuilder(world.area, gameConfig.personConfig).build)(gameConfig.populationSize)
+      people <- Generated.setOf(PersonBuilder(world.area, gameConfig.personConfig).build)(gameConfig.populationSize)
     yield
       Game(
         world,
-        population
+        Population(people)
       )
 
 
@@ -78,6 +79,7 @@ case class PersonBuilder(area: Area,
       acceleration <- Acceleration.generated(personConfig.accelerationRange, personConfig.accelerationRange, personConfig.accelerationRange)
     yield
       Person(
+        id = PersonId(),
         position,
         speed,
         personConfig.initialSpeedRange,

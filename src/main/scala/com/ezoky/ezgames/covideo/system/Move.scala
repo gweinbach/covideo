@@ -5,7 +5,7 @@
 package com.ezoky.ezgames.covideo.system
 
 import com.ezoky.ezgames.covideo.component.{Area, Position, Speed}
-import com.ezoky.ezgames.covideo.entity.{Game, Person, World}
+import com.ezoky.ezgames.covideo.entity.*
 
 /**
  * @author gweinbach on 14/11/2020
@@ -18,5 +18,5 @@ given Move[Game] with
   extension(entity: Game)
     override def move(within: Area): Game =
       entity.copy(
-        people = entity.people.map(_.move(within))
+        people = entity.people.mapEntity(_.move(within))
       )

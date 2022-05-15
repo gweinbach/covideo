@@ -1,7 +1,6 @@
 package com.ezoky.ezgames.covideo.system.swing
 
 import com.ezoky.ezgames.covideo.component.*
-import com.ezoky.ezgames.covideo.entity
 import com.ezoky.ezgames.covideo.entity.*
 import com.ezoky.ezgames.covideo.system.Builder
 
@@ -16,15 +15,14 @@ import javax.swing.{BorderFactory, JFrame, JPanel}
  */
 case class SwingScene(optArea: Option[Area] = None,
                       margins: Margin = Margin(),
-                      sprites: Set[Sprite] = Set.empty,
+                      sprites: Population[Sprite] = Population.empty,
                       mainWindow: MainWindow = MainWindow())
   extends Scene :
 
   AWTEventQueue.invokeLater(() =>
     // side effect, not pure
     mainWindow.setVisible(true)
-      mainWindow
-    .resize(preferredDimension)
+    mainWindow.resize(preferredDimension)
   )
 
   override lazy val preferredDimension: SceneDimension =
@@ -42,8 +40,9 @@ case class SwingScene(optArea: Option[Area] = None,
       area.maxPosition.y.value.intValue px,
     )
 
-  override def withSprite(sprite: Sprite): SwingScene =
-    val withSprite = copy(sprites = sprites + sprite)
+  override def withSprite(id: PersonId,
+                          sprite: Sprite): SwingScene =
+    val withSprite = copy(sprites = sprites.add(id -> sprite))
     // side effect, not pure
     mainWindow.updateScene(withSprite)
     withSprite
@@ -64,7 +63,7 @@ private case class SwingSceneBuilder(sceneConfig: SceneConfig,
 
 private class MainWindow(var name: String = "",
                          var frameSize: AWTDimension = new AWTDimension(),
-                         var panel: DrawingPanel = new DrawingPanel())
+                         val panel: DrawingPanel = new DrawingPanel())
   extends JFrame :
 
   println("Creating a MainWindow")
@@ -88,7 +87,7 @@ private class MainWindow(var name: String = "",
     repaint()
 
   def updateScene(scene: SwingScene): Unit =
-    panel = panel.updateScene(scene)
+    panel.updateScene(scene)
 
 
 /**
@@ -113,8 +112,8 @@ private class DrawingPanel()
   private def doDrawing(g: Graphics): Unit =
     val g2d = g.asInstanceOf[Graphics2D]
     for
-      scene <- optScene.toSet
-      sprite <- scene.sprites
+      scene <- optScene.toIterable
+      sprite <- scene.sprites.values
     yield
       val awtImage = sprite.image.asInstanceOf[AWTImage]
 
@@ -131,14 +130,12 @@ private class DrawingPanel()
       //              )
 
       val spritePosition = scene.project(sprite.position)
-//      println(spritePosition)
-//      g2d.fillRect(spritePosition.x, spritePosition.y, 20, 20)
       g2d.drawImage(awtImage, spritePosition.x, spritePosition.y, this)
 
     g2d.dispose()
 
 
-  def updateScene(scene: SwingScene): DrawingPanel =
+  def updateScene(scene: SwingScene): Unit =
     if (optScene.isEmpty)
       setPreferredSize(scene.preferredDimension.awtDimension)
       //    setLocation(scene.margins.left, scene.margins.top)
@@ -153,4 +150,3 @@ private class DrawingPanel()
 
     optScene = Some(scene)
     repaint()
-    this

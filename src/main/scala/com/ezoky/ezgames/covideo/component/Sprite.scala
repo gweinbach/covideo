@@ -9,9 +9,9 @@ trait Sprite:
   type ImageType
 
   val image: ImageType
-
+  
   val previousPosition: Option[Position]
   val position: Position
-
+  
   def moveTo(position: Position): Sprite
   

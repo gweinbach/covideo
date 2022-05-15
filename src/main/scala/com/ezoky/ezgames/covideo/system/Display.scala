@@ -1,7 +1,7 @@
 package com.ezoky.ezgames.covideo.system
 
 import com.ezoky.ezgames.covideo.component.Sprite
-import com.ezoky.ezgames.covideo.entity.{Game, Scene}
+import com.ezoky.ezgames.covideo.entity.*
 
 /**
  * @author gweinbach on 03/01/2022
@@ -15,6 +15,6 @@ given Display[Game] with
     override def display: Game =
       entity.copy(
         world = entity.world.copy(
-          scene = entity.world.scene.withSprites(entity.people.map(_.sprite))
+          scene = entity.world.scene.withSprites(entity.people.mapEntity(_.sprite))
         )
       )
