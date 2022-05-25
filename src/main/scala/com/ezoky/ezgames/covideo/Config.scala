@@ -3,9 +3,6 @@ package com.ezoky.ezgames.covideo
 import com.ezoky.ezgames.covideo.component.*
 import com.ezoky.ezgames.covideo.component.Dimension.*
 import com.ezoky.ezgames.covideo.entity.*
-import com.ezoky.ezgames.covideo.component.Dimension.Geometry
-import com.ezoky.ezgames.covideo.component.{AccelerationRange, SpeedRange}
-import com.ezoky.ezgames.covideo.entity.{AreaConfig, GameConfig, Margin, PersonConfig, SceneConfig, SceneDimension, WorldConfig}
 
 object Config:
 
@@ -36,7 +33,6 @@ object Config:
       populationSize = 10,
       Person, World
     )
-
   val Loop =
     GameLoopConfig(
       fps = 60

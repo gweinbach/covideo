@@ -4,6 +4,8 @@
 
 package com.ezoky.ezgames.covideo.component
 
+import Generate.*
+
 import scala.annotation.tailrec
 import scala.math.Numeric.DoubleIsFractional
 import scala.util.Random
@@ -79,6 +81,9 @@ object Dimension:
         sizeValue,
         geometry
       )
+
+    def zoom[N: Numeric](ratio: N): SizeValue =
+      _DimensionFractional.times(sizeValue, _NumberToDimensionConverter.apply(ratio))
 
     def randomPosition(using Geometry): PositionValue =
       relativePosition(_Random)

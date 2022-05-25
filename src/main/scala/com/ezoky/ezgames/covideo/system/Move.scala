@@ -18,5 +18,5 @@ given Move[Game] with
   extension(entity: Game)
     override def move(within: Area): Game =
       entity.copy(
-        people = entity.people.mapEntity(_.move(within))
+        people = entity.people.map(_.move(within))
       )

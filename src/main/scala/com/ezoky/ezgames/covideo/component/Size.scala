@@ -21,6 +21,9 @@ sealed trait Size[C <: Coord](val value: SizeValue)(using val geometry: Geometry
   final def randomCoord: C =
     coord(value.randomPosition)
 
+  final def minCoord: C =
+    coord(value.minPosition)
+    
   final def maxCoord: C =
     coord(value.maxPosition)
 

@@ -34,7 +34,7 @@ case class Person(id: PersonId,
     copy(acceleration = newAcceleration.truncate(within = accelerationRange))
 
 
-type PersonId = UUID
+opaque type PersonId = UUID
 
 object PersonId {
   def apply(): PersonId =
@@ -55,7 +55,7 @@ object Population:
   def empty[T]: Population[T] =
     Map.empty[PersonId, T]
 
-  def mapEntity[A, B](population: Population[A])(f: A => B): Population[B] =
+  def map[A, B](population: Population[A])(f: A => B): Population[B] =
     population.map {
       case (id, a) =>
         val b = f(a)
@@ -73,10 +73,10 @@ extension [A](population: Population[A])
   def add(kv: (PersonId, A)): Population[A] =
     population + kv
 
-  def mapEntity[B](f: A => B): Population[B] =
-    Population.mapEntity(population)(f)
+  def map[B](f: A => B): Population[B] =
+    Population.map(population)(f)
 
-  def foldLeftF[B](z: B)(op: (B, (PersonId, A)) => B): B =
+  def foldLeft[B](z: B)(op: (B, (PersonId, A)) => B): B =
     Population.foldLeft(population)(z)(op)
 
 

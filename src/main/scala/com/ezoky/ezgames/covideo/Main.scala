@@ -1,10 +1,10 @@
 package com.ezoky.ezgames.covideo
 
 import com.ezoky.ezcategory.Endomorphism
-import com.ezoky.ezgames.covideo.component.*
+import com.ezoky.ezgames.covideo.component.Generate.*
 import com.ezoky.ezgames.covideo.component.Dimension.*
 import com.ezoky.ezgames.covideo.entity.*
-import com.ezoky.ezgames.covideo.system.given
+import com.ezoky.ezgames.covideo.system.{Accelerate, Move, Evolve, Display, given}
 import com.ezoky.ezgames.covideo.system.swing.*
 
 import scala.annotation.tailrec

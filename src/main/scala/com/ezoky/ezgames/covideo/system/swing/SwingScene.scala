@@ -1,11 +1,12 @@
 package com.ezoky.ezgames.covideo.system.swing
 
-import com.ezoky.ezgames.covideo.component.*
+import com.ezoky.ezgames.covideo.component.{Area, Sprite, Position}
+import com.ezoky.ezgames.covideo.component.Generate.*
 import com.ezoky.ezgames.covideo.entity.*
 import com.ezoky.ezgames.covideo.system.Builder
 
 import java.awt.image.BufferedImage as AWTImage
-import java.awt.{Color as AWTColor, Dimension as AWTDimension, EventQueue as AWTEventQueue}
+import java.awt.{Graphics2D, Color as AWTColor, Dimension as AWTDimension, EventQueue as AWTEventQueue}
 import javax.swing.border.Border
 import javax.swing.{BorderFactory, JFrame, JPanel}
 
@@ -30,8 +31,8 @@ case class SwingScene(optArea: Option[Area] = None,
 
   override def project(position: Position): ScenePosition =
     ScenePosition(
-      position.x.value.intValue px,
-      position.y.value.intValue px
+      margins.left + position.x.value.intValue px,
+      margins.top + position.y.value.intValue px
     )
 
   override def project(area: Area): SceneDimension =
@@ -44,7 +45,7 @@ case class SwingScene(optArea: Option[Area] = None,
                           sprite: Sprite): SwingScene =
     val withSprite = copy(sprites = sprites.add(id -> sprite))
     // side effect, not pure
-    mainWindow.updateScene(withSprite)
+    mainWindow.draw(withSprite)
     withSprite
 
   override def withArea(area: Area): SwingScene =
@@ -61,10 +62,23 @@ private case class SwingSceneBuilder(sceneConfig: SceneConfig,
     Generated.unit(scene)
 
 
+//type Drawn[A] = (A, Graphics2D) => (A, Graphics2D)
+//
+//case class Draw[A: Drawn](toDraw: A)
+//
+//given Drawn[Sprite] with
+//  in =>
+//    val (sprite: SwingSprite, g2d: Graphics2D) = in
+//    val awtImage = sprite.image.asInstanceOf[AWTImage]
+//    val spritePosition = scene.project(sprite.position)
+//    g2d.drawImage(awtImage, spritePosition.x, spritePosition.y, this)
+//    (sprite, g2d)
+//
+
 private class MainWindow(var name: String = "",
                          var frameSize: AWTDimension = new AWTDimension(),
                          val panel: DrawingPanel = new DrawingPanel())
-  extends JFrame :
+  extends JFrame:
 
   println("Creating a MainWindow")
 
@@ -86,8 +100,9 @@ private class MainWindow(var name: String = "",
     frameSize = size.awtDimension
     repaint()
 
-  def updateScene(scene: SwingScene): Unit =
+  def draw(scene: SwingScene): Unit =
     panel.updateScene(scene)
+    (scene, this)
 
 
 /**

@@ -6,6 +6,7 @@ package com.ezoky.ezgames.covideo.component
 
 import com.ezoky.ezgames.covideo.component.Coord.{XCoord, YCoord, ZCoord}
 import com.ezoky.ezgames.covideo.component.Dimension.*
+import com.ezoky.ezgames.covideo.component.Generate.*
 
 import scala.math.Ordering.Implicits.*
 
@@ -16,7 +17,7 @@ import scala.math.Ordering.Implicits.*
 case class Speed(xSpeed: XSpeed,
                  ySpeed: YSpeed,
                  zSpeed: ZSpeed):
-  
+
   def move(position: Position,
            within: Area): Position =
     Position(
@@ -58,7 +59,7 @@ case class SpeedRange private(min: SpeedValue,
                               max: SpeedValue):
   def generatedSpeedValue: Generated[SpeedValue] =
     SpeedValue.generatedBetween(min, max)
-    
+
   def truncate(speedValue: SpeedValue): SpeedValue =
     if (speedValue < min)
       min

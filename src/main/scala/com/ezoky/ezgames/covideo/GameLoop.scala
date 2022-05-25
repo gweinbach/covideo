@@ -1,7 +1,7 @@
 package com.ezoky.ezgames.covideo
 
 import com.ezoky.ezcategory.Endomorphism
-import com.ezoky.ezgames.covideo.component.{Generated, Generator}
+import com.ezoky.ezgames.covideo.component.Generate.*
 import com.ezoky.ezgames.covideo.entity.Game
 
 import scala.annotation.tailrec

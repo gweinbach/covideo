@@ -18,5 +18,8 @@ case class Area(width: Width,
   def randomPosition: Position =
     Position(width.randomCoord, height.randomCoord, depth.randomCoord)
 
+  def minPosition: Position =
+    Position(width.minCoord, height.minCoord, depth.minCoord)
+    
   def maxPosition: Position =
     Position(width.maxCoord, height.maxCoord, depth.maxCoord)

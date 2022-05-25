@@ -8,12 +8,11 @@ import java.awt.image.BufferedImage as AWTImage
 case class SwingSprite(asset: AWTImage,
                        position: Position,
                        previousPosition: Option[Position] = None)
-  extends Sprite :
+  extends Sprite:
 
   override type ImageType = AWTImage
 
   override val image: ImageType = asset
-
   
   override def moveTo(position: Position): SwingSprite =
     copy(

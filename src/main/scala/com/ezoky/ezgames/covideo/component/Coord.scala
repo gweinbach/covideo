@@ -4,8 +4,10 @@
 
 package com.ezoky.ezgames.covideo.component
 
+import Generate.*
 import Dimension.*
-import com.ezoky.ezgames.covideo.component.Coord.{XCoord, YCoord, ZCoord}
+import Coord.{XCoord, YCoord, ZCoord}
+
 import Numeric.Implicits._
 
 /**

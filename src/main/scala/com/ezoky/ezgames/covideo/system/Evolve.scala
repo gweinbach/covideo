@@ -1,7 +1,8 @@
 package com.ezoky.ezgames.covideo.system
 
-import com.ezoky.ezgames.covideo.component.*
-import com.ezoky.ezgames.covideo.entity.*
+import com.ezoky.ezgames.covideo.component.Acceleration
+import com.ezoky.ezgames.covideo.component.Generate.*
+import com.ezoky.ezgames.covideo.entity.{Person, Game, Population, values}
 
 trait Evolve[T]:
   extension (entity: Generated[T]) def evolve: Generated[T]
