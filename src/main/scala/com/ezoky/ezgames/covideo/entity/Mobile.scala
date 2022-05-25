@@ -1,6 +1,6 @@
 package com.ezoky.ezgames.covideo.entity
 
-import com.ezoky.ezgames.covideo.component.{Acceleration, AccelerationRange, Area, Position, Speed, SpeedRange}
+import com.ezoky.ezgames.covideo.component.*
 
 case class Mobile(position: Position,
                   speed: Speed,

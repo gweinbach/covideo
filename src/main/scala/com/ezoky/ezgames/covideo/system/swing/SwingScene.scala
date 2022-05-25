@@ -3,6 +3,7 @@ package com.ezoky.ezgames.covideo.system.swing
 import com.ezoky.ezgames.covideo.component.{Area, Sprite, Position}
 import com.ezoky.ezgames.covideo.component.Generate.*
 import com.ezoky.ezgames.covideo.entity.*
+import com.ezoky.ezgames.covideo.entity.People.{PersonId, Population}
 import com.ezoky.ezgames.covideo.system.Builder
 
 import java.awt.image.BufferedImage as AWTImage

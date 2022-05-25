@@ -4,6 +4,8 @@
 
 package com.ezoky.ezgames.covideo.entity
 
+import com.ezoky.ezgames.covideo.entity.People.{Person, PersonConfig, Population}
+
 /**
  * @author gweinbach on 14/11/2020
  * @since 0.1.0

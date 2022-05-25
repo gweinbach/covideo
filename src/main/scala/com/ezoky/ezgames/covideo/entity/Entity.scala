@@ -7,7 +7,7 @@ trait Entity[I]:
     obj match
       case that: Entity[_] =>
         (that != null) && (that.id == this.id)
-      case default  =>
+      case default =>
         false
 
   override def hashCode(): Int =

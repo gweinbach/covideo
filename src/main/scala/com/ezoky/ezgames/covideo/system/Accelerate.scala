@@ -1,7 +1,6 @@
 package com.ezoky.ezgames.covideo.system
 
-//import com.ezoky.ezgames.covideo.component.*
-import com.ezoky.ezgames.covideo.entity.*
+import com.ezoky.ezgames.covideo.entity.Game
 
 trait Accelerate[T]:
   extension (entity: T) def accelerate: T

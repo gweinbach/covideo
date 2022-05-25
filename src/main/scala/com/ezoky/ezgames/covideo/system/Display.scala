@@ -1,14 +1,13 @@
 package com.ezoky.ezgames.covideo.system
 
-import com.ezoky.ezgames.covideo.component.Sprite
-import com.ezoky.ezgames.covideo.entity.{Game, map}
+import com.ezoky.ezgames.covideo.entity.Game
 
 /**
  * @author gweinbach on 03/01/2022
  * @since 0.2.0
  */
 trait Display[T]:
-  extension(entity: T) def display: T
+  extension (entity: T) def display: T
 
 given Display[Game] with
   extension (entity: Game)

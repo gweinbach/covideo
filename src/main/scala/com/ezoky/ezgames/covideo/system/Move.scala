@@ -5,7 +5,7 @@
 package com.ezoky.ezgames.covideo.system
 
 import com.ezoky.ezgames.covideo.component.{Area, Position, Speed}
-import com.ezoky.ezgames.covideo.entity.*
+import com.ezoky.ezgames.covideo.entity.Game
 
 /**
  * @author gweinbach on 14/11/2020

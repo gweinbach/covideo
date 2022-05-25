@@ -3,6 +3,7 @@ package com.ezoky.ezgames.covideo.system.swing
 import com.ezoky.ezgames.covideo.component.{Position, Area, Speed, Acceleration, Healthy, Depth}
 import com.ezoky.ezgames.covideo.component.Generate.*
 import com.ezoky.ezgames.covideo.component.Dimension.*
+import com.ezoky.ezgames.covideo.entity.People.*
 import com.ezoky.ezgames.covideo.entity.*
 import com.ezoky.ezgames.covideo.system.Builder
 
