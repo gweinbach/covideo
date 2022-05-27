@@ -16,24 +16,20 @@ import java.util.UUID
 object People:
 
   case class Person(id: PersonId,
-                    position: Position,
-                    speed: Speed,
-                    speedRange: SpeedRange,
-                    acceleration: Acceleration,
-                    accelerationRange: AccelerationRange,
+                    mobile: Mobile,
                     healthCondition: HealthCondition,
                     sprite: Sprite)
     extends Entity[PersonId]:
 
     def move(within: Area): Person =
-      val newPosition = speed.move(position, within)
-      copy(position = newPosition, sprite = sprite.moveTo(newPosition))
+      val movedMobile = mobile.move(within = within)
+      copy(mobile = movedMobile, sprite = sprite.moveTo(movedMobile.position))
 
     def accelerate: Person =
-      copy(speed = acceleration.accelerate(speed, speedRange))
+      copy(mobile = mobile.accelerate)
 
     def turn(newAcceleration: Acceleration): Person =
-      copy(acceleration = newAcceleration.truncate(within = accelerationRange))
+      copy(mobile = mobile.turn(newAcceleration))
 
 
   opaque type PersonId = UUID
@@ -83,5 +79,4 @@ object People:
 
 
 
-  case class PersonConfig(initialSpeedRange: SpeedRange,
-                          accelerationRange: AccelerationRange)
+  case class PersonConfig(mobileConfig: MobileConfig)

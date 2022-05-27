@@ -24,10 +24,13 @@ object Config:
     WorldConfig(
       Area, Scene
     )
+  val Mobile = MobileConfig(
+    speedRange = SpeedRange(-10.0 speed, 10.0 speed),
+    accelerationRange = AccelerationRange(-1.5 acceleration, 1.5 acceleration)
+  )
   val Person =
     PersonConfig(
-      initialSpeedRange = SpeedRange(-10.0 speed, 10.0 speed),
-      accelerationRange = AccelerationRange(-1.5 acceleration, 1.5 acceleration)
+      mobileConfig = Mobile
     )
   val Game =
     GameConfig(

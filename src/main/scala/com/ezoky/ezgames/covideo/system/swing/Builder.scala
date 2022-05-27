@@ -1,6 +1,6 @@
 package com.ezoky.ezgames.covideo.system.swing
 
-import com.ezoky.ezgames.covideo.component.{Position, Area, Speed, Acceleration, Healthy, Depth}
+import com.ezoky.ezgames.covideo.component.{Acceleration, Area, Depth, Healthy, Mobile, MobileConfig, Position, Speed}
 import com.ezoky.ezgames.covideo.component.Generate.*
 import com.ezoky.ezgames.covideo.component.Dimension.*
 import com.ezoky.ezgames.covideo.entity.People.*
@@ -70,25 +70,37 @@ private case class AreaBuilder(sceneDimension: SceneDimension,
       )
     )
 
+case class MobileBuilder(area: Area,
+                         mobileConfig: MobileConfig)
+  extends Builder[Mobile]:
+
+  override def build: Generated[Mobile] =
+    for
+      position <- Position.generated(area)
+      speed <- Speed.generated(mobileConfig.speedRange, mobileConfig.speedRange, mobileConfig.speedRange)
+      acceleration <- Acceleration.generated(mobileConfig.accelerationRange, mobileConfig.accelerationRange, mobileConfig.accelerationRange)
+    yield
+      Mobile(
+        position,
+        speed,
+        mobileConfig.speedRange,
+        acceleration,
+        mobileConfig.accelerationRange
+      )
+
 case class PersonBuilder(area: Area,
                          personConfig: PersonConfig)
-  extends Builder[Person] :
+  extends Builder[Person]:
 
   override def build: Generated[Person] =
     for
-      position <- Position.generated(area)
-      speed <- Speed.generated(personConfig.initialSpeedRange, personConfig.initialSpeedRange, personConfig.initialSpeedRange)
-      acceleration <- Acceleration.generated(personConfig.accelerationRange, personConfig.accelerationRange, personConfig.accelerationRange)
+      mobile <- MobileBuilder(area, personConfig.mobileConfig).build
     yield
       Person(
         id = PersonId(),
-        position,
-        speed,
-        personConfig.initialSpeedRange,
-        acceleration,
-        personConfig.accelerationRange,
+        mobile,
         Healthy,
-        SwingSprite(Assets.SmileySunglasses, position)
+        SwingSprite(Assets.SmileySunglasses, mobile.position)
       )
 
 

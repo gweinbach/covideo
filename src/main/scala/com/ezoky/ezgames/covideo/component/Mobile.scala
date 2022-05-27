@@ -1,4 +1,10 @@
-package com.ezoky.ezgames.covideo.entity
+/*
+ * @author gweinbach on $today.date
+ * @since 0.2.0
+ *  
+ */
+
+package com.ezoky.ezgames.covideo.component
 
 import com.ezoky.ezgames.covideo.component.*
 
