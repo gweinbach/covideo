@@ -1,6 +1,6 @@
 package com.ezoky.ezgames.covideo
 
-import com.ezoky.ezcategory.Endomorphism
+import com.ezoky.ezcategory.{Endomorphism, IO}
 import com.ezoky.ezgames.covideo.component.Generate.*
 import com.ezoky.ezgames.covideo.entity.Game
 
@@ -9,7 +9,8 @@ import scala.annotation.tailrec
 case class GameLoopConfig(fps: Int)
 
 class GameLoop(initialGame: Generated[Game],
-               gameStep: Endomorphism[(Generated[Game], Generator)],
+               gameStep: Generated[Game] => Generated[IO[Game]],
+//               gameStep: Endomorphism[(Generated[Game], Generator)],
                seed: Generator,
                gameLoopConfig: GameLoopConfig)
   extends Runnable :
@@ -24,11 +25,13 @@ class GameLoop(initialGame: Generated[Game],
     loop(initialGame, seed, nextStep)
 
   @tailrec
-  final def loop(generatedGame: Generated[Game],
+  final def loop(game: Generated[Game],
                  generator: Generator,
                  nextStep: Long): Unit =
 
-    val (nextGame, nextGen) = gameStep((generatedGame, generator))
+    val generatedGame: Generated[IO[Game]] = gameStep(game)
+    val (ioGame, nextGen) = generatedGame(generator)
+    val nextGame = Generated(ioGame.unsafeRun())
 
     val (remainingMilliseconds, remainingNanoseconds) =
       val remainingNs = nextStep - System.nanoTime()

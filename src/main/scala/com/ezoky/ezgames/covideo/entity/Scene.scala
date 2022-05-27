@@ -1,5 +1,6 @@
 package com.ezoky.ezgames.covideo.entity
 
+import com.ezoky.ezcategory.IO
 import com.ezoky.ezgames.covideo.component.*
 import com.ezoky.ezgames.covideo.component.Dimension.*
 import com.ezoky.ezgames.covideo.entity.People.{PersonId, Population}
@@ -10,16 +11,34 @@ import scala.math.Numeric.DoubleIsFractional
  * @author gweinbach on 03/01/2022
  * @since 0.2.0
  */
-trait Scene:
+case class Scene(area: Area,
+                 name: String = "",
+                 margins: Margin = Margin(),
+                 sprites: Population[Sprite] = Population.empty):
 
-  lazy val preferredDimension: SceneDimension
+  lazy val preferredDimension: SceneDimension =
+    project(area) withMargin margins
 
-  def project(position: Position): ScenePosition
+  // This projection method should take care of 3D
+  def project(position: Position): ScenePosition =
+    ScenePosition(
+      margins.left + position.x.value.intValue px,
+      margins.top + position.y.value.intValue px
+    )
 
-  def project(area: Area): SceneDimension
+  // This projection method should take care of 3D
+  def project(area: Area): SceneDimension =
+    SceneDimension(
+      area.maxPosition.x.value.intValue px,
+      area.maxPosition.y.value.intValue px,
+    )
+
+  def withName(name: String): Scene =
+    copy(name = name)
 
   def withSprite(id: PersonId,
-                 sprite: Sprite): Scene
+                 sprite: Sprite): Scene =
+    copy(sprites = sprites.add(id -> sprite))
 
   def withSprites(sprites: Population[Sprite]): Scene =
     sprites.foldLeft(this) {
@@ -27,7 +46,11 @@ trait Scene:
         scene.withSprite(id, sprite)
     }
 
-  def withArea(area: Area): Scene
+  def withArea(area: Area): Scene =
+    copy(area = area)
+
+  def withMargins(margins: Margin): Scene =
+    copy(margins = margins)
 
 
 object DefaultScreenSize
@@ -70,12 +93,6 @@ case class SceneDimension(width: Pixel,
     SceneDimension(
       width + margin.left + margin.right,
       height + margin.top + margin.bottom
-    )
-
-  def withoutMargin(margin: Margin): SceneDimension =
-    SceneDimension(
-      width,
-      height
     )
 
 case class ScenePosition(x: Pixel,

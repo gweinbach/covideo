@@ -4,6 +4,7 @@
 
 package com.ezoky.ezgames.covideo.entity
 
+import com.ezoky.ezcategory.IO
 import com.ezoky.ezgames.covideo.component.Dimension.Geometry
 import com.ezoky.ezgames.covideo.component.{Area, Sprite}
 

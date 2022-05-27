@@ -25,7 +25,7 @@ given (using Evolve[Mobile]): Evolve[Person] with
     override def evolve: Generated[Person] =
       for
         person <- entity
-        evolvedMobile <- Generated.unit(person.mobile).evolve
+        evolvedMobile <- Generated(person.mobile).evolve
       yield
         person.copy(mobile = evolvedMobile)
 

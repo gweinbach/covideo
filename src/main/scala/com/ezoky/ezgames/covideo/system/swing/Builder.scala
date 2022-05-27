@@ -1,11 +1,11 @@
 package com.ezoky.ezgames.covideo.system.swing
 
-import com.ezoky.ezgames.covideo.component.{Acceleration, Area, Depth, Healthy, Mobile, MobileConfig, Position, Speed}
-import com.ezoky.ezgames.covideo.component.Generate.*
+import com.ezoky.ezgames.covideo.component.*
 import com.ezoky.ezgames.covideo.component.Dimension.*
-import com.ezoky.ezgames.covideo.entity.People.*
+import com.ezoky.ezgames.covideo.component.Generate.*
 import com.ezoky.ezgames.covideo.entity.*
-import com.ezoky.ezgames.covideo.system.Builder
+import com.ezoky.ezgames.covideo.entity.People.*
+import com.ezoky.ezgames.covideo.system.{Builder, DisplaySystem}
 
 import java.awt.{Dimension as AWTDimension, EventQueue as AWTEventQueue}
 import java.util.UUID
@@ -15,7 +15,7 @@ import javax.swing.{JFrame, JPanel}
  * @author gweinbach on 03/01/2022
  * @since 0.2.0
  */
-case class GameBuilder(gameConfig: GameConfig)
+case class GameBuilder(gameConfig: GameConfig)(using DisplaySystem)
   extends Builder[Game] :
 
   override def build: Generated[Game] =
@@ -29,7 +29,7 @@ case class GameBuilder(gameConfig: GameConfig)
       )
 
 
-case class WorldBuilder(worldConfig: WorldConfig)
+case class WorldBuilder(worldConfig: WorldConfig)(using DisplaySystem)
   extends Builder[World] :
 
   override def build: Generated[World] =
@@ -37,18 +37,18 @@ case class WorldBuilder(worldConfig: WorldConfig)
     val sceneDimension =
       worldConfig.sceneConfig.sceneSize match
         case DefaultScreenSize =>
-          DefaultScreenSceneDimension
+          summon[DisplaySystem].defaultScreenSceneDimension
         case sceneSize: SceneDimension =>
           sceneSize
 
     for
       area <- AreaBuilder(
-        sceneDimension withoutMargin worldConfig.sceneConfig.margin,
+        sceneDimension,
         worldConfig.areaConfig
       ).build
-      scene <- SwingSceneBuilder(
+      scene <- SceneBuilder(
+        area,
         worldConfig.sceneConfig,
-        area
       ).build
     yield
       World(
@@ -62,7 +62,7 @@ private case class AreaBuilder(sceneDimension: SceneDimension,
   extends Builder[Area] :
 
   override def build: Generated[Area] =
-    Generated.unit(
+    Generated(
       Area(
         sceneDimension.width.width(using areaConfig.xGeometry),
         sceneDimension.height.height(using areaConfig.yGeometry),
@@ -70,9 +70,23 @@ private case class AreaBuilder(sceneDimension: SceneDimension,
       )
     )
 
+private case class SceneBuilder(area: Area,
+                                sceneConfig: SceneConfig)
+  extends Builder[Scene] :
+
+  override def build: Generated[Scene] =
+    Generated(
+      Scene(
+        area,
+        name = sceneConfig.name,
+        margins = sceneConfig.margin
+      )
+    )
+
+
 case class MobileBuilder(area: Area,
                          mobileConfig: MobileConfig)
-  extends Builder[Mobile]:
+  extends Builder[Mobile] :
 
   override def build: Generated[Mobile] =
     for
@@ -90,7 +104,7 @@ case class MobileBuilder(area: Area,
 
 case class PersonBuilder(area: Area,
                          personConfig: PersonConfig)
-  extends Builder[Person]:
+  extends Builder[Person] :
 
   override def build: Generated[Person] =
     for
@@ -102,18 +116,6 @@ case class PersonBuilder(area: Area,
         Healthy,
         SwingSprite(Assets.SmileySunglasses, mobile.position)
       )
-
-
-private val DefaultScreenSceneDimension: SceneDimension =
-
-  import java.awt.{GraphicsDevice, GraphicsEnvironment}
-
-  val gd: GraphicsDevice = GraphicsEnvironment.getLocalGraphicsEnvironment.getDefaultScreenDevice
-  val screenWidth: Pixel = gd.getDisplayMode.getWidth px
-  val screenHeight: Pixel = gd.getDisplayMode.getHeight px
-
-  SceneDimension(screenWidth, screenHeight)
-
 
 
 

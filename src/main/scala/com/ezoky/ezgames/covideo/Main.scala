@@ -1,10 +1,10 @@
 package com.ezoky.ezgames.covideo
 
-import com.ezoky.ezcategory.Endomorphism
+import com.ezoky.ezcategory.{Endomorphism, IO}
 import com.ezoky.ezgames.covideo.component.Generate.*
-import com.ezoky.ezgames.covideo.component.Dimension.*
+import com.ezoky.ezgames.covideo.component.Dimension.{given_Ordering_SpeedValue, *}
 import com.ezoky.ezgames.covideo.entity.*
-import com.ezoky.ezgames.covideo.system.{Accelerate, Move, Evolve, Display, given}
+import com.ezoky.ezgames.covideo.system.{Accelerate, Display, DisplaySystem, Evolve, Move, given}
 import com.ezoky.ezgames.covideo.system.swing.*
 
 import scala.annotation.tailrec
@@ -16,6 +16,8 @@ import scala.annotation.tailrec
 
 def msg = s"I was compiled by scala 3 but using scala ${util.Properties.versionNumberString} stdlib :)"
 
+given DisplaySystem = SwingDisplaySystem
+
 @main def main: Unit =
   println(msg)
 
@@ -25,9 +27,8 @@ def msg = s"I was compiled by scala 3 but using scala ${util.Properties.versionN
   new GameLoop(game, step, generator, Config.Loop)
 
 
-
-def step(generatedGame: Generated[Game],
-         generator: Generator): (Generated[Game], Generator) =
-  val (evolvedGame, nextGen) = generatedGame.evolve(generator)
-  val nextGame = Generated.unit(evolvedGame.move(within = evolvedGame.world.area).accelerate.display)
-  (nextGame, nextGen)
+def step(game: Generated[Game]): Generated[IO[Game]] =
+  for
+    nextGame <- game.evolve
+  yield
+    nextGame.move.accelerate.display

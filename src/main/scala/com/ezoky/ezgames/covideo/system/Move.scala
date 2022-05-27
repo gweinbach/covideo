@@ -12,11 +12,11 @@ import com.ezoky.ezgames.covideo.entity.Game
  * @since 0.1.0
  */
 trait Move[T]:
-  extension(entity: T) def move(within: Area): T
+  extension(entity: T) def move: T
 
 given Move[Game] with
   extension(entity: Game)
-    override def move(within: Area): Game =
+    override def move: Game =
       entity.copy(
-        people = entity.people.map(_.move(within))
+        people = entity.people.map(_.move(entity.world.area))
       )

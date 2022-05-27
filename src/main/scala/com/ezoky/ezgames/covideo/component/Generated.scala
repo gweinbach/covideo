@@ -26,6 +26,8 @@ object Generate:
 
 
   object Generated:
+    
+    def apply[A](a: A): Generated[A] = unit(a)
 
     def unit[A](a: A): Generated[A] =
       (gen: Generator) => (a, gen)
