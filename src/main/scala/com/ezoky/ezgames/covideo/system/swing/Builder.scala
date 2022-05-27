@@ -32,15 +32,14 @@ case class GameBuilder(gameConfig: GameConfig)(using DisplaySystem)
 case class WorldBuilder(worldConfig: WorldConfig)(using DisplaySystem)
   extends Builder[World] :
 
+  lazy val sceneDimension =
+    worldConfig.sceneConfig.sceneSize match
+      case DefaultScreenSize =>
+        summon[DisplaySystem].defaultScreenSceneDimension
+      case sceneSize: SceneDimension =>
+        sceneSize
+
   override def build: Generated[World] =
-
-    val sceneDimension =
-      worldConfig.sceneConfig.sceneSize match
-        case DefaultScreenSize =>
-          summon[DisplaySystem].defaultScreenSceneDimension
-        case sceneSize: SceneDimension =>
-          sceneSize
-
     for
       area <- AreaBuilder(
         sceneDimension,
@@ -116,7 +115,6 @@ case class PersonBuilder(area: Area,
         Healthy,
         SwingSprite(Assets.SmileySunglasses, mobile.position)
       )
-
 
 
 given Conversion[Pixel, Int] with

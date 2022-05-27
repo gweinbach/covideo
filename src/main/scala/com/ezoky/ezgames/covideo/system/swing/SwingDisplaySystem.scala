@@ -17,7 +17,7 @@ import javax.swing.{BorderFactory, JFrame, JPanel}
  * @since 0.2.0
  */
 object SwingDisplaySystem
-  extends DisplaySystem:
+  extends DisplaySystem :
 
   override def defaultScreenSceneDimension: SceneDimension =
     import java.awt.{GraphicsDevice, GraphicsEnvironment}
@@ -39,7 +39,7 @@ object SwingDisplaySystem
 
 
 private class MainWindow()
-  extends JFrame:
+  extends JFrame :
 
   println("Creating a MainWindow")
 
