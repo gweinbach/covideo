@@ -68,12 +68,12 @@ object Generate:
             (set + a, nextGen)
         }
 
-    def foldSetGen[A, B](set: Set[A],
+    def flatMapSet[A, B](set: Set[A],
                          f: Generated[A] => Generated[B]): Generated[Set[B]] =
-      foldSet(set.map(Generated.unit), f)
+      mapSet(set.map(Generated.unit), f)
 
-    def foldSet[A, B](set: Set[A],
-                      f: A => Generated[B]): Generated[Set[B]] =
+    def mapSet[A, B](set: Set[A],
+                     f: A => Generated[B]): Generated[Set[B]] =
       (seed: Generator) =>
         set.foldLeft((Set.empty[B], seed)) {
           case ((setOfB, gen), a) =>

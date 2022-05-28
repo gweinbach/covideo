@@ -34,6 +34,6 @@ given (using Evolve[Person]): Evolve[Game] with
     override def evolve: Generated[Game] =
       for
         game <- entity
-        evolvedPeople <- Generated.foldSetGen(game.people.values.toSet, _.evolve)
+        evolvedPeople <- Generated.flatMapSet(game.people.values.toSet, _.evolve)
       yield
         game.copy(people = Population(evolvedPeople))

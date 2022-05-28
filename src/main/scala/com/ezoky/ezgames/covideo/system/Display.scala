@@ -1,6 +1,7 @@
 package com.ezoky.ezgames.covideo.system
 
 import com.ezoky.ezcategory.IO
+import com.ezoky.ezgames.covideo.component.{HealthCondition, Sprite}
 import com.ezoky.ezgames.covideo.entity.{Game, Scene, SceneDimension}
 
 /**
@@ -28,5 +29,9 @@ given (using DisplaySystem): Display[Game] with
 
 trait DisplaySystem:
 
+  // Generic
   def defaultScreenSceneDimension: SceneDimension
   def drawScene(scene: Scene): IO[Unit]
+
+  // Game specific
+  def spriteByHealthCondition(healthCondition: HealthCondition): Sprite

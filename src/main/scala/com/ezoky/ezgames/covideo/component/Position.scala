@@ -5,7 +5,6 @@
 package com.ezoky.ezgames.covideo.component
 
 import com.ezoky.ezgames.covideo.component.Generate.*
-import com.ezoky.ezgames.covideo.component.Coord.*
 
 import scala.util.Random
 
@@ -19,13 +18,16 @@ case class Position(x: XCoord,
 
 object Position:
 
+  val Zero: Position =
+    Position(XCoord.Zero, YCoord.Zero, ZCoord.Zero)
+
   def generated(width: Width,
                 height: Height,
                 depth: Depth): Generated[Position] =
     Generated.map3(
-      generatedXCoord(width),
-      generatedYCoord(height),
-      generatedZCoord(depth)
+      XCoord.generated(width),
+      YCoord.generated(height),
+      ZCoord.generated(depth)
     )(Position(_, _, _))
 
   def generated(area: Area): Generated[Position] =

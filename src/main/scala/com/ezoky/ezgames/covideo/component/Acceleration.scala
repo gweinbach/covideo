@@ -1,7 +1,6 @@
 package com.ezoky.ezgames.covideo.component
 
 import Generate.*
-import Coord.{XCoord, YCoord, ZCoord}
 import Dimension.{AccelerationValue, SpeedValue}
 
 import scala.math.Ordering.Implicits.*

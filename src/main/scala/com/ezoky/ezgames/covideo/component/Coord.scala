@@ -6,7 +6,6 @@ package com.ezoky.ezgames.covideo.component
 
 import Generate.*
 import Dimension.*
-import Coord.{XCoord, YCoord, ZCoord}
 
 import Numeric.Implicits._
 
@@ -14,26 +13,45 @@ import Numeric.Implicits._
  * @author gweinbach on 14/11/2020
  * @since 0.1.0
  */
-enum Coord(value: PositionValue):
+sealed trait Coord(value: PositionValue)
 
-  case XCoord(value: PositionValue)
-    extends Coord(value)
+final case class XCoord(value: PositionValue)
+  extends Coord(value)
 
-  case YCoord(value: PositionValue)
-    extends Coord(value)
+final case class YCoord(value: PositionValue)
+  extends Coord(value)
 
-  case ZCoord(value: PositionValue)
-    extends Coord(value)
+final case class ZCoord(value: PositionValue)
+  extends Coord(value)
 
 
-def generatedPositionValue[C <: Coord](size: Size[C]): Generated[PositionValue] =
+object XCoord:
+
+  val Zero: XCoord =
+    XCoord(PositionValue.Zero)
+
+  def generated(within: Width): Generated[XCoord] =
+    generatedPositionValue(within).map(XCoord(_))
+
+
+object YCoord:
+
+  val Zero: YCoord =
+    YCoord(PositionValue.Zero)
+
+  def generated(within: Height): Generated[YCoord] =
+    generatedPositionValue(within).map(YCoord(_))
+
+
+object ZCoord:
+
+  val Zero: ZCoord =
+    ZCoord(PositionValue.Zero)
+
+  def generated(within: Depth): Generated[ZCoord] =
+    generatedPositionValue(within).map(ZCoord(_))
+
+
+private def generatedPositionValue[C <: Coord, S <: Size[C]](size: S): Generated[PositionValue] =
   GeneratedDouble.map(size.relativePosition(_))
 
-def generatedXCoord(width: Width): Generated[XCoord] =
-  generatedPositionValue(width).map(XCoord(_))
-
-def generatedYCoord(height: Height): Generated[YCoord] =
-  generatedPositionValue(height).map(YCoord(_))
-
-def generatedZCoord(depth: Depth): Generated[ZCoord] =
-  generatedPositionValue(depth).map(ZCoord(_))

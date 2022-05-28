@@ -10,8 +10,10 @@ package com.ezoky.ezgames.covideo.component
  */
 trait HealthCondition 
 
-case object Healthy extends HealthCondition
+object HealthCondition:
 
-case object Sick extends HealthCondition
+  case object Healthy extends HealthCondition
 
-case object Healed extends HealthCondition
+  case object Sick extends HealthCondition
+
+  case object Healed extends HealthCondition

@@ -10,12 +10,11 @@ case class GameLoopConfig(fps: Int)
 
 class GameLoop(initialGame: Generated[Game],
                gameStep: Generated[Game] => Generated[IO[Game]],
-//               gameStep: Endomorphism[(Generated[Game], Generator)],
                seed: Generator,
                gameLoopConfig: GameLoopConfig)
   extends Runnable :
 
-  val stepDurationInNanoseconds = GameLoop.NanosecondsInSecond / gameLoopConfig.fps
+  val stepDurationInNanoseconds = GameLoop.NanosecondsInOneSecond / gameLoopConfig.fps
 
   val thread = new Thread(this)
   thread.start()
@@ -39,11 +38,11 @@ class GameLoop(initialGame: Generated[Game],
         System.err.println(s"Overloaded: ${remainingNs}ns")
         (0L, 0)
       else
-        (remainingNs / GameLoop.NanosecondsInMillisecond, (remainingNs % GameLoop.NanosecondsInMillisecond).intValue)
+        (remainingNs / GameLoop.NanosecondsInOneMillisecond, (remainingNs % GameLoop.NanosecondsInOneMillisecond).intValue)
     Thread.sleep(remainingMilliseconds, remainingNanoseconds)
 
     loop(nextGame, nextGen, System.nanoTime() + stepDurationInNanoseconds)
 
 object GameLoop:
-  val NanosecondsInSecond = 1000000000L
-  val NanosecondsInMillisecond = 1000000L
+  val NanosecondsInOneSecond = 1000000000L
+  val NanosecondsInOneMillisecond = 1000000L

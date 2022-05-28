@@ -2,10 +2,11 @@ package com.ezoky.ezgames.covideo.system.swing
 
 import com.ezoky.ezcategory.IO
 import com.ezoky.ezgames.covideo.component.Generate.*
-import com.ezoky.ezgames.covideo.component.{Area, Position, Sprite}
+import com.ezoky.ezgames.covideo.component.HealthCondition.*
+import com.ezoky.ezgames.covideo.component.*
 import com.ezoky.ezgames.covideo.entity.*
 import com.ezoky.ezgames.covideo.entity.People.{PersonId, Population}
-import com.ezoky.ezgames.covideo.system.{Builder, DisplaySystem}
+import com.ezoky.ezgames.covideo.system.DisplaySystem
 
 import java.awt.image.BufferedImage as AWTImage
 import java.awt.{Graphics2D, GraphicsDevice, GraphicsEnvironment, Color as AWTColor, Dimension as AWTDimension, EventQueue as AWTEventQueue}
@@ -37,6 +38,18 @@ object SwingDisplaySystem
       MainWindow().draw(scene)
     }
 
+  override def spriteByHealthCondition(healthCondition: HealthCondition): Sprite =
+    healthCondition match
+      case Healthy => SwingSprite.SmileySunglasses
+      case Sick => SwingSprite.SmileySick
+
+
+private given Conversion[Pixel, Int] with
+  def apply(pixel: Pixel): Int = pixel.asInt
+
+extension (sceneDimension: SceneDimension)
+  private def awtDimension: AWTDimension =
+    AWTDimension(sceneDimension.width, sceneDimension.height)
 
 private class MainWindow()
   extends JFrame :
@@ -73,7 +86,7 @@ private class MainWindow()
   def draw(scene: Scene): Unit =
     panel.updateScene(scene)
 
-object MainWindow:
+private object MainWindow:
 
   // singleton
   private var _MainWindow: Option[MainWindow] = None

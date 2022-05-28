@@ -1,21 +1,32 @@
-package com.ezoky.ezgames.covideo.system.swing
+/*
+ * @author gweinbach on $today.date
+ * @since 0.2.0
+ *  
+ */
+
+/*
+ * @author gweinbach on $today.date
+ * @since 0.2.0
+ *
+ */
+
+package com.ezoky.ezgames.covideo
 
 import com.ezoky.ezgames.covideo.component.*
 import com.ezoky.ezgames.covideo.component.Dimension.*
 import com.ezoky.ezgames.covideo.component.Generate.*
-import com.ezoky.ezgames.covideo.entity.*
+import com.ezoky.ezgames.covideo.component.HealthCondition.*
 import com.ezoky.ezgames.covideo.entity.People.*
-import com.ezoky.ezgames.covideo.system.{Builder, DisplaySystem}
-
-import java.awt.{Dimension as AWTDimension, EventQueue as AWTEventQueue}
-import java.util.UUID
-import javax.swing.{JFrame, JPanel}
+import com.ezoky.ezgames.covideo.entity.*
+import com.ezoky.ezgames.covideo.system.DisplaySystem
+import com.ezoky.ezgames.covideo.system.swing.*
 
 /**
  * @author gweinbach on 03/01/2022
  * @since 0.2.0
  */
-case class GameBuilder(gameConfig: GameConfig)(using DisplaySystem)
+case class GameBuilder(gameConfig: GameConfig)
+                      (using DisplaySystem)
   extends Builder[Game] :
 
   override def build: Generated[Game] =
@@ -29,7 +40,8 @@ case class GameBuilder(gameConfig: GameConfig)(using DisplaySystem)
       )
 
 
-case class WorldBuilder(worldConfig: WorldConfig)(using DisplaySystem)
+case class WorldBuilder(worldConfig: WorldConfig)
+                       (using DisplaySystem)
   extends Builder[World] :
 
   lazy val sceneDimension =
@@ -103,6 +115,7 @@ case class MobileBuilder(area: Area,
 
 case class PersonBuilder(area: Area,
                          personConfig: PersonConfig)
+                        (using DisplaySystem)
   extends Builder[Person] :
 
   override def build: Generated[Person] =
@@ -113,17 +126,7 @@ case class PersonBuilder(area: Area,
         id = PersonId(),
         mobile,
         Healthy,
-        SwingSprite(Assets.SmileySunglasses, mobile.position)
+        summon[DisplaySystem].spriteByHealthCondition(Healthy)
       )
 
 
-given Conversion[Pixel, Int] with
-  def apply(pixel: Pixel): Int = pixel.asInt
-
-extension (scenePosition: ScenePosition)
-  def awtDimension: AWTDimension =
-    AWTDimension(scenePosition.x, scenePosition.y)
-
-extension (sceneDimension: SceneDimension)
-  def awtDimension: AWTDimension =
-    AWTDimension(sceneDimension.width, sceneDimension.height)

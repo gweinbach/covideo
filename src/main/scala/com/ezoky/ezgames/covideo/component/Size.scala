@@ -4,7 +4,6 @@
 
 package com.ezoky.ezgames.covideo.component
 
-import com.ezoky.ezgames.covideo.component.Coord.*
 import com.ezoky.ezgames.covideo.component.Dimension.*
 
 /**
