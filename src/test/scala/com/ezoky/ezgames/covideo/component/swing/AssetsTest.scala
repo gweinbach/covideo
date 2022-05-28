@@ -1,5 +1,12 @@
-package com.ezoky.ezgames.covideo.system.swing
+/*
+ * @author gweinbach on $today.date
+ * @since 0.2.0
+ *  
+ */
 
+package com.ezoky.ezgames.covideo.component.swing
+
+import com.ezoky.ezgames.covideo.component.swing.Assets
 import org.junit.Assert.*
 import org.junit.Test
 

@@ -4,6 +4,7 @@ import com.ezoky.ezcategory.IO
 import com.ezoky.ezgames.covideo.component.Generate.*
 import com.ezoky.ezgames.covideo.component.HealthCondition.*
 import com.ezoky.ezgames.covideo.component.*
+import com.ezoky.ezgames.covideo.component.swing.SwingSprite
 import com.ezoky.ezgames.covideo.entity.*
 import com.ezoky.ezgames.covideo.entity.People.{PersonId, Population}
 import com.ezoky.ezgames.covideo.system.DisplaySystem
