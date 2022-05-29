@@ -5,6 +5,9 @@
 package com.ezoky.ezgames.covideo.component
 
 import com.ezoky.ezgames.covideo.component.Dimension.*
+import com.ezoky.ezgames.covideo.component.Generate.Generated
+
+import scala.math.Numeric.Implicits.*
 
 /**
  * @author gweinbach on 14/11/2020
@@ -17,14 +20,18 @@ sealed trait Size[C <: Coord](val value: SizeValue)(using val geometry: Geometry
   def relativePosition[N: Numeric](n: N): PositionValue =
     value.relativePosition(n)
 
+  @deprecated("Use generatedCoord instead")
   final def randomCoord: C =
     coord(value.randomPosition)
 
   final def minCoord: C =
     coord(value.minPosition)
-    
+
   final def maxCoord: C =
     coord(value.maxPosition)
+
+  final def generatedCoord: Generated[C] =
+    GeneratedPositionValue.map(positionValue => coord(relativePosition(positionValue)(FractionalPositionValue)))
 
 
 case class Width(override val value: SizeValue)(using geometry: Geometry)

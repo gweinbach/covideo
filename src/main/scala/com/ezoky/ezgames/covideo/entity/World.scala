@@ -5,7 +5,7 @@
 package com.ezoky.ezgames.covideo.entity
 
 import com.ezoky.ezcategory.IO
-import com.ezoky.ezgames.covideo.component.Dimension.Geometry
+import com.ezoky.ezgames.covideo.component.Dimension.{Geometry, SizeValue}
 import com.ezoky.ezgames.covideo.component.{Area, Sprite}
 
 /**
@@ -20,7 +20,10 @@ case class WorldConfig(areaConfig: AreaConfig,
                        sceneConfig: SceneConfig)
 
 
-case class AreaConfig(xGeometry: Geometry,
+case class AreaConfig(width: SizeValue,
+                      xGeometry: Geometry,
+                      height: SizeValue,
                       yGeometry: Geometry,
+                      depth: SizeValue,
                       zGeometry: Geometry)
 

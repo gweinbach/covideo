@@ -1,14 +1,3 @@
-/*
- * @author gweinbach on $today.date
- * @since 0.2.0
- *  
- */
-
-/*
- * @author gweinbach on $today.date
- * @since 0.2.0
- *
- */
 
 package com.ezoky.ezgames.covideo
 
@@ -16,8 +5,9 @@ import com.ezoky.ezgames.covideo.component.*
 import com.ezoky.ezgames.covideo.component.Dimension.*
 import com.ezoky.ezgames.covideo.component.Generate.*
 import com.ezoky.ezgames.covideo.component.HealthCondition.*
-import com.ezoky.ezgames.covideo.entity.People.*
+import com.ezoky.ezgames.covideo.component.Screen.*
 import com.ezoky.ezgames.covideo.entity.*
+import com.ezoky.ezgames.covideo.entity.People.*
 import com.ezoky.ezgames.covideo.system.DisplaySystem
 import com.ezoky.ezgames.covideo.system.swing.*
 
@@ -44,21 +34,12 @@ case class WorldBuilder(worldConfig: WorldConfig)
                        (using DisplaySystem)
   extends Builder[World] :
 
-  lazy val sceneDimension =
-    worldConfig.sceneConfig.sceneSize match
-      case DefaultScreenSize =>
-        summon[DisplaySystem].defaultScreenSceneDimension
-      case sceneSize: SceneDimension =>
-        sceneSize
-
   override def build: Generated[World] =
     for
       area <- AreaBuilder(
-        sceneDimension,
         worldConfig.areaConfig
       ).build
       scene <- SceneBuilder(
-        area,
         worldConfig.sceneConfig,
       ).build
     yield
@@ -68,29 +49,37 @@ case class WorldBuilder(worldConfig: WorldConfig)
       )
 
 
-private case class AreaBuilder(sceneDimension: SceneDimension,
-                               areaConfig: AreaConfig)
+private case class AreaBuilder(areaConfig: AreaConfig)
   extends Builder[Area] :
 
   override def build: Generated[Area] =
     Generated(
       Area(
-        sceneDimension.width.width(using areaConfig.xGeometry),
-        sceneDimension.height.height(using areaConfig.yGeometry),
-        Depth.Flat
+        Width(areaConfig.width)(using areaConfig.xGeometry),
+        Height(areaConfig.height)(using areaConfig.yGeometry),
+        Depth(areaConfig.depth)(using areaConfig.zGeometry),
       )
     )
 
-private case class SceneBuilder(area: Area,
-                                sceneConfig: SceneConfig)
+private case class SceneBuilder(sceneConfig: SceneConfig)
+                               (using DisplaySystem)
   extends Builder[Scene] :
+
+  lazy val sceneDimension =
+    sceneConfig.sceneSize match
+      case DefaultScreenSize =>
+        summon[DisplaySystem].defaultScreenSceneDimension
+      case sceneSize: ScreenDimension =>
+        sceneSize
+
 
   override def build: Generated[Scene] =
     Generated(
       Scene(
-        area,
         name = sceneConfig.name,
-        margins = sceneConfig.margin
+        dimension = sceneDimension,
+        margins = sceneConfig.margin,
+        zoomRatio = sceneConfig.zoomRatio
       )
     )
 
@@ -101,7 +90,7 @@ case class MobileBuilder(area: Area,
 
   override def build: Generated[Mobile] =
     for
-      position <- Position.generated(area)
+      position <- area.generatedPosition
       speed <- Speed.generated(mobileConfig.speedRange, mobileConfig.speedRange, mobileConfig.speedRange)
       acceleration <- Acceleration.generated(mobileConfig.accelerationRange, mobileConfig.accelerationRange, mobileConfig.accelerationRange)
     yield

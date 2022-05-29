@@ -1,9 +1,10 @@
 package com.ezoky.ezgames.covideo.system.swing
 
 import com.ezoky.ezcategory.IO
+import com.ezoky.ezgames.covideo.component.*
 import com.ezoky.ezgames.covideo.component.Generate.*
 import com.ezoky.ezgames.covideo.component.HealthCondition.*
-import com.ezoky.ezgames.covideo.component.*
+import com.ezoky.ezgames.covideo.component.Screen.*
 import com.ezoky.ezgames.covideo.component.swing.SwingSprite
 import com.ezoky.ezgames.covideo.entity.*
 import com.ezoky.ezgames.covideo.entity.People.{PersonId, Population}
@@ -21,22 +22,22 @@ import javax.swing.{BorderFactory, JFrame, JPanel}
 object SwingDisplaySystem
   extends DisplaySystem :
 
-  override def defaultScreenSceneDimension: SceneDimension =
+  override def defaultScreenSceneDimension: ScreenDimension =
     import java.awt.{GraphicsDevice, GraphicsEnvironment}
 
     val gd: GraphicsDevice = GraphicsEnvironment.getLocalGraphicsEnvironment.getDefaultScreenDevice
     val screenWidth: Pixel = gd.getDisplayMode.getWidth px
     val screenHeight: Pixel = gd.getDisplayMode.getHeight px
 
-    SceneDimension(screenWidth, screenHeight)
-
+    ScreenDimension(screenWidth, screenHeight)
 
   override def drawScene(scene: Scene): IO[Unit] =
     IO {
-      // side effect, not pure
-      MainWindow().updateTitle(scene.name)
-      MainWindow().resize(scene.preferredDimension)
-      MainWindow().draw(scene)
+      // side effects, not pure
+      val mainWindow = MainWindow(scene.id)
+      mainWindow.updateTitle(scene.name)
+      mainWindow.resize(scene.preferredDimension)
+      mainWindow.draw(scene)
     }
 
   override def spriteByHealthCondition(healthCondition: HealthCondition): Sprite =
@@ -48,7 +49,7 @@ object SwingDisplaySystem
 private given Conversion[Pixel, Int] with
   def apply(pixel: Pixel): Int = pixel.asInt
 
-extension (sceneDimension: SceneDimension)
+extension (sceneDimension: ScreenDimension)
   private def awtDimension: AWTDimension =
     AWTDimension(sceneDimension.width, sceneDimension.height)
 
@@ -71,7 +72,7 @@ private class MainWindow()
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
     setVisible(true)
 
-  def resize(size: SceneDimension): Unit =
+  def resize(size: ScreenDimension): Unit =
     if (size.awtDimension != frameSize)
       setSize(
         size.awtDimension
@@ -90,14 +91,14 @@ private class MainWindow()
 private object MainWindow:
 
   // singleton
-  private var _MainWindow: Option[MainWindow] = None
+  private val _MainWindows: scala.collection.mutable.Map[SceneId, MainWindow] = scala.collection.mutable.Map.empty
 
-  def apply(): MainWindow =
-    _MainWindow.getOrElse {
+  def apply(sceneId: SceneId): MainWindow =
+    _MainWindows.getOrElse(sceneId, {
       val mainWindow = new MainWindow()
-      _MainWindow = Some(mainWindow)
+      _MainWindows.addOne(sceneId, mainWindow)
       mainWindow
-    }
+    })
 
 
 /**

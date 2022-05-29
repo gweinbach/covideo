@@ -6,7 +6,7 @@ package com.ezoky.ezgames.covideo.component
 
 import Generate.*
 
-import scala.annotation.tailrec
+import scala.annotation.{tailrec, targetName}
 import scala.math.Numeric.DoubleIsFractional
 import scala.util.Random
 
@@ -30,6 +30,8 @@ object Dimension:
 
   private def _NumberToDimensionConverter[N: Numeric]: (N) => _DimensionType =
     (n: N) => summon[Numeric[N]].toDouble(n)
+
+  private val _GeneratedDimension: Generated[_DimensionType] = GeneratedDouble
 
   // end of _DimensionType choice's dependencies
 
@@ -66,14 +68,13 @@ object Dimension:
     def apply(size: _DimensionType): SizeValue = size.abs
 
 
-
   extension (sizeValue: SizeValue)
 
-    def isNull: Boolean =
+    inline def isNull: Boolean =
       sizeValue == SizeValue.Zero
 
-    def isNotNull: Boolean =
-      sizeValue != SizeValue.Zero
+    inline def isNotNull: Boolean =
+      !isNull
 
     def relativePosition[N: Numeric](n: N)(using geometry: Geometry): PositionValue =
       PositionValue(
@@ -82,9 +83,11 @@ object Dimension:
         geometry
       )
 
+    @targetName("zoom_SizeValue")
     def zoom[N: Numeric](ratio: N): SizeValue =
       _DimensionFractional.times(sizeValue, _NumberToDimensionConverter.apply(ratio))
 
+    @deprecated("use GeneratedPositionValue instead")
     def randomPosition(using Geometry): PositionValue =
       relativePosition(_Random)
 
@@ -97,7 +100,7 @@ object Dimension:
     def isOutOfBounds(position: PositionValue): Boolean =
       (position < PositionValue.Zero) || (position >= sizeValue)
 
-    def isWithinBounds(position: PositionValue): Boolean =
+    inline def isWithinBounds(position: PositionValue): Boolean =
       !isOutOfBounds(position)
 
     @tailrec
@@ -129,6 +132,10 @@ object Dimension:
       else
         dimensionValue
 
+  val GeneratedSizeValue: Generated[SizeValue] = _GeneratedDimension
+
+  val FractionalSizeValue: Fractional[SizeValue] = _DimensionFractional
+
 
   // Position
   opaque type PositionValue = _DimensionType
@@ -142,6 +149,7 @@ object Dimension:
               usingGeometry: Geometry): PositionValue =
       usingGeometry.normalizePosition(position, withinBoundary)
 
+    @deprecated("Use Generated[PositionValue] instead")
     def random(withinBoundary: SizeValue,
                usingGeometry: Geometry): PositionValue =
       withinBoundary.randomPosition(using usingGeometry)
@@ -156,6 +164,10 @@ object Dimension:
     def doubleValue: Double =
       _DimensionFractional.toDouble(position)
 
+    @targetName("zoom_PositionValue")
+    def zoom[N: Numeric](ratio: N): PositionValue =
+      _DimensionFractional.times(position, _NumberToDimensionConverter.apply(ratio))
+
     def move(speed: SpeedValue,
              withinBoundary: SizeValue,
              usingGeometry: Geometry): PositionValue =
@@ -165,10 +177,15 @@ object Dimension:
       summon[Ordering[Double]].compare(position, otherPosition)
 
 
+
   given Ordering[PositionValue] =
     new Ordering[PositionValue]:
       override def compare(x: PositionValue,
                            y: PositionValue): Int = x.compare(y)
+
+  val GeneratedPositionValue: Generated[PositionValue] = _GeneratedDimension
+
+  val FractionalPositionValue: Fractional[PositionValue] = _DimensionFractional
 
 
   // Timeval

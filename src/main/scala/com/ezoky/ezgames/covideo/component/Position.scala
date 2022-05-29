@@ -6,8 +6,6 @@ package com.ezoky.ezgames.covideo.component
 
 import com.ezoky.ezgames.covideo.component.Generate.*
 
-import scala.util.Random
-
 /**
  * @author gweinbach on 14/11/2020
  * @since 0.1.0
@@ -21,17 +19,17 @@ object Position:
   val Zero: Position =
     Position(XCoord.Zero, YCoord.Zero, ZCoord.Zero)
 
-  def generated(width: Width,
-                height: Height,
-                depth: Depth): Generated[Position] =
+  def generatedWithin(width: Width,
+                      height: Height,
+                      depth: Depth): Generated[Position] =
     Generated.map3(
-      XCoord.generated(width),
-      YCoord.generated(height),
-      ZCoord.generated(depth)
+      XCoord.generatedWithin(width),
+      YCoord.generatedWithin(height),
+      ZCoord.generatedWithin(depth)
     )(Position(_, _, _))
 
-  def generated(area: Area): Generated[Position] =
-    generated(
+  def generatedWithin(area: Area): Generated[Position] =
+    generatedWithin(
       area.width,
       area.height,
       area.depth

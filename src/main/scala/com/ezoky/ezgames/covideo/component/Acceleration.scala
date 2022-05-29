@@ -54,6 +54,9 @@ trait AccelerationCoord[C <: Coord, S <: SpeedCoord[C], A <: AccelerationCoord[C
   def truncate(within: AccelerationRange): A
 
 
+/**
+ * inclusive on both bounds
+ */
 case class AccelerationRange private(min: AccelerationValue,
                                      max: AccelerationValue):
   def generatedAccelerationValue: Generated[AccelerationValue] =

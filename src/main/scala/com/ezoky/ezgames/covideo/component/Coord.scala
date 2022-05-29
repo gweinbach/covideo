@@ -4,10 +4,10 @@
 
 package com.ezoky.ezgames.covideo.component
 
-import Generate.*
-import Dimension.*
+import com.ezoky.ezgames.covideo.component.Dimension.*
+import com.ezoky.ezgames.covideo.component.Generate.*
 
-import Numeric.Implicits._
+import scala.math.Numeric.Implicits.*
 
 /**
  * @author gweinbach on 14/11/2020
@@ -30,8 +30,8 @@ object XCoord:
   val Zero: XCoord =
     XCoord(PositionValue.Zero)
 
-  def generated(within: Width): Generated[XCoord] =
-    generatedPositionValue(within).map(XCoord(_))
+  def generatedWithin(width: Width): Generated[XCoord] =
+    generatedPositionValue(width).map(XCoord(_))
 
 
 object YCoord:
@@ -39,8 +39,8 @@ object YCoord:
   val Zero: YCoord =
     YCoord(PositionValue.Zero)
 
-  def generated(within: Height): Generated[YCoord] =
-    generatedPositionValue(within).map(YCoord(_))
+  def generatedWithin(height: Height): Generated[YCoord] =
+    generatedPositionValue(height).map(YCoord(_))
 
 
 object ZCoord:
@@ -48,8 +48,8 @@ object ZCoord:
   val Zero: ZCoord =
     ZCoord(PositionValue.Zero)
 
-  def generated(within: Depth): Generated[ZCoord] =
-    generatedPositionValue(within).map(ZCoord(_))
+  def generatedWithin(depth: Depth): Generated[ZCoord] =
+    generatedPositionValue(depth).map(ZCoord(_))
 
 
 private def generatedPositionValue[C <: Coord, S <: Size[C]](size: S): Generated[PositionValue] =

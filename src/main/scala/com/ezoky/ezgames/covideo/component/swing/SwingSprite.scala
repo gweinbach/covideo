@@ -1,8 +1,3 @@
-/*
- * @author gweinbach on $today.date
- * @since 0.2.0
- *  
- */
 
 package com.ezoky.ezgames.covideo.component.swing
 
@@ -11,7 +6,10 @@ import com.ezoky.ezgames.covideo.component.{Position, Sprite}
 import java.awt.image.BufferedImage as AWTImage
 import javax.imageio.ImageIO
 
-
+/**
+ * @author gweinbach on 29/05/2022
+ * @since 0.2.0
+ */
 case class SwingSprite(asset: AWTImage,
                        position: Position = Position.Zero,
                        previousPosition: Option[Position] = None)

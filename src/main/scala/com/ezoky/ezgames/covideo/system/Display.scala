@@ -1,8 +1,9 @@
 package com.ezoky.ezgames.covideo.system
 
 import com.ezoky.ezcategory.IO
+import com.ezoky.ezgames.covideo.component.Screen.ScreenDimension
 import com.ezoky.ezgames.covideo.component.{HealthCondition, Sprite}
-import com.ezoky.ezgames.covideo.entity.{Game, Scene, SceneDimension}
+import com.ezoky.ezgames.covideo.entity.{Game, Scene}
 
 /**
  * @author gweinbach on 03/01/2022
@@ -30,7 +31,8 @@ given (using DisplaySystem): Display[Game] with
 trait DisplaySystem:
 
   // Generic
-  def defaultScreenSceneDimension: SceneDimension
+  def defaultScreenSceneDimension: ScreenDimension
+
   def drawScene(scene: Scene): IO[Unit]
 
   // Game specific

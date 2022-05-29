@@ -5,6 +5,7 @@
 package com.ezoky.ezgames.covideo.component
 
 import com.ezoky.ezgames.covideo.component.Dimension.*
+import com.ezoky.ezgames.covideo.component.Generate.Generated
 import com.ezoky.ezgames.covideo.component.{Depth, Height, Width}
 
 /**
@@ -15,6 +16,7 @@ case class Area(width: Width,
                 height: Height,
                 depth: Depth):
 
+  @deprecated("Use 'generatedPosition' instead")
   def randomPosition: Position =
     Position(width.randomCoord, height.randomCoord, depth.randomCoord)
 
@@ -23,3 +25,6 @@ case class Area(width: Width,
     
   def maxPosition: Position =
     Position(width.maxCoord, height.maxCoord, depth.maxCoord)
+
+  def generatedPosition: Generated[Position] =
+    Position.generatedWithin(this)

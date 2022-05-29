@@ -2,6 +2,7 @@ package com.ezoky.ezgames.covideo
 
 import com.ezoky.ezgames.covideo.component.*
 import com.ezoky.ezgames.covideo.component.Dimension.*
+import com.ezoky.ezgames.covideo.component.Screen.*
 import com.ezoky.ezgames.covideo.entity.*
 import com.ezoky.ezgames.covideo.entity.People.*
 
@@ -9,16 +10,20 @@ object Config:
 
   val Area =
     AreaConfig(
+      400 size,
       xGeometry = Geometry.Toric,
+      300 size,
       yGeometry = Geometry.Toric,
+      0 size,
       zGeometry = Geometry.Flat
     )
   val Scene =
     SceneConfig(
       name = "COVIDEO",
 //      sceneSize = SceneDimension(width = 1200 px, height = 800 px), // DefaultScreenSize
-      sceneSize = SceneDimension(width = 800 px, height = 600 px), // DefaultScreenSize
+      sceneSize = ScreenDimension(width = 800 px, height = 600 px), // DefaultScreenSize
 //      margin = Margin(top = 100 px, left = 100 px, bottom = 100 px, right = 100 px)
+      zoomRatio = 1.5
     )
   val World =
     WorldConfig(
@@ -39,5 +44,5 @@ object Config:
     )
   val Loop =
     GameLoopConfig(
-      fps = 60
+      fps = 20
     )

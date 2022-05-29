@@ -54,6 +54,9 @@ trait SpeedCoord[C <: Coord](val value: SpeedValue):
                          within: S): C
 
 
+/**
+ * inclusive on both bounds
+ */
 case class SpeedRange private(min: SpeedValue,
                               max: SpeedValue):
   def generatedSpeedValue: Generated[SpeedValue] =

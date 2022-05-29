@@ -34,10 +34,9 @@ object People:
 
   opaque type PersonId = UUID
 
-  object PersonId {
+  object PersonId:
     def apply(): PersonId =
       UUID.randomUUID()
-  }
 
 
   opaque type Population[T] = Map[PersonId, T]
