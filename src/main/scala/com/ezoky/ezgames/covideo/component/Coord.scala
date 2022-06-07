@@ -31,7 +31,7 @@ object XCoord:
     XCoord(PositionValue.Zero)
 
   def generatedWithin(width: Width): Generated[XCoord] =
-    generatedPositionValue(width).map(XCoord(_))
+    width.generatedCoord
 
 
 object YCoord:
@@ -40,7 +40,7 @@ object YCoord:
     YCoord(PositionValue.Zero)
 
   def generatedWithin(height: Height): Generated[YCoord] =
-    generatedPositionValue(height).map(YCoord(_))
+    height.generatedCoord
 
 
 object ZCoord:
@@ -49,9 +49,6 @@ object ZCoord:
     ZCoord(PositionValue.Zero)
 
   def generatedWithin(depth: Depth): Generated[ZCoord] =
-    generatedPositionValue(depth).map(ZCoord(_))
+    depth.generatedCoord
 
-
-private def generatedPositionValue[C <: Coord, S <: Size[C]](size: S): Generated[PositionValue] =
-  GeneratedDouble.map(size.relativePosition(_))
 

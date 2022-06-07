@@ -34,7 +34,7 @@ case class Scene(id: SceneId = SceneId(),
     )
 
   // This projection method should take care of 3D
-  def project(area: Area): ScreenDimension =
+  def project(area: Box): ScreenDimension =
     ScreenDimension(
       area.maxPosition.x.value.zoom(zoomRatio) px,
       area.maxPosition.y.value.zoom(zoomRatio) px,

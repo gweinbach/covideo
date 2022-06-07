@@ -12,9 +12,9 @@ import com.ezoky.ezgames.covideo.component.{Depth, Height, Width}
  * @author gweinbach on 14/11/2020
  * @since 0.1.0
  */
-case class Area(width: Width,
-                height: Height,
-                depth: Depth):
+case class Box(width: Width,
+               height: Height,
+               depth: Depth):
 
   @deprecated("Use 'generatedPosition' instead")
   def randomPosition: Position =

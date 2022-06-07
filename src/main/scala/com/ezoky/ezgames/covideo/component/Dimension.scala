@@ -4,7 +4,8 @@
 
 package com.ezoky.ezgames.covideo.component
 
-import Generate.*
+import com.ezoky.ezgames.covideo.component.Generate.*
+import com.ezoky.eznumber.Precisions
 
 import scala.annotation.{tailrec, targetName}
 import scala.math.Numeric.DoubleIsFractional
@@ -20,6 +21,7 @@ object Dimension:
   // and must be updated if this changes
   private type _DimensionType = Double
   private val _Zero: _DimensionType = 0.0
+  private val _One: _DimensionType = 1.0
   private val _Epsilon: _DimensionType = 1E-16 // 17 significant digits for Double
 
   private def _Random: _DimensionType = Random().nextDouble()
@@ -36,7 +38,7 @@ object Dimension:
   // end of _DimensionType choice's dependencies
 
 
-  enum Geometry :
+  enum Geometry:
 
     case Flat
 
@@ -55,8 +57,6 @@ object Dimension:
 
         case Bounded =>
           boundary.bounce(value)
-
-
 
 
   opaque type SizeValue = _DimensionType
@@ -93,7 +93,7 @@ object Dimension:
 
     def minPosition(using Geometry): PositionValue =
       relativePosition(0.0)
-      
+
     def maxPosition(using Geometry): PositionValue =
       relativePosition(1.0 - _Epsilon)
 
@@ -177,9 +177,8 @@ object Dimension:
       summon[Ordering[Double]].compare(position, otherPosition)
 
 
-
   given Ordering[PositionValue] =
-    new Ordering[PositionValue]:
+    new Ordering[PositionValue] :
       override def compare(x: PositionValue,
                            y: PositionValue): Int = x.compare(y)
 
@@ -193,12 +192,11 @@ object Dimension:
 
   opaque type DurationValue = _StepType
 
-  object DurationValue :
+  object DurationValue:
     val Zero: DurationValue = 0
 
     def apply(duration: Long): DurationValue =
       duration.abs
-
 
 
   // Speed
@@ -231,7 +229,6 @@ object Dimension:
 
   given Ordering[SpeedValue] =
     (x: SpeedValue, y: SpeedValue) => x.compare(y)
-
 
 
   // Acceleration
@@ -279,4 +276,166 @@ object Dimension:
 
     def steps: DurationValue =
       DurationValue(durationValue)
+
+
+  // Spatial Geometry
+
+  type SpatialCoordinate = _DimensionType
+
+  import spire.implicits.*
+  val SpatialPrecisions: Precisions[SpatialCoordinate] = new Precisions[SpatialCoordinate] {}
+  import SpatialPrecisions.*
+
+  given SpatialPrecision: Precision = Precision(1E-12)
+//
+//  extension (t1: SpatialCoordinate)
+//    override def equals(obj: Any): Boolean =
+//      obj match
+//        case t2: SpatialCoordinate =>
+//          t1.~=(t2)(usinsuper.equals(obj)g precision)
+//        case _ =>
+//          false
+
+  //  val SpatialPrecisions.OverrideEquals.*
+//
+//
+//  sealed trait Axis:
+//    def base: Vector
+//
+//  object Axis:
+//
+//    case object X extends Axis:
+//      override def base: Vector = Vector.OneX
+//
+//    case object Y extends Axis:
+//      override def base: Vector = Vector.OneY
+//
+//    case object Z extends Axis:
+//      override def base: Vector = Vector.OneZ
+//
+//  case class Point(x: SpatialCoordinate,
+//                   y: SpatialCoordinate,
+//                   z: SpatialCoordinate):
+//
+//    def translate(translationVector: Vector): Point =
+//      Point(x + translationVector.x, y + translationVector.y, z + translationVector.z)
+//
+//    override def equals(obj: Any): Boolean =
+//      obj match
+//        case that: Point if (that != null) =>
+//          (this.x ~= that.x) &&
+//          (this.y ~= that.y) &&
+//          (this.z ~= that.z)
+//        case _ =>
+//          false
+//
+//
+//  object Point:
+//    val Zero = Point(_Zero, _Zero, _Zero)
+//
+//    val OneX = Point(_One, _Zero, _Zero)
+//    val OneY = Point(_Zero, _One, _Zero)
+//    val OneZ = Point(_Zero, _Zero, _One)
+//
+//  case class Vector(x: SpatialCoordinate,
+//                    y: SpatialCoordinate,
+//                    z: SpatialCoordinate):
+//    lazy val dest: Point =
+//      Point(x, y, z)
+//
+//    lazy val tuple: (SpatialCoordinate, SpatialCoordinate, SpatialCoordinate) =
+//      (x, y, z)
+//
+//    def unary_- =
+//      Vector(-x, -y, -z)
+//
+//    def +(v: Vector): Vector =
+//      Vector(x + v.x, y + v.y, z + v.z)
+//
+//    def -(v: Vector): Vector =
+//      Vector(x - v.x, y - v.y, z - v.z)
+//
+//    def *[N: Numeric](n: N): Vector =
+//      Vector(
+//        _DimensionFractional.times(x, _NumberToDimensionConverter.apply(n)),
+//        _DimensionFractional.times(y, _NumberToDimensionConverter.apply(n)),
+//        _DimensionFractional.times(z, _NumberToDimensionConverter.apply(n))
+//      )
+//
+//    infix def ∧(v: Vector): Vector =
+//      Vector(
+//        y * v.z - z * v.y,
+//        z * v.x - x * v.z,
+//        x * v.y - y * v.x
+//      )
+//
+//    def rotate(rotationVector: RotationVector): Option[Vector] =
+//      rotationVector.rotateVector(this)
+//
+//    override def equals(obj: Any): Boolean =
+//      obj match
+//        case that: Vector if (that != null) =>
+//          (this.x ~= that.x) &&
+//          (this.y ~= that.y) &&
+//          (this.z ~= that.z)
+//        case _ =>
+//          false
+//
+//
+//  object Vector:
+//
+////    def apply(tuple: (SpatialCoordinate, SpatialCoordinate, SpatialCoordinate)): Vector =
+////      Vector(tuple._1, tuple._2, tuple._3)
+//
+//    def apply(start: Point,
+//              end: Point): Vector =
+//      Vector(end.x - start.x, end.y - start.y, end.z - start.z)
+//
+//    def apply(end: Point): Vector =
+//      Vector(Point.Zero, end)
+//
+//    def apply(sizeValue: SizeValue,
+//              axis: Axis): Vector =
+//      axis match
+//        case Axis.X => Vector(sizeValue, _Zero, _Zero)
+//        case Axis.Y => Vector(_Zero, sizeValue, _Zero)
+//        case Axis.Z => Vector(_Zero, _Zero, sizeValue)
+//
+//
+//    val Null = Vector(_Zero, _Zero, _Zero)
+//
+//    val OneX = Vector(_One, _Zero, _Zero)
+//    val OneY = Vector(_Zero, _One, _Zero)
+//    val OneZ = Vector(_Zero, _Zero, _One)
+//
+//
+//  case class Vertex(s: Point,
+//                    t: Point):
+//
+//    def translate(translationVector: Vector): Vertex =
+//      Vertex(s.translate(translationVector), t.translate(translationVector))
+
+  //    def rotate(rotationVector: Vector): Vertex =
+  //      Vertex(s.rotate(rotationVector), t.rotate(rotationVector))
+  //
+//
+//  object Vertex:
+//    def apply(s: Point, v: Vector): Vertex =
+//      new Vertex(s, v.dest)
+
+
+  import spire.implicits.*
+  val H = new com.ezoky.ez3d.H[SpatialCoordinate](SpatialPrecision.value) {}
+  import H.*
+
+  type RotationVector = Quaternion
+
+  def RotationVector(angle: SpatialCoordinate,
+                     axis: Vector): Option[RotationVector] =
+    Quaternion.fromRotationVector(axis = axis.tuple, angle = angle)
+
+  extension (rotationVector: RotationVector)
+    def rotateVector(vector: Vector): Option[Vector] =
+      rotationVector.rotate(vector.tuple).map(tuple => Vector(tuple._1, tuple._2, tuple._3))
+
 

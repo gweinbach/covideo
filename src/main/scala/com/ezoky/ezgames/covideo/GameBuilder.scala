@@ -50,11 +50,11 @@ case class WorldBuilder(worldConfig: WorldConfig)
 
 
 private case class AreaBuilder(areaConfig: AreaConfig)
-  extends Builder[Area] :
+  extends Builder[Box] :
 
-  override def build: Generated[Area] =
+  override def build: Generated[Box] =
     Generated(
-      Area(
+      Box(
         Width(areaConfig.width)(using areaConfig.xGeometry),
         Height(areaConfig.height)(using areaConfig.yGeometry),
         Depth(areaConfig.depth)(using areaConfig.zGeometry),
@@ -84,7 +84,7 @@ private case class SceneBuilder(sceneConfig: SceneConfig)
     )
 
 
-case class MobileBuilder(area: Area,
+case class MobileBuilder(area: Box,
                          mobileConfig: MobileConfig)
   extends Builder[Mobile] :
 
@@ -96,13 +96,14 @@ case class MobileBuilder(area: Area,
     yield
       Mobile(
         position,
+        area,
         speed,
         mobileConfig.speedRange,
         acceleration,
         mobileConfig.accelerationRange
       )
 
-case class PersonBuilder(area: Area,
+case class PersonBuilder(area: Box,
                          personConfig: PersonConfig)
                         (using DisplaySystem)
   extends Builder[Person] :

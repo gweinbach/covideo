@@ -150,4 +150,8 @@ class DimensionTest {
       }
     }
   }
+
+  @Test def rotateTest: Unit =
+    val oneQuarter = RotationVector((math.Pi/2), Vector.OneZ).get
+    assertEquals(Vector.OneX.rotate(oneQuarter), Some(Vector.OneY))
 }

@@ -21,8 +21,8 @@ object People:
                     sprite: Sprite)
     extends Entity[PersonId]:
 
-    def move(within: Area): Person =
-      val movedMobile = mobile.move(within = within)
+    def move: Person =
+      val movedMobile = mobile.move
       copy(mobile = movedMobile, sprite = sprite.moveTo(movedMobile.position))
 
     def accelerate: Person =

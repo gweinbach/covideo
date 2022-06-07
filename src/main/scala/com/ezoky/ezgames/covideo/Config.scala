@@ -44,5 +44,5 @@ object Config:
     )
   val Loop =
     GameLoopConfig(
-      fps = 20
+      fps = 60
     )

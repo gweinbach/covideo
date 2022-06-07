@@ -24,6 +24,10 @@ case class Acceleration(xAcceleration: XAcceleration,
       zAcceleration
     )
 
+trait Accelerating[T]:
+  extension (accelerating: T) def acceleration: Acceleration
+  
+
 object Acceleration:
 
   val Zero: Acceleration =

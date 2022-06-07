@@ -17,8 +17,18 @@ sealed trait Size[C <: Coord](val value: SizeValue)(using val geometry: Geometry
 
   def coord(position: PositionValue): C
 
-  def relativePosition[N: Numeric](n: N): PositionValue =
+  private def relativePosition[N: Numeric](n: N): PositionValue =
     value.relativePosition(n)
+
+  def *[N: Numeric](n: N): C =
+    coord(relativePosition(n))
+
+  def /[N: Fractional](n: N): Option[C] =
+    val fractionalN = summon[Fractional[N]]
+    if (fractionalN.zero == n)
+      None
+    else
+      Some(coord(relativePosition(fractionalN.div(fractionalN.one, n))))
 
   @deprecated("Use generatedCoord instead")
   final def randomCoord: C =
@@ -33,11 +43,19 @@ sealed trait Size[C <: Coord](val value: SizeValue)(using val geometry: Geometry
   final def generatedCoord: Generated[C] =
     GeneratedPositionValue.map(positionValue => coord(relativePosition(positionValue)(FractionalPositionValue)))
 
+  lazy val axis: Axis
+
+  val vector: Vector =
+    Vector(value, axis)
+
 
 case class Width(override val value: SizeValue)(using geometry: Geometry)
-  extends Size[XCoord](value) :
+  extends Size[XCoord](value):
+
   override def coord(position: PositionValue): XCoord =
     XCoord(position)
+
+  override lazy val axis: Axis = Axis.X
 
 
 object Width:
@@ -45,9 +63,12 @@ object Width:
 
 
 case class Height(override val value: SizeValue)(using geometry: Geometry)
-  extends Size[YCoord](value) :
+  extends Size[YCoord](value):
+
   override def coord(position: PositionValue): YCoord =
     YCoord(position)
+
+  override lazy val axis: Axis = Axis.Y
 
 
 object Height:
@@ -55,9 +76,12 @@ object Height:
 
 
 case class Depth(override val value: SizeValue)(using geometry: Geometry)
-  extends Size[ZCoord](value) :
+  extends Size[ZCoord](value):
+
   override def coord(position: PositionValue): ZCoord =
     ZCoord(position)
+
+  override lazy val axis: Axis = Axis.Z
 
 
 object Depth:

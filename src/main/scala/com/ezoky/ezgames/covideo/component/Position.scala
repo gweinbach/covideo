@@ -28,9 +28,13 @@ object Position:
       ZCoord.generatedWithin(depth)
     )(Position(_, _, _))
 
-  def generatedWithin(area: Area): Generated[Position] =
+  def generatedWithin(area: Box): Generated[Position] =
     generatedWithin(
       area.width,
       area.height,
       area.depth
     )
+
+trait Positioned[T]:
+  extension (positioned: T) 
+    def position: Position

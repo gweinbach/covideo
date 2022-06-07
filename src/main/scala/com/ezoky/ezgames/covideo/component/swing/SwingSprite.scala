@@ -3,7 +3,9 @@ package com.ezoky.ezgames.covideo.component.swing
 
 import com.ezoky.ezgames.covideo.component.{Position, Sprite}
 
-import java.awt.image.BufferedImage as AWTImage
+import java.awt.Rectangle
+import java.awt.geom.Area
+import java.awt.image.{BufferedImage as AWTImage}
 import javax.imageio.ImageIO
 
 /**
@@ -29,6 +31,22 @@ object SwingSprite:
 
   val SmileySunglasses = SwingSprite(Assets.SmileySunglasses)
   val SmileySick = SwingSprite(Assets.SmileySick)
+
+
+  def getNonTransparentArea(image: AWTImage): Area =
+    val area = new Area
+    for (x <- 0 until image.getWidth)
+      for (y <- 0 until image.getHeight)
+        val pixel = image.getRGB(x, y)
+        if (isTransparent(pixel))
+          val r = new Rectangle(x, y, 1, 1)
+          area.add(new Area(r))
+    area
+
+  private def isTransparent(pixel: Int): Boolean =
+    (pixel & 0xff000000) != 0
+
+
 
 
 private object Assets:

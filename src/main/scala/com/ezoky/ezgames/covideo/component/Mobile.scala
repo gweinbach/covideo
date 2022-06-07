@@ -1,24 +1,17 @@
-/*
- * @author gweinbach on $today.date
- * @since 0.2.0
- *  
- */
-
 package com.ezoky.ezgames.covideo.component
 
-import com.ezoky.ezgames.covideo.component.*
-
 case class Mobile(position: Position,
+                  area: Box,
                   speed: Speed,
                   speedRange: SpeedRange,
                   acceleration: Acceleration,
                   accelerationRange: AccelerationRange):
 
-  def move(within: Area): Mobile =
-    copy(position = speed.move(position, within))
+  def move: Mobile =
+    copy(position = speed.move(position, within = area))
 
   def accelerate: Mobile =
-    copy(speed = acceleration.accelerate(speed, speedRange))
+    copy(speed = acceleration.accelerate(speed, within = speedRange))
 
   def turn(newAcceleration: Acceleration): Mobile =
     copy(acceleration = newAcceleration.truncate(within = accelerationRange))
@@ -26,3 +19,15 @@ case class Mobile(position: Position,
 
 case class MobileConfig(speedRange: SpeedRange,
                         accelerationRange: AccelerationRange)
+
+given Positioned[Mobile] with
+  extension (positioned: Mobile)
+    override def position: Position = positioned.position
+
+given Moving[Mobile] with
+  extension (moving: Mobile)
+    override def speed: Speed = moving.speed
+
+given Accelerating[Mobile] with
+  extension (accelerating: Mobile)
+    override def acceleration: Acceleration = accelerating.acceleration

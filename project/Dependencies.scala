@@ -13,16 +13,14 @@ object Dependencies {
     val scala213 = "2.13.7"
 
     val scala2 = scala213
-    val scala3 = "3.1.1"
+    val scala3 = "3.1.2"
 
-//    val Cats = "2.7.0"
-//
-//    // Cats
-//    val `cats-kernel` = "org.typelevel" %% "cats-kernel" % Versions.Cats
-//    val `cats-core` = "org.typelevel" %% "cats-core" % Versions.Cats
-//    val `cats-mtl` = "org.typelevel" %% "cats-mtl" % Versions.Cats
-//    // Minimal dependencies to use cats library
-//    val `cats-minimal` = Seq(`cats-kernel`, `cats-core`)
+    // Scala standard modules
+    val ScalaParallelCollections = "1.0.4"
+
+    // Typelevel
+    val Cats = "2.7.0"
+    val Spire = "0.18.0-M3"
 
     object Test {
 
@@ -33,5 +31,28 @@ object Dependencies {
       val Scalatest = "3.2.10"
       val Scalacheck = "1.15.4"
     }
+  }
+
+  // Scala standard modules
+  val `scala-parallel-collections` = "org.scala-lang.modules" %% "scala-parallel-collections" % Versions.ScalaParallelCollections
+
+  // Typelevel
+
+    // Cats
+    val `cats-kernel` = "org.typelevel" %% "cats-kernel" % Versions.Cats
+    val `cats-core` = "org.typelevel" %% "cats-core" % Versions.Cats
+    val `cats-mtl` = "org.typelevel" %% "cats-mtl" % Versions.Cats
+    // Minimal dependencies to use cats library
+    val `cats-minimal` = Seq(`cats-kernel`, `cats-core`)
+
+    // Spire
+    val spire = "org.typelevel" %% "spire" % Versions.Spire
+
+  // end Typelevel
+
+  object Test {
+    val `junit-interface` =  "com.novocode" % "junit-interface" % Versions.Test.JunitInterface % "test"
+    val scalacheck = "org.scalacheck" %% "scalacheck" % Versions.Test.Scalacheck % "test"
+    val scalatest = "org.scalatest" %% "scalatest" % Versions.Test.Scalatest % "test"
   }
 }

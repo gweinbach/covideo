@@ -123,7 +123,7 @@ private class DrawingPanel()
   private def doDrawing(g: Graphics): Unit =
     val g2d = g.asInstanceOf[Graphics2D]
     for
-      scene <- optScene.toIterable
+      scene <- optScene.toSeq
       sprite <- scene.sprites.values
     yield
       val awtImage = sprite.image.asInstanceOf[AWTImage]

@@ -18,12 +18,15 @@ case class Speed(xSpeed: XSpeed,
                  zSpeed: ZSpeed):
 
   def move(position: Position,
-           within: Area): Position =
+           within: Box): Position =
     Position(
       xSpeed.move(position.x, within.width),
       ySpeed.move(position.y, within.height),
       zSpeed.move(position.z, within.depth),
     )
+    
+trait Moving[T]:
+  extension (moving: T) def speed: Speed
 
 object Speed:
 
