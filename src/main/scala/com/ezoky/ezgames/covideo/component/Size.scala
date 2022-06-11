@@ -6,8 +6,11 @@ package com.ezoky.ezgames.covideo.component
 
 import com.ezoky.ezgames.covideo.component.Dimension.*
 import com.ezoky.ezgames.covideo.component.Generate.Generated
+import Dimension.Ez3D.*
 
-import scala.math.Numeric.Implicits.*
+import spire.*
+import spire.math.*
+import spire.implicits.*
 
 /**
  * @author gweinbach on 14/11/2020
@@ -23,7 +26,7 @@ sealed trait Size[C <: Coord](val value: SizeValue)(using val geometry: Geometry
   def *[N: Numeric](n: N): C =
     coord(relativePosition(n))
 
-  def /[N: Fractional](n: N): Option[C] =
+  def /[N: Fractional: Numeric](n: N): Option[C] =
     val fractionalN = summon[Fractional[N]]
     if (fractionalN.zero == n)
       None
@@ -41,12 +44,15 @@ sealed trait Size[C <: Coord](val value: SizeValue)(using val geometry: Geometry
     coord(value.maxPosition)
 
   final def generatedCoord: Generated[C] =
-    GeneratedPositionValue.map(positionValue => coord(relativePosition(positionValue)(FractionalPositionValue)))
+    GeneratedPositionValue.map(positionValue => coord(relativePosition(positionValue)(using NumericPositionValue)))
 
+  // 3D extensions
   lazy val axis: Axis
 
-  val vector: Vector =
-    Vector(value, axis)
+  lazy val vector: Vector =
+    value.axisVector(axis)
+
+  // end 3D extensions
 
 
 case class Width(override val value: SizeValue)(using geometry: Geometry)

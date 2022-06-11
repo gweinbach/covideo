@@ -6,33 +6,25 @@
 
 package com.ezoky.ez3d
 
-import com.ezoky.eznumber.Precisions
+import com.ezoky.eznumber.*
 import spire.*
 import spire.algebra.Trig
-import spire.math.*
 import spire.implicits.*
-import com.ezoky.eznumber.Precisions
+import spire.math.*
 
-import reflect.Selectable.reflectiveSelectable
+import scala.reflect.Selectable.reflectiveSelectable
 
 /**
  * @since 0.2.0
  * @author gweinbach on 06/06/2022
  */
-trait Vectors[T: Fractional](spatialPrecision: T):
+trait Vectors[T: Numeric: Precision]:
 
   type _SpatialCoordinate = T
-  private val _SpatialFractional: Fractional[_SpatialCoordinate] = summon[Fractional[_SpatialCoordinate]]
-  private val _0: _SpatialCoordinate = _SpatialFractional.zero
-  private val _1: _SpatialCoordinate = _SpatialFractional.one
+  private val _SpatialNumeric: Numeric[_SpatialCoordinate] = summon[Numeric[_SpatialCoordinate]]
 
-  val _Precisions: Precisions[T] = new Precisions[T] {}
-  import _Precisions.*
-  given SpatialPrecision: Precision = Precision(spatialPrecision)
-
-  type RotationVector <: {
-    def rotateVector(vector: Vector): Option[Vector]
-  }
+  private val _0: _SpatialCoordinate = _SpatialNumeric.zero
+  private val _1: _SpatialCoordinate = _SpatialNumeric.one
 
   sealed trait Axis:
     def base: Vector
@@ -50,10 +42,11 @@ trait Vectors[T: Fractional](spatialPrecision: T):
 
   case class Point(x: _SpatialCoordinate,
                    y: _SpatialCoordinate,
-                   z: _SpatialCoordinate):
+                   z: _SpatialCoordinate)
+    extends Transformable[Point]:
 
-    def translate(translationVector: Vector): Point =
-      Point(x + translationVector.x, y + translationVector.y, z + translationVector.z)
+    infix def +(v: Vector): Point =
+      Point(x + v.x, y + v.y, z + v.z)
 
     override def equals(obj: Any): Boolean =
       obj match
@@ -74,13 +67,14 @@ trait Vectors[T: Fractional](spatialPrecision: T):
 
   case class Vector(x: _SpatialCoordinate,
                     y: _SpatialCoordinate,
-                    z: _SpatialCoordinate):
+                    z: _SpatialCoordinate)
+    extends Transformable[Vector]:
 
     lazy val tuple: (_SpatialCoordinate, _SpatialCoordinate, _SpatialCoordinate) =
       (x, y, z)
 
     lazy val magnitude: _SpatialCoordinate =
-      _SpatialFractional.sqrt(this ⋅ this)
+      _SpatialNumeric.sqrt(this ⋅ this)
 
     lazy val normalized: Option[Vector] =
       this / magnitude
@@ -126,9 +120,6 @@ trait Vectors[T: Fractional](spatialPrecision: T):
         x * v.y - y * v.x
       )
 
-    def rotate(rotationVector: RotationVector): Option[Vector] =
-      rotationVector.rotateVector(this)
-
     override def equals(obj: Any): Boolean =
       obj match
         case that: Vector if (that != null) =>
@@ -163,17 +154,18 @@ trait Vectors[T: Fractional](spatialPrecision: T):
     val OneZ = Vector(_0, _0, _1)
 
 
+
+  type Vertices = Iterable[Vertex]
+
   case class Vertex(s: Point,
-                    t: Point):
+                    t: Point)
+    extends Transformable[Vertex]:
 
-    def translate(translationVector: Vector): Vertex =
-      Vertex(s.translate(translationVector), t.translate(translationVector))
-
-//    def rotate(rotationVector: Vector): Vertex =
-//      Vertex(s.rotate(rotationVector), t.rotate(rotationVector))
+    infix def +(v: Vector): Vertex =
+      Vertex(s + v, t + v)
 
 
   object Vertex:
     def apply(s: Point, v: Vector): Vertex =
-      new Vertex(s, v.dest(s))
+      Vertex(s, v.dest(s))
 

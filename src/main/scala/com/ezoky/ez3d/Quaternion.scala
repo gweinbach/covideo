@@ -6,6 +6,7 @@
 
 package com.ezoky.ez3d
 
+import com.ezoky.eznumber.*
 import spire.*
 import spire.algebra.Trig
 import spire.implicits.*
@@ -15,7 +16,7 @@ import spire.math.*
  * @since 0.2.0
  * @author gweinbach on 01/06/2022
  */
-trait H[T: Fractional](spatialPrecision: T)
+trait H[T: Fractional: Precision]
   extends Vectors[T]:
 
   private val frac = summon[Fractional[T]]
@@ -28,9 +29,9 @@ trait H[T: Fractional](spatialPrecision: T)
                         c: T,
                         d: T):
 
-    infix def *(m: T): Quaternion = Quaternion(a * m, b * m, c * m, m * m)
+    infix def *(m: T): Quaternion = Quaternion(a * m, b * m, c * m, d * m)
 
-    private def divideBy(d: T): Quaternion = Quaternion(a / d, b / d, c / d, d / d)
+    private def divideBy(x: T): Quaternion = Quaternion(a / x, b / x, c / x, d / x)
 
     infix def /(d: T): Option[Quaternion] =
       if d == _0 then

@@ -6,6 +6,10 @@ import com.ezoky.ezgames.covideo.component.Dimension.*
 import com.ezoky.ezgames.covideo.component.Screen.*
 import com.ezoky.ezgames.covideo.entity.People.{PersonId, Population}
 
+import spire.*
+import spire.implicits.*
+import spire.math.*
+
 import java.util.UUID
 
 /**
@@ -18,13 +22,14 @@ case class Scene(id: SceneId = SceneId(),
                  margins: Margin = Margin(),
                  sprites: Population[Sprite] = Population.empty,
                  zoomRatio: ZoomRatio)
-  extends Entity[SceneId]:
+  extends Entity[SceneId] :
 
   lazy val preferredDimension: ScreenDimension =
     dimension withMargin margins
 
   // used to convert PositionValues to Pixels
   private given Fractional[PositionValue] = FractionalPositionValue
+  private given Numeric[PositionValue] = NumericPositionValue
 
   // This projection method should take care of 3D
   def project(position: Position): ScreenPosition =
@@ -55,7 +60,6 @@ case class Scene(id: SceneId = SceneId(),
 
   def withMargins(margins: Margin): Scene =
     copy(margins = margins)
-
 
 
 opaque type SceneId = UUID

@@ -6,23 +6,23 @@
 
 package com.ezoky.eznumber
 
-import spire.*
-import spire.implicits.*
-import spire.math.*
-
 import scala.annotation.targetName
+
+//import Numeric.Implicits._
+
+import spire.*
+import spire.math.*
+import spire.implicits.*
 
 /**
  * @since 0.2.0
  * @author gweinbach on 06/06/2022
  */
-trait Precisions[T: Numeric]:
+case class Precision[T: Numeric](value: T)
 
-  case class Precision(value: T)
+extension [T: Numeric](t1: T)
 
-  extension (t1: T)
-
-    @targetName("equalsWithPrecision")
-    infix def ~=(t2: T)
-                (using precision: Precision): Boolean =
-      (t1 - t2).abs <= precision.value
+  @targetName("equalsWithPrecision")
+  infix def ~=(t2: T)
+              (using precision: Precision[T]): Boolean =
+    (t1 - t2).abs <= precision.value

@@ -7,6 +7,9 @@
 package com.ezoky.ezgames.covideo.component
 
 import com.ezoky.ezgames.covideo.component.Dimension.*
+import spire.*
+import spire.implicits.*
+import spire.math.*
 
 /**
  * @since 0.2.0
@@ -30,7 +33,7 @@ object Screen:
     def asInt: Int =
       pixel
 
-  extension [N: Numeric](n: N)
+  extension[N: Numeric] (n: N)
     def px: Pixel = summon[Numeric[N]].toInt(n)
 
   case class ScreenDimension(width: Pixel,

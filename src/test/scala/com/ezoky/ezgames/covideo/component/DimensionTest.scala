@@ -5,6 +5,7 @@
 package com.ezoky.ezgames.covideo.component
 
 import com.ezoky.ezgames.covideo.component.Dimension.*
+import com.ezoky.ezgames.covideo.component.Dimension.Ez3D.*
 import org.junit.Assert.*
 import org.junit.Test
 
@@ -152,6 +153,6 @@ class DimensionTest {
   }
 
   @Test def rotateTest: Unit =
-    val oneQuarter = RotationVector((math.Pi/2), Vector.OneZ).get
-    assertEquals(Vector.OneX.rotate(oneQuarter), Some(Vector.OneY))
+    val oneQuarter = VectorRotation((math.Pi/2), Vector.OneZ)
+    assertEquals(Vector.OneX.rotate(using oneQuarter), Some(Vector.OneY))
 }

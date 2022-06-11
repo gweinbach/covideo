@@ -7,26 +7,46 @@
 package com.ezoky.ezgames.covideo.component
 
 import com.ezoky.ezgames.covideo.component.Dimension.*
+import Dimension.Ez3D.*
+import com.ezoky.ez3d.{Rotation, Transformable, Translation}
 
 /**
  * @since 0.2.0
  * @author gweinbach on 31/05/2022
  */
-trait Shape:
+trait Shape
+  extends Transformable[Shape]:
   val vertices: Vertices
 
-  def translate(translationVector: Vector): Shape =
-    Shape(
-      vertices.map(_.translate(translationVector))
-    )
+//  def translate(translationVector: Vector): Shape =
+//    Shape(
+//      vertices.map(_.translate(translationVector))
+//    )
+//
+//  def rotate(rotationVector: Vector): Shape =
+//    Shape(
+//      vertices
+////      vertices.map(_.rotate(rotationVector))
+//    )
 
-  def rotate(rotationVector: Vector): Shape =
-    Shape(
-      vertices
-//      vertices.map(_.rotate(rotationVector))
-    )
+class ShapeRotation(using Rotation[Vertex])
+  extends Rotation[Shape]:
 
-type Vertices = Iterable[Vertex]
+  override def rotate(v: Shape): Option[Shape] =
+    v.vertices.map(_.rotate).foldLeft[Option[scala.Vector[Vertex]]](Some(scala.Vector.empty[Vertex])){
+      case (Some(vertices), Some(vertex)) =>
+        Some(vertices :+ vertex)
+      case _ =>
+        None
+    }.map(Shape.apply)
+
+
+class ShapeTranslation(using Translation[Vertex])
+  extends Translation[Shape]:
+
+  override def translate(v: Shape): Shape =
+    Shape(v.vertices.map(_.translate))
+
 
 object Shape:
   def apply(shapeVertices: Vertices): Shape =
@@ -39,15 +59,15 @@ case class Parallelepiped(box: Box)
     val widthVector = box.width.vector
     val heightVector = box.height.vector
     val depthVector = box.depth.vector
-    val diagonal = widthVector + heightVector + depthVector
+    val diagonal = VertexTranslation(widthVector + heightVector + depthVector)
     List(
       Vertex(Point.Zero, widthVector), Vertex(Point.Zero, heightVector), Vertex(Point.Zero, depthVector),
-      Vertex(widthVector.dest, heightVector), Vertex(widthVector.dest, depthVector),
-      Vertex(heightVector.dest, widthVector), Vertex(heightVector.dest, depthVector),
-      Vertex(depthVector.dest, widthVector), Vertex(depthVector.dest, heightVector),
-      Vertex(Point.Zero, -widthVector).translate(diagonal),
-      Vertex(Point.Zero, -heightVector).translate(diagonal),
-      Vertex(Point.Zero, -depthVector).translate(diagonal)
+      Vertex(widthVector.dest(), heightVector), Vertex(widthVector.dest(), depthVector),
+      Vertex(heightVector.dest(), widthVector), Vertex(heightVector.dest(), depthVector),
+      Vertex(depthVector.dest(), widthVector), Vertex(depthVector.dest(), heightVector),
+      Vertex(Point.Zero, -widthVector).translate(using diagonal),
+      Vertex(Point.Zero, -heightVector).translate(using diagonal),
+      Vertex(Point.Zero, -depthVector).translate(using diagonal)
     )
 
 
