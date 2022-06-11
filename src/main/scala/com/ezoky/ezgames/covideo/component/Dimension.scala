@@ -25,13 +25,10 @@ object Dimension:
   // everything is this section depends on the choice made for _DimensionType
   // and must be updated if this changes
   private type _DimensionType = Double
-  private val _Zero: _DimensionType = 0.0
-  private val _One: _DimensionType = 1.0
+  private val _DimensionNumeric: Numeric[_DimensionType] = summon[Numeric[_DimensionType]]
   private val _Epsilon: _DimensionType = 1E-16 // 17 significant digits for Double
 
   private def _Random: _DimensionType = Random().nextDouble()
-
-  private val _DimensionNumeric: Numeric[_DimensionType] = summon[Numeric[_DimensionType]]
 
   // rather use explicit conversion even if implicit one is private
   private def _NumberToDimensionConverter[N: Numeric]: (N) => _DimensionType =
@@ -49,6 +46,9 @@ object Dimension:
 
   // end of _DimensionType choice's dependencies
 
+
+  private val _Zero: _DimensionType = _DimensionNumeric.zero
+  private val _One: _DimensionType = _DimensionNumeric.one
 
   enum Geometry:
 
