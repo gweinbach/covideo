@@ -16,28 +16,28 @@ import spire.math.*
  * @since 0.2.0
  * @author gweinbach on 01/06/2022
  */
-trait H[T: Fractional: Precision]
-  extends Vectors[T]:
+trait H[T: Numeric : Precision]
+  extends Vectors[T] :
 
-  private val frac = summon[Fractional[T]]
+  private val _Numeric = summon[Numeric[T]]
 
-  private val _0 = frac.zero
-  private val _1 = frac.one
+  private val _0 = _Numeric.zero
+  private val _1 = _Numeric.one
 
   case class Quaternion(a: T,
                         b: T,
                         c: T,
                         d: T):
 
-    infix def *(m: T): Quaternion = Quaternion(a * m, b * m, c * m, d * m)
+    infix def *(x: T): Quaternion = Quaternion(a * x, b * x, c * x, d * x)
 
-    private def divideBy(x: T): Quaternion = Quaternion(a / x, b / x, c / x, d / x)
+    private def divideBy(y: T): Quaternion = Quaternion(a / y, b / y, c / y, d / y)
 
-    infix def /(d: T): Option[Quaternion] =
-      if d == _0 then
+    infix def /(y: T): Option[Quaternion] =
+      if y == _0 then
         None
       else
-        Some(divideBy(d))
+        Some(divideBy(y))
 
     infix def x(q2: Quaternion): Option[Quaternion] =
       val v1 = Vector(b, c, d)
@@ -50,12 +50,11 @@ trait H[T: Fractional: Precision]
       ).normalized
 
     lazy val real: T = a
-    lazy val imaginary: Vector =
-      Vector(b, c, d)
+    lazy val imaginary: Vector = Vector(b, c, d)
 
     lazy val conjugate: Quaternion = Quaternion(a, b = -b, c = -c, d = -d)
     lazy val squareMagnitude: T = a * a + b * b + c * c + d * d
-    lazy val magnitude: T = frac.sqrt(squareMagnitude)
+    lazy val magnitude: T = _Numeric.sqrt(squareMagnitude)
     lazy val normalized: Option[Quaternion] = this / magnitude
     lazy val inverse: Option[Quaternion] = conjugate / squareMagnitude
 
@@ -71,13 +70,24 @@ trait H[T: Fractional: Precision]
         q2 <- q1 x conjugate
       yield q2.imaginary
 
+    override def equals(obj: Any): Boolean =
+      obj match
+        case that: Quaternion if (that != null) =>
+          (this.a ~= that.a) &&
+            (this.b ~= that.b) &&
+            (this.c ~= that.c) &&
+            (this.d ~= that.d)
+        case _ =>
+          false
+
+
   object Quaternion:
     def apply(real: T, imaginary: Vector): Quaternion =
       new Quaternion(real, imaginary.x, imaginary.y, imaginary.z)
 
     def fromRotationVector(axis: Vector,
                            angle: T)
-                          (using ev: Trig[T]): Option[Quaternion] =
+                          (using Trig[T]): Option[Quaternion] =
       val sinA = sin(angle / 2)
       val cosA = cos(angle / 2)
 
@@ -86,28 +96,8 @@ trait H[T: Fractional: Precision]
         axis * sinA
       ).normalized
 
-
-  val Zero = Quaternion(_0, _0, _0, _0)
-  val i = Quaternion(_0, _1, _0, _0)
-  val j = Quaternion(_0, _0, _1, _0)
-  val k = Quaternion(_0, _0, _0, _1)
-
-//  extension (t1: (T, T, T))
-//
-//    infix def ⋅(t2: (T, T, T)): T =
-//      t1._1 * t2._1 + t1._2 * t2._2 + t1._3 * t2._3
-//
-//    infix def ∧(t2: (T, T, T)): (T, T, T) =
-//      (
-//        t1._2 * t2._3 - t1._3 * t2._2,
-//        t1._3 * t2._1 - t1._1 * t2._3,
-//        t1._1 * t2._2 - t1._2 * t2._1
-//      )
-//
-//    def magnitude: T =
-//      frac.sqrt(t1._1 * t1._1 + t1._2 * t1._2 + t1._3 * t1._3)
-//
-//  extension (t: T)
-//    private infix def dot(t2: (T, T, T)): (T, T, T) =
-//      (t * t2._1, t * t2._2, t * t2._3)
-//
+    val Zero = Quaternion(_0, _0, _0, _0)
+    val One = Quaternion(_1, _0, _0, _0)
+    val I = Quaternion(_0, _1, _0, _0)
+    val J = Quaternion(_0, _0, _1, _0)
+    val K = Quaternion(_0, _0, _0, _1)

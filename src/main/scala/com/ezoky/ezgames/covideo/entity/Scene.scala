@@ -28,7 +28,6 @@ case class Scene(id: SceneId = SceneId(),
     dimension withMargin margins
 
   // used to convert PositionValues to Pixels
-  private given Fractional[PositionValue] = FractionalPositionValue
   private given Numeric[PositionValue] = NumericPositionValue
 
   // This projection method should take care of 3D

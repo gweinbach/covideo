@@ -5,12 +5,11 @@
 package com.ezoky.ezgames.covideo.component
 
 import com.ezoky.ezgames.covideo.component.Dimension.*
+import com.ezoky.ezgames.covideo.component.Dimension.Ez3D.*
 import com.ezoky.ezgames.covideo.component.Generate.Generated
-import Dimension.Ez3D.*
-
 import spire.*
-import spire.math.*
 import spire.implicits.*
+import spire.math.*
 
 /**
  * @author gweinbach on 14/11/2020
@@ -26,12 +25,12 @@ sealed trait Size[C <: Coord](val value: SizeValue)(using val geometry: Geometry
   def *[N: Numeric](n: N): C =
     coord(relativePosition(n))
 
-  def /[N: Fractional: Numeric](n: N): Option[C] =
-    val fractionalN = summon[Fractional[N]]
-    if (fractionalN.zero == n)
+  def /[N: Numeric](n: N): Option[C] =
+    val numericN = summon[Numeric[N]]
+    if (numericN.zero == n)
       None
     else
-      Some(coord(relativePosition(fractionalN.div(fractionalN.one, n))))
+      Some(coord(relativePosition(numericN.div(numericN.one, n))))
 
   @deprecated("Use generatedCoord instead")
   final def randomCoord: C =
@@ -52,11 +51,11 @@ sealed trait Size[C <: Coord](val value: SizeValue)(using val geometry: Geometry
   lazy val vector: Vector =
     value.axisVector(axis)
 
-  // end 3D extensions
+// end 3D extensions
 
 
 case class Width(override val value: SizeValue)(using geometry: Geometry)
-  extends Size[XCoord](value):
+  extends Size[XCoord](value) :
 
   override def coord(position: PositionValue): XCoord =
     XCoord(position)
@@ -69,7 +68,7 @@ object Width:
 
 
 case class Height(override val value: SizeValue)(using geometry: Geometry)
-  extends Size[YCoord](value):
+  extends Size[YCoord](value) :
 
   override def coord(position: PositionValue): YCoord =
     YCoord(position)
@@ -82,7 +81,7 @@ object Height:
 
 
 case class Depth(override val value: SizeValue)(using geometry: Geometry)
-  extends Size[ZCoord](value):
+  extends Size[ZCoord](value) :
 
   override def coord(position: PositionValue): ZCoord =
     ZCoord(position)

@@ -8,8 +8,6 @@ package com.ezoky.eznumber
 
 import scala.annotation.targetName
 
-//import Numeric.Implicits._
-
 import spire.*
 import spire.math.*
 import spire.implicits.*

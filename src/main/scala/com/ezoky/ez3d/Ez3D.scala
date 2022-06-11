@@ -17,7 +17,7 @@ import spire.math.*
  * @since $NEXT_VERSION
  * @author gweinbach on 10/06/2022
  */
-class Ez3D[T: Fractional : Numeric : Trig : Precision]
+class Ez3D[T: Numeric : Trig : Precision]
   extends Vectors[T] with H[T] :
 
   // Vector Transformations

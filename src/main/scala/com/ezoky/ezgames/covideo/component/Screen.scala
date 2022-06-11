@@ -27,9 +27,6 @@ object Screen:
     def -(other: Pixel): Pixel =
       pixel - other
 
-    //  def size(viewScale: Double): SizeValue =
-    //    (pixel size).zoom(1.0 / viewScale)(using DoubleIsFractional)
-
     def asInt: Int =
       pixel
 
