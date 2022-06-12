@@ -30,5 +30,6 @@ lazy val root = project
     libraryDependencies += Dependencies.spire,
 
     libraryDependencies += Dependencies.Test.`junit-interface`,
+    libraryDependencies += Dependencies.Test.scalatest,
     libraryDependencies += Dependencies.Test.scalacheck,
   )

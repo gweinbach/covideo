@@ -50,7 +50,7 @@ case class Parallelepiped(box: Box)
     val heightVector = box.height.vector
     val depthVector = box.depth.vector
     val diagonal = VertexTranslation(widthVector + heightVector + depthVector)
-    List(
+    scala.Vector(
       Vertex(Point.Zero, widthVector), Vertex(Point.Zero, heightVector), Vertex(Point.Zero, depthVector),
       Vertex(widthVector.dest(), heightVector), Vertex(widthVector.dest(), depthVector),
       Vertex(heightVector.dest(), widthVector), Vertex(heightVector.dest(), depthVector),

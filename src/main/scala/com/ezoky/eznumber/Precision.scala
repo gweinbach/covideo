@@ -16,11 +16,13 @@ import spire.implicits.*
  * @since 0.2.0
  * @author gweinbach on 06/06/2022
  */
-case class Precision[T: Numeric](value: T)
+case class Precision[T: Numeric](value: T):
+  inline def ~=(t1: T, t2: T): Boolean =
+    (t1 - t2).abs <= value
 
 extension [T: Numeric](t1: T)
 
   @targetName("equalsWithPrecision")
   infix def ~=(t2: T)
               (using precision: Precision[T]): Boolean =
-    (t1 - t2).abs <= precision.value
+    precision.~=(t1, t2)
