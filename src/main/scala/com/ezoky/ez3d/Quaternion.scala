@@ -17,7 +17,7 @@ import spire.math.*
  * @author gweinbach on 01/06/2022
  */
 trait H[T: Numeric : Precision]
-  extends Vectors[T] :
+  extends Space[T] :
 
   private val _Numeric = summon[Numeric[T]]
 

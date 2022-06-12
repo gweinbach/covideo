@@ -18,13 +18,12 @@ import scala.reflect.Selectable.reflectiveSelectable
  * @since 0.2.0
  * @author gweinbach on 06/06/2022
  */
-trait Vectors[T: Numeric: Precision]:
+trait Space[T: Numeric: Precision]:
 
-  type _SpatialCoordinate = T
-  private val _SpatialNumeric: Numeric[_SpatialCoordinate] = summon[Numeric[_SpatialCoordinate]]
+  private val _SpatialNumeric: Numeric[T] = summon[Numeric[T]]
 
-  private val _0: _SpatialCoordinate = _SpatialNumeric.zero
-  private val _1: _SpatialCoordinate = _SpatialNumeric.one
+  private val _0: T = _SpatialNumeric.zero
+  private val _1: T = _SpatialNumeric.one
 
   sealed trait Axis:
     def base: Vector
@@ -40,9 +39,9 @@ trait Vectors[T: Numeric: Precision]:
     case object Z extends Axis:
       override def base: Vector = Vector.OneZ
 
-  case class Point(x: _SpatialCoordinate,
-                   y: _SpatialCoordinate,
-                   z: _SpatialCoordinate)
+  case class Point(x: T,
+                   y: T,
+                   z: T)
     extends Transformable[Point]:
 
     infix def +(v: Vector): Point =
@@ -65,15 +64,17 @@ trait Vectors[T: Numeric: Precision]:
     val OneY = Point(_0, _1, _0)
     val OneZ = Point(_0, _0, _1)
 
-  case class Vector(x: _SpatialCoordinate,
-                    y: _SpatialCoordinate,
-                    z: _SpatialCoordinate)
+  
+  
+  case class Vector(x: T,
+                    y: T,
+                    z: T)
     extends Transformable[Vector]:
 
-    lazy val tuple: (_SpatialCoordinate, _SpatialCoordinate, _SpatialCoordinate) =
+    lazy val tuple: (T, T, T) =
       (x, y, z)
 
-    lazy val magnitude: _SpatialCoordinate =
+    lazy val magnitude: T =
       _SpatialNumeric.sqrt(this ⋅ this)
 
     lazy val normalized: Option[Vector] =
@@ -110,7 +111,7 @@ trait Vectors[T: Numeric: Precision]:
           )
         )
 
-    infix def ⋅(v: Vector): _SpatialCoordinate =
+    infix def ⋅(v: Vector): T =
       x * v.x + y * v.y + z * v.z
 
     infix def ∧(v: Vector): Vector =
@@ -139,7 +140,7 @@ trait Vectors[T: Numeric: Precision]:
     def apply(end: Point): Vector =
       Vector(Point.Zero, end)
 
-    def apply(magnitude: _SpatialCoordinate,
+    def apply(magnitude: T,
               axis: Axis): Vector =
       axis match
         case Axis.X => Vector(magnitude, _0, _0)

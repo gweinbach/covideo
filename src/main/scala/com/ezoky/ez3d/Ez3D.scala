@@ -18,11 +18,11 @@ import spire.math.*
  * @author gweinbach on 10/06/2022
  */
 class Ez3D[T: Numeric : Trig : Precision]
-  extends Vectors[T] with H[T] :
+  extends Space[T] with H[T] :
 
   // Vector Transformations
   case class VectorRotation(angle: T,
-                            axis: Vector) extends Rotation[Vector]:
+                            axis: Vector) extends Rotation[Vector] :
 
     private val quaternion = Quaternion.fromRotationVector(axis, angle)
 
@@ -30,7 +30,7 @@ class Ez3D[T: Numeric : Trig : Precision]
       quaternion.flatMap(_.rotate(v))
 
   case class VectorTranslation(translation: Vector)
-    extends Translation[Vector]:
+    extends Translation[Vector] :
 
     final override def translate(v: Vector): Vector =
       v + translation
@@ -40,8 +40,8 @@ class Ez3D[T: Numeric : Trig : Precision]
 
   // Point Transformations
   case class PointRotation(center: Point,
-                            angle: T,
-                            axis: Vector) extends Rotation[Point]:
+                           angle: T,
+                           axis: Vector) extends Rotation[Point] :
 
     private val quaternion = Quaternion.fromRotationVector(axis, angle)
 
@@ -52,7 +52,7 @@ class Ez3D[T: Numeric : Trig : Precision]
         vr.dest(center)
 
   case class PointTranslation(translation: Vector)
-    extends Translation[Point]:
+    extends Translation[Point] :
 
     final override def translate(v: Point): Point =
       v + translation
@@ -63,7 +63,7 @@ class Ez3D[T: Numeric : Trig : Precision]
   // Vertex Transformations
   case class VertexRotation(center: Point,
                             angle: T,
-                            axis: Vector) extends Rotation[Vertex]:
+                            axis: Vector) extends Rotation[Vertex] :
 
     private val quaternion = Quaternion.fromRotationVector(axis, angle)
 
@@ -76,15 +76,18 @@ class Ez3D[T: Numeric : Trig : Precision]
 
 
   case class VertexTranslation(translation: Vector)
-    extends Translation[Vertex]:
+    extends Translation[Vertex] :
 
     final override def translate(v: Vertex): Vertex =
       v + translation
 
-  // end Vertex Transformations
+// end Vertex Transformations
 
 
 class Double3D(using Precision[Double]) extends Ez3D[Double]
+
 class Float3D(using Precision[Float]) extends Ez3D[Float]
+
 class BigDecimal3D(using Precision[BigDecimal]) extends Ez3D[BigDecimal]
+
 class Real3D(using Precision[Real]) extends Ez3D[Real]

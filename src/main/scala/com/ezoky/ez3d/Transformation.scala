@@ -7,7 +7,7 @@
 package com.ezoky.ez3d
 
 /**
- * @since $NEXT_VERSION
+ * @since 0.2.0
  * @author gweinbach on 11/06/2022
  */
 trait Transformation[V]

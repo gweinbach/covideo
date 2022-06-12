@@ -10,12 +10,12 @@ object Config:
 
   val Area =
     AreaConfig(
-      400 size,
+      800 size,
       xGeometry = Geometry.Toric,
-      300 size,
+      600 size,
       yGeometry = Geometry.Toric,
-      0 size,
-      zGeometry = Geometry.Flat
+      200 size,
+      zGeometry = Geometry.Toric
     )
   val Scene =
     SceneConfig(
@@ -30,7 +30,7 @@ object Config:
       Area, Scene
     )
   val Mobile = MobileConfig(
-    speedRange = SpeedRange(-10.0 speed, 10.0 speed),
+    speedRange = SpeedRange(-3.0 speed, 3.0 speed),
     accelerationRange = AccelerationRange(-1.5 acceleration, 1.5 acceleration)
   )
   val Person =
@@ -39,7 +39,7 @@ object Config:
     )
   val Game =
     GameConfig(
-      populationSize = 10,
+      populationSize = 20,
       Person, World
     )
   val Loop =

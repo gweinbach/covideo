@@ -5,7 +5,7 @@
 package com.ezoky.ezgames.covideo.component
 
 import com.ezoky.ezgames.covideo.component.Generate.*
-import com.ezoky.ez3d.{Double3D, Ez3D, H, Vectors}
+import com.ezoky.ez3d.{Double3D, Ez3D, H, Space}
 import com.ezoky.eznumber.*
 
 import scala.annotation.{tailrec, targetName}
