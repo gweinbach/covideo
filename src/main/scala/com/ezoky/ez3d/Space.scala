@@ -147,6 +147,8 @@ trait Space[T: Numeric: Precision]:
         case Axis.Y => Vector(_0, magnitude, _0)
         case Axis.Z => Vector(_0, _0, magnitude)
 
+    def fill(t: T): Vector =
+      Vector(t, t, t)
 
     val Null = Vector(_0, _0, _0)
 
