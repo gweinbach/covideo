@@ -144,12 +144,16 @@ trait TransformationMatrix[T: Numeric : Trig : Precision]
     override val x31 = _0
     override val x32 = _0
 
+    def inverse: Option[Homothety] =
+      ratio.inverse.map(Homothety(_))
+
+
   object Homothety:
     def global(ratio: T): Homothety =
       Homothety(Vector.fill(ratio))
 
   case class AffineTranslation(vector: Vector)
-    extends AffineTransformation:
+    extends AffineTransformation
 //    override val x00 = _1
 //    override val x01 = _0
 //    override val x02 = _0

@@ -18,7 +18,7 @@ import scala.reflect.Selectable.reflectiveSelectable
  * @since 0.2.0
  * @author gweinbach on 06/06/2022
  */
-trait Space[T: Numeric: Precision]:
+trait Space[T: Numeric : Precision]:
 
   private val _SpatialNumeric: Numeric[T] = summon[Numeric[T]]
 
@@ -30,19 +30,19 @@ trait Space[T: Numeric: Precision]:
 
   object Axis:
 
-    case object X extends Axis:
+    case object X extends Axis :
       override def base: Vector = Vector.OneX
 
-    case object Y extends Axis:
+    case object Y extends Axis :
       override def base: Vector = Vector.OneY
 
-    case object Z extends Axis:
+    case object Z extends Axis :
       override def base: Vector = Vector.OneZ
 
   case class Point(x: T,
                    y: T,
                    z: T)
-    extends Transformable[Point]:
+    extends Transformable[Point] :
 
     infix def +(v: Vector): Point =
       Point(x + v.x, y + v.y, z + v.z)
@@ -64,12 +64,11 @@ trait Space[T: Numeric: Precision]:
     val OneY = Point(_0, _1, _0)
     val OneZ = Point(_0, _0, _1)
 
-  
-  
+
   case class Vector(x: T,
                     y: T,
                     z: T)
-    extends Transformable[Vector]:
+    extends Transformable[Vector] :
 
     lazy val tuple: (T, T, T) =
       (x, y, z)
@@ -79,6 +78,12 @@ trait Space[T: Numeric: Precision]:
 
     lazy val normalized: Option[Vector] =
       this / magnitude
+
+    lazy val inverse: Option[Vector] =
+      if ((x == 0) || (y == 0) || (z == 0)) then
+        Some(Vector(_1 / x, _1 / y, _1 / z))
+      else
+        None
 
     def unary_- =
       Vector(-x, -y, -z)
@@ -157,12 +162,11 @@ trait Space[T: Numeric: Precision]:
     val OneZ = Vector(_0, _0, _1)
 
 
-
   type Vertices = Iterable[Vertex]
 
   case class Vertex(s: Point,
                     t: Point)
-    extends Transformable[Vertex]:
+    extends Transformable[Vertex] :
 
     infix def +(v: Vector): Vertex =
       Vertex(s + v, t + v)
