@@ -22,7 +22,7 @@ trait TransformationMatrix[T: Numeric : Trig : Precision]
 
   private val _num = Numeric[T]
   private val _0: T = _num.zero
-  private val _1: T = _num.one
+  private val _One: T = _num.one
 
   case class HVector(x: T,
                      y: T,
@@ -58,10 +58,10 @@ trait TransformationMatrix[T: Numeric : Trig : Precision]
 
   object HVector:
     def apply(v: Vector): HVector =
-      HVector(v.x, v.y, v.z, _1)
+      HVector(v.x, v.y, v.z, _One)
 
     val Zero = HVector(_0, _0, _0, _0)
-    val One = HVector(_1, _1, _1, _1)
+    val One = HVector(_One, _One, _One, _One)
 
   extension (v: Vector)
     def homogeneous: HVector =
@@ -124,7 +124,7 @@ trait TransformationMatrix[T: Numeric : Trig : Precision]
     final override val x03: T = _0
     final override val x13: T = _0
     final override val x23: T = _0
-    final override val x33: T = _1
+    final override val x33: T = _One
 
   case class Homothety(ratio: Vector)
     extends AffineTransformation:
@@ -153,19 +153,19 @@ trait TransformationMatrix[T: Numeric : Trig : Precision]
       Homothety(Vector.fill(ratio))
 
   case class AffineTranslation(vector: Vector)
-    extends AffineTransformation
-//    override val x00 = _1
-//    override val x01 = _0
-//    override val x02 = _0
-//
-//    override val x10 = _0
-//    override val x11 = _1
-//    override val x12 = _0
-//
-//    override val x20 = _0
-//    override val x21 = _0
-//    override val x22 = _1
-//
-//    override val x30 = vector.x
-//    override val x31 = vector.y
-//    override val x32 = vector.z
+    extends AffineTransformation:
+    override val x00 = _One
+    override val x01 = _0
+    override val x02 = _0
+
+    override val x10 = _0
+    override val x11 = _One
+    override val x12 = _0
+
+    override val x20 = _0
+    override val x21 = _0
+    override val x22 = _One
+
+    override val x30 = vector.x
+    override val x31 = vector.y
+    override val x32 = vector.z
