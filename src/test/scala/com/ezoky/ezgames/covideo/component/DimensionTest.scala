@@ -9,6 +9,7 @@ import com.ezoky.ezgames.covideo.component.Dimension.Ez3D.*
 import org.junit.Assert.*
 import org.junit.Test
 
+
 class DimensionTest {
   
   @Test def sizeTest(): Unit = {
@@ -21,7 +22,7 @@ class DimensionTest {
     
     val s3 = (10.0 size)
     assertEquals(s3, s1)
-    
+
   }
 
   @Test def toricPositionTest(): Unit = {
@@ -51,6 +52,36 @@ class DimensionTest {
     assertNotEquals(c10_9, c1)
     assertEquals(c10_9, PositionValue(1, 9.0 size, Geometry.Toric))
 
+  }
+
+  @Test def sizeUsingImplicits: Unit = {
+    {
+      given Geometry = Geometry.Flat
+
+      assertEquals(PositionValue.Zero, (0.0 size).minPosition)
+      assertEquals(PositionValue.Zero, (0.0 size).maxPosition)
+
+      assertEquals(PositionValue.Zero, (10.0 size).minPosition)
+      assertEquals(PositionValue.Zero, (10.0 size).maxPosition)
+    }
+    {
+      given Geometry = Geometry.Toric
+
+      assertEquals(PositionValue.Zero, (0.0 size).minPosition)
+      assertEquals(PositionValue.Zero, (0.0 size).maxPosition)
+
+      assertEquals(PositionValue.Zero, (10.0 size).minPosition)
+      assertEquals(10.0, (10.0 size).maxPosition.doubleValue, 1E-14)
+    }
+    {
+      given Geometry = Geometry.Bounded
+
+      assertEquals(PositionValue.Zero, (0.0 size).minPosition)
+      assertEquals(PositionValue.Zero, (0.0 size).maxPosition)
+
+      assertEquals(PositionValue.Zero, (10.0 size).minPosition)
+      assertEquals(10.0, (10.0 size).maxPosition.doubleValue, 1E-14)
+    }
   }
 
   @Test def positionUsingImplicits: Unit = {

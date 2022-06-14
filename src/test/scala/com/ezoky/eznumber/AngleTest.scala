@@ -42,7 +42,6 @@ class AngleTest extends AnyFlatSpec:
 
   "Angles" can "be compared with precision" in {
 
-    given Numeric[Radians] = RadianIsNumeric
     given Precision[Radians] = Precision(1E-10 radians)
 
     assert((PI radians) ~= (3.1415926535 radians))
@@ -50,9 +49,17 @@ class AngleTest extends AnyFlatSpec:
     assert(!((PI radians) ~= (3.1415926534 radians)))
 
 
-    given Numeric[Degrees] = DegreeIsNumeric
     given Precision[Degrees] = Precision(1E-2 degrees)
 
     assert((180 degrees) ~= (180.01 degrees))
     assert(!((180 degrees) ~= (180.1 degrees)))
+  }
+
+  "Angles" can "be converted" in {
+
+    assert((PI radians) === ((180.0 degrees): Radians))
+    assert(((PI radians): Degrees) === (180.0 degrees))
+
+    assert((PI radians) === (180.0 degrees).toRadians)
+    assert((PI radians).toDegrees === (180.0 degrees))
   }

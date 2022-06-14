@@ -6,6 +6,7 @@ package com.ezoky.ezgames.covideo.component
 
 import com.ezoky.ezgames.covideo.component.Generate.*
 import com.ezoky.ez3d.{Double3D, Ez3D, H, Space}
+import com.ezoky.ezgames.covideo.component.Dimension.Geometry.Flat
 import com.ezoky.eznumber.*
 
 import scala.annotation.{tailrec, targetName}
@@ -106,11 +107,14 @@ object Dimension:
     def randomPosition(using Geometry): PositionValue =
       relativePosition(_Random)
 
-    def minPosition(using Geometry): PositionValue =
+    inline def minPosition(using Geometry): PositionValue =
       relativePosition(0.0)
 
-    def maxPosition(using Geometry): PositionValue =
-      relativePosition(1.0 - _Epsilon)
+    inline def maxPosition(using geometry:  Geometry): PositionValue =
+      geometry match
+        case Flat => minPosition
+        case _ if (sizeValue == SizeValue.Zero) => minPosition
+        case _ => relativePosition(1.0 - _Epsilon)
 
     def isOutOfBounds(position: PositionValue): Boolean =
       (position < PositionValue.Zero) || (position >= sizeValue)
@@ -121,13 +125,12 @@ object Dimension:
     def axisVector(axis: Axis): Vector =
       Vector(sizeValue, axis)
 
-    @tailrec
     private[Dimension] def remainder(dimensionValue: _DimensionType): _DimensionType =
       if (isNull) {
         Dimension._Zero
       }
       else if (dimensionValue < Dimension._Zero) {
-        remainder(sizeValue + dimensionValue)
+        (sizeValue + (dimensionValue % sizeValue)) % sizeValue
       }
       else {
         dimensionValue % sizeValue
