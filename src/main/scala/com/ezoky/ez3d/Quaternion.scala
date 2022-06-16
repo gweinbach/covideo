@@ -12,6 +12,8 @@ import spire.algebra.Trig
 import spire.implicits.*
 import spire.math.*
 
+import scala.annotation.targetName
+
 /**
  * @since 0.2.0
  * @author gweinbach on 01/06/2022
@@ -39,7 +41,8 @@ trait H[T: Numeric : Precision]
       else
         Some(divideBy(y))
 
-    infix def x(q2: Quaternion): Option[Quaternion] =
+    @targetName("times")
+    infix def ×(q2: Quaternion): Option[Quaternion] =
       val v1 = Vector(b, c, d)
       val w1 = a
       val v2 = Vector(q2.b, q2.c, q2.d)
@@ -61,13 +64,13 @@ trait H[T: Numeric : Precision]
     def rotationAngle(using trig: Trig[T]): T =
       acos(a) / 2
 
-    def rotationAxis: Option[Vector] =
-      Vector(b, c, d).normalized
+    def rotationAxis: Option[NonNullVector] =
+      Vector.nonNull(b, c, d).map(_.normalized)
 
     def rotate(vector: Vector): Option[Vector] =
       for
-        q1 <- this x Quaternion(_0, vector)
-        q2 <- q1 x conjugate
+        q1 <- this × Quaternion(_0, vector)
+        q2 <- q1 × conjugate
       yield q2.imaginary
 
     override def equals(obj: Any): Boolean =
@@ -82,7 +85,8 @@ trait H[T: Numeric : Precision]
 
 
   object Quaternion:
-    def apply(real: T, imaginary: Vector): Quaternion =
+    def apply(real: T,
+              imaginary: Vector): Quaternion =
       new Quaternion(real, imaginary.x, imaginary.y, imaginary.z)
 
     def fromRotationVector(axis: Vector,

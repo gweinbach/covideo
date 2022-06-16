@@ -16,8 +16,8 @@ import spire.math.*
  * @since 0.2.0
  * @author gweinbach on 12/06/2022
  */
-trait Projection[T: Numeric: Trig: Precision]
-    extends Space[T]:
+trait Projection[T: Numeric : Trig : Precision]
+  extends Space[T] with Plane[T] with TransformationMatrix[T] :
 
 
   sealed trait ProjectionViewFrustum:
@@ -26,9 +26,13 @@ trait Projection[T: Numeric: Trig: Precision]
 
   sealed trait ProjectionCamera:
     val position: Point
-    val lookVector: Vector
-    val upVector: Vector
+    val target: Point
+    val look: NonNullVector
+    val up: NonNullVector
+    val right: NonNullVector
     val viewFrustum: ProjectionViewFrustum
+
+    val eye = Vector(position)
 
 
   object Parallel:
@@ -40,10 +44,12 @@ trait Projection[T: Numeric: Trig: Precision]
       extends ProjectionViewFrustum
 
     case class Camera(position: Point,
-                      lookVector: Vector,
-                      upVector: Vector,
+                      look: NonNullVector,
+                      up: NonNullVector,
+                      right: NonNullVector,
                       viewFrustum: ViewFrustum)
-      extends ProjectionCamera
+      extends ProjectionCamera:
+      override val target = look.dest(position)
 
 
   object Perspective:
@@ -55,8 +61,34 @@ trait Projection[T: Numeric: Trig: Precision]
       extends ProjectionViewFrustum:
       lazy val widthAngle = heightAngle + aspectRatio
 
-    case class Camera(position: Point,
-                      lookVector: Vector,
-                      upVector: Vector,
-                      viewFrustum: ViewFrustum)
-      extends ProjectionCamera
+    case class LookAtCamera private(position: Point,
+                                    look: NonNullVector,
+                                    up: NonNullVector,
+                                    right: NonNullVector,
+                                    basis: OrthonormalBasis,
+                                    viewFrustum: ViewFrustum)
+      extends ProjectionCamera:
+
+      def project(p: Point): PlanePoint = ???
+
+      override val target = look.dest(position)
+      
+      lazy val translation = AffineTranslation(eye).inverse
+      lazy val orientation = BasisRotation(basis)
+      
+      lazy val viewMatrix = orientation ×: translation
+      
+
+    object LookAtCamera:
+
+      def safe(position: Point,
+               target: Point,
+               upVector: Vector,
+               viewFrustum: ViewFrustum): Option[LookAtCamera] =
+        for
+          look <- Vector.nonNull(position, target)
+          up <- Vector.nonNull(upVector)
+          right <- Vector.nonNullCrossProduct(-up, look)
+          basis <- Basis.orthogonal(right, up, -look)
+        yield
+          LookAtCamera(position, look, up, right, basis.normalized, viewFrustum)

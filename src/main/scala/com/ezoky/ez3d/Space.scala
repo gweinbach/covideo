@@ -26,18 +26,18 @@ trait Space[T: Numeric : Precision]:
   private val _1: T = _SpatialNumeric.one
 
   sealed trait Axis:
-    def base: Vector
+    def base: NonNullVector
 
   object Axis:
 
     case object X extends Axis :
-      override def base: Vector = Vector.OneX
+      override def base: NonNullVector = Vector.OneX
 
     case object Y extends Axis :
-      override def base: Vector = Vector.OneY
+      override def base: NonNullVector = Vector.OneY
 
     case object Z extends Axis :
-      override def base: Vector = Vector.OneZ
+      override def base: NonNullVector = Vector.OneZ
 
   case class Point(x: T,
                    y: T,
@@ -65,66 +65,49 @@ trait Space[T: Numeric : Precision]:
     val OneZ = Point(_0, _0, _1)
 
 
-  case class Vector(x: T,
-                    y: T,
-                    z: T)
+  sealed trait Vector
     extends Transformable[Vector] :
+    val x: T
+    val y: T
+    val z: T
 
-    lazy val tuple: (T, T, T) =
+    final lazy val tuple: (T, T, T) =
       (x, y, z)
 
-    lazy val magnitude: T =
+    final lazy val isNull: Boolean =
+      Vector.isNullTuple(x, y, z)
+
+    final lazy val magnitude: T =
       _SpatialNumeric.sqrt(this ⋅ this)
 
-    lazy val normalized: Option[Vector] =
-      this / magnitude
+    final lazy val isNormalized: Boolean =
+      magnitude == _1
 
-    lazy val inverse: Option[Vector] =
-      if ((x == 0) || (y == 0) || (z == 0)) then
-        Some(Vector(_1 / x, _1 / y, _1 / z))
-      else
-        None
-
-    def unary_- =
-      Vector(-x, -y, -z)
-
-    def dest(origin: Point = Point.Zero): Point =
+    final def dest(origin: Point = Point.Zero): Point =
       Point(origin.x + x, origin.y + y, origin.z + z)
 
-    def +(v: Vector): Vector =
+    def unary_- : Vector
+
+    def isCollinear(v: Vector): Boolean
+
+    lazy val inverse: Option[Vector]
+
+    infix def +(v: Vector): Vector =
       Vector(x + v.x, y + v.y, z + v.z)
 
-    def -(v: Vector): Vector =
+    infix def -(v: Vector): Vector =
       Vector(x - v.x, y - v.y, z - v.z)
 
-    def *(n: T): Vector =
-      Vector(
-        x * n,
-        y * n,
-        z * n
-      )
+    infix def *(n: T): Vector
 
-    def /(n: T): Option[Vector] =
-      if n == _0 then
-        None
-      else
-        Some(
-          Vector(
-            x / n,
-            y / n,
-            z / n
-          )
-        )
+    protected def divideBy(n: T): Vector
+
+    infix def /(n: T): Option[Vector]
 
     infix def ⋅(v: Vector): T =
       x * v.x + y * v.y + z * v.z
 
-    infix def ∧(v: Vector): Vector =
-      Vector(
-        y * v.z - z * v.y,
-        z * v.x - x * v.z,
-        x * v.y - y * v.x
-      )
+    infix def ∧(v: Vector): Vector
 
     override def equals(obj: Any): Boolean =
       obj match
@@ -136,30 +119,297 @@ trait Space[T: Numeric : Precision]:
           false
 
 
+  case object NullVector
+    extends Vector :
+    override val x: T = _0
+    override val y: T = _0
+    override val z: T = _0
+
+    override inline def unary_- = NullVector
+
+    override def isCollinear(v: Vector): Boolean =
+      true
+
+    override lazy val inverse: None.type =
+      None
+
+    override def +(v: Vector): Vector =
+      v match
+        case NullVector =>
+          NullVector
+        case _ =>
+          v
+
+    override def -(v: Vector): Vector =
+      v match
+        case NullVector =>
+          NullVector
+        case _ =>
+          -v
+
+    override def *(n: T): NullVector.type =
+      NullVector
+
+    override protected def divideBy(n: T): NullVector.type =
+      NullVector
+
+    override def /(n: T): Option[NullVector.type] =
+      if n == _0 then
+        None
+      else
+        Some(NullVector)
+
+    override infix def ⋅(v: Vector): T =
+      _0
+
+    override infix def ∧(v: Vector): NullVector.type =
+      NullVector
+
+  case class NonNullVector(x: T,
+                           y: T,
+                           z: T)
+    extends Vector :
+
+    lazy val normalized: NonNullVector =
+      divideBy(magnitude)
+
+    override inline def unary_- =
+      NonNullVector(-x, -y, -z)
+
+    override def isCollinear(v: Vector): Boolean =
+      (this ∧ v).isNull
+
+    override lazy val inverse: Option[NonNullVector] =
+      if (x ~= _0) || (y ~= _0) || (z ~= _0) then
+        None
+      else
+        Some(NonNullVector(_1 / x, _1 / y, _1 / z))
+
+    override def *(n: T): Vector =
+      if n == _0 then
+        NullVector
+      else
+        NonNullVector(
+          x * n,
+          y * n,
+          z * n
+        )
+
+    override protected def divideBy(n: T): NonNullVector =
+      NonNullVector(
+        x / n,
+        y / n,
+        z / n
+      )
+
+    override final def /(n: T): Option[NonNullVector] =
+      if n == _0 then
+        None
+      else
+        Some(
+          divideBy(n)
+        )
+
+    override final infix def ∧(v: Vector): Vector =
+      Vector.nonNullCrossProduct(this, v).fold(NullVector)(v => v)
+
+
   object Vector:
 
-    def apply(start: Point,
-              end: Point): Vector =
-      Vector(end.x - start.x, end.y - start.y, end.z - start.z)
+    def isNullTuple(x: T, y: T, z: T): Boolean =
+      (x ~= _0) && (y ~= _0) && (z ~= _0)
 
-    def apply(end: Point): Vector =
-      Vector(Point.Zero, end)
+    inline def apply(x: T, y: T, z: T): Vector =
+      nonNull(x, y, z).fold(NullVector)(v => v)
 
-    def apply(magnitude: T,
-              axis: Axis): Vector =
-      axis match
-        case Axis.X => Vector(magnitude, _0, _0)
-        case Axis.Y => Vector(_0, magnitude, _0)
-        case Axis.Z => Vector(_0, _0, magnitude)
+    inline def apply(start: Point,
+                     end: Point): Vector =
+      nonNull(start, end).fold(NullVector)(v => v)
+
+    inline def apply(end: Point): Vector =
+      nonNull(end).fold(NullVector)(v => v)
+
+    inline def apply(magnitude: T,
+                     axis: Axis): Vector =
+      nonNull(magnitude, axis).fold(NullVector)(v => v)
+
+    def nonNull(x: T,
+                       y: T,
+                       z: T): Option[NonNullVector] =
+      if isNullTuple(x, y, z) then
+        None
+      else
+        Some(NonNullVector(x, y, z))
+
+    def nonNull(start: Point,
+                       end: Point): Option[NonNullVector] =
+      if start == end then
+        None
+      else
+        Some(NonNullVector(end.x - start.x, end.y - start.y, end.z - start.z))
+
+    def nonNull(end: Point): Option[NonNullVector] =
+      nonNull(Point.Zero, end)
+
+    def nonNull(v: Vector): Option[NonNullVector] =
+      if v.isNull then
+        None
+      else
+        Some(NonNullVector(v.x, v.y, v.z))
+
+    def nonNull(magnitude: T,
+                       axis: Axis): Option[NonNullVector] =
+      if magnitude == _0 then
+        None
+      else
+        Some(
+          axis match
+            case Axis.X => NonNullVector(magnitude, _0, _0)
+            case Axis.Y => NonNullVector(_0, magnitude, _0)
+            case Axis.Z => NonNullVector(_0, _0, magnitude)
+        )
+
+    def nonNullCrossProduct(v1: Vector,
+                            v2: Vector): Option[NonNullVector] =
+      val nx = v1.y * v2.z - v1.z * v2.y
+      val ny = v1.z * v2.x - v1.x * v2.z
+      val nz = v1.x * v2.y - v1.y * v2.x
+      if Vector.isNullTuple(nx, ny, nz) then
+        None
+      else
+        Some(NonNullVector(nx, ny, nz))
 
     def fill(t: T): Vector =
       Vector(t, t, t)
 
-    val Null = Vector(_0, _0, _0)
+    val Null = NullVector
 
-    val OneX = Vector(_1, _0, _0)
-    val OneY = Vector(_0, _1, _0)
-    val OneZ = Vector(_0, _0, _1)
+    val OneX = NonNullVector(_1, _0, _0)
+    val OneY = NonNullVector(_0, _1, _0)
+    val OneZ = NonNullVector(_0, _0, _1)
+
+
+  /**
+   * Base vectors are not coplanar
+   */
+  sealed trait Basis:
+    self =>
+
+    lazy val i: NonNullVector
+    lazy val j: NonNullVector
+    lazy val k: NonNullVector
+
+    lazy val normalized: Basis =
+      new Basis :
+        override lazy val i: NonNullVector = self.i.normalized
+        override lazy val j: NonNullVector = self.j.normalized
+        override lazy val k: NonNullVector = self.k.normalized
+
+    lazy val isNormalized: Boolean =
+      Basis.normalized(i, j, k)
+
+    lazy val isOrthogonal: Boolean =
+      Basis.orthogonal(i, j, k)
+
+    override def equals(obj: Any): Boolean =
+      obj match
+        case that: Basis if (that != null) =>
+          (this.i == that.i) &&
+            (this.j == that.j) &&
+            (this.k == that.k)
+        case _ =>
+          false
+
+  trait NormalizedBasis extends Basis :
+    override lazy val normalized: NormalizedBasis =
+      this
+
+  trait OrthogonalBasis extends Basis :
+    self =>
+    override lazy val normalized: OrthonormalBasis =
+      new OrthonormalBasis :
+        override lazy val i: NonNullVector = self.i.normalized
+        override lazy val j: NonNullVector = self.j.normalized
+        override lazy val k: NonNullVector = self.k.normalized
+
+  trait OrthonormalBasis extends OrthogonalBasis with NormalizedBasis :
+    override lazy val normalized: OrthonormalBasis =
+      this
+
+  object Basis:
+
+    def coplanar(i: NonNullVector,
+                 j: NonNullVector,
+                 k: NonNullVector): Boolean =
+      ((i ∧ j) ∧ (i ∧ k)).isNull
+
+    def orthogonal(i: NonNullVector,
+                   j: NonNullVector,
+                   k: NonNullVector): Boolean =
+      (i ⋅ j == _0) && (i ⋅ k == _0) && (k ⋅ j == _0)
+
+    def normalized(i: NonNullVector,
+                   j: NonNullVector,
+                   k: NonNullVector): Boolean =
+      i.isNormalized && j.isNormalized && k.isNormalized
+
+    def safe(i: Vector,
+             j: Vector,
+             k: Vector): Option[Basis] =
+      for
+        baseI <- Vector.nonNull(i)
+        baseJ <- Vector.nonNull(j)
+        baseK <- Vector.nonNull(k) if (!coplanar(baseI, baseJ, baseK))
+      yield
+        new Basis :
+          override lazy val i: NonNullVector = baseI
+          override lazy val j: NonNullVector = baseJ
+          override lazy val k: NonNullVector = baseK
+
+    def orthogonal(i: Vector,
+                   j: Vector,
+                   k: Vector): Option[OrthogonalBasis] =
+      for
+        baseI <- Vector.nonNull(i)
+        baseJ <- Vector.nonNull(j)
+        baseK <- Vector.nonNull(k)
+        if (!coplanar(baseI, baseJ, baseK)) && orthogonal(baseI, baseJ, baseK)
+      yield
+        new OrthogonalBasis :
+          override lazy val i: NonNullVector = baseI
+          override lazy val j: NonNullVector = baseJ
+          override lazy val k: NonNullVector = baseK
+
+    def normalized(i: Vector,
+                   j: Vector,
+                   k: Vector): Option[NormalizedBasis] =
+      for
+        baseI <- Vector.nonNull(i)
+        baseJ <- Vector.nonNull(j)
+        baseK <- Vector.nonNull(k) if (!coplanar(baseI, baseJ, baseK))
+      yield
+        new NormalizedBasis :
+          override lazy val i: NonNullVector = baseI.normalized
+          override lazy val j: NonNullVector = baseJ.normalized
+          override lazy val k: NonNullVector = baseK.normalized
+
+    def orthonormal(i: Vector,
+                    j: Vector): Option[OrthonormalBasis] =
+      for
+        baseI <- Vector.nonNull(i)
+        baseJ <- Vector.nonNull(j) if (baseI ⋅ baseJ == _0)
+        baseK <- Vector.nonNullCrossProduct(baseI, baseJ)
+      yield
+        new OrthonormalBasis :
+          override lazy val i: NonNullVector = baseI
+          override lazy val j: NonNullVector = baseJ
+          override lazy val k: NonNullVector = baseK
+
+    val Normal: OrthonormalBasis =
+      new OrthonormalBasis :
+        override lazy val i: NonNullVector = Axis.X.base
+        override lazy val j: NonNullVector = Axis.Y.base
+        override lazy val k: NonNullVector = Axis.Z.base
 
 
   type Vertices = Iterable[Vertex]
