@@ -4,13 +4,13 @@ import spire.algebra.Trig
 import spire.math.Numeric
 
 import scala.annotation.targetName
-import scala.reflect.Typeable
+//import scala.reflect.Typeable
 
 /**
  * @since 0.2.0
  * @author gweinbach on 12/06/2022
  */
-trait AngleTypes[T: Trig: Numeric]:
+private trait AngleTypes[T: Trig: Numeric]:
 
   opaque type Degrees = T
   opaque type Radians = T
@@ -28,7 +28,7 @@ trait AngleTypes[T: Trig: Numeric]:
   val RadianIsNumeric: Numeric[Radians] = _num
   val DegreeIsNumeric: Numeric[Degrees] = _num
 
-  sealed trait UniformTrig[A <: Angle: Typeable]:
+  sealed trait UniformTrig[A <: Angle]:
     def pi: A
 
     def sin(a: A): T
@@ -126,10 +126,6 @@ trait Angles[T: Trig: Numeric] extends AngleTypes[T]:
     @targetName("convertAngleToDegrees")
     def toDegrees: Degrees =
       summon[UniformTrig[U]].toDegrees(a)
-
-//  extension [U <: Angle: Precision](a1: U)
-//    infix def ~=(a2: U): Boolean =
-//      summon[Precision[U]].~=(a1, a2)
 
 
   private val _trig = summon[Trig[T]]

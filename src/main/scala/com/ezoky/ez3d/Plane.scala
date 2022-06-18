@@ -18,6 +18,15 @@ trait Plane[T: Numeric]:
   case class PlanePoint(x: T, 
                         y: T)
 
-  case class PlaneVector(p1: PlanePoint, 
-                         p2: PlanePoint)
+  case class PlaneVector(x: T,
+                         y: T)
+  
+  object PlaneVector:
+
+    def apply(p1: PlanePoint, 
+              p2: PlanePoint): PlaneVector = 
+      new PlaneVector(
+        p2.x - p1.x,
+        p2.y - p1.y
+      )
   

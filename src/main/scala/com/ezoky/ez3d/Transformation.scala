@@ -58,4 +58,3 @@ trait Transformable[V <: Transformable[V]]:
 
   final def translate(using translation: Translation[V]): V =
     translation.translate(self)
-    

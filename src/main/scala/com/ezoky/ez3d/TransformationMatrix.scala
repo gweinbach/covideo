@@ -67,13 +67,16 @@ trait TransformationMatrix[T: Numeric : Trig : Precision]
     val Zero = HVector(_0, _0, _0, _0)
     val One = HVector(__1, __1, __1, __1)
 
-  extension (p: Point)
-    def homogeneous: HVector =
-      HVector.point(p)
 
-  extension (v: Vector)
+  type Object3D = Point|Vector
+
+  extension (o: Object3D)
     def homogeneous: HVector =
-      HVector.vector(v)
+      o match
+        case p: Point =>
+          HVector.point(p)
+        case v:Vector =>
+          HVector.vector(v)
 
   /**
    * We use Column major convention
@@ -92,25 +95,25 @@ trait TransformationMatrix[T: Numeric : Trig : Precision]
     @targetName("times")
     infix def ×:(m: Matrix): Matrix =
       Matrix(
-        y00 = x00 * m.x00 + x10 * m.x01 + x20 * m.x02 + x30 * m.x03,
-        y01 = x01 * m.x00 + x11 * m.x01 + x21 * m.x02 + x31 * m.x03,
-        y02 = x02 * m.x00 + x12 * m.x01 + x22 * m.x02 + x32 * m.x03,
-        y03 = x03 * m.x00 + x13 * m.x01 + x23 * m.x02 + x33 * m.x03,
+        y00 = x00 * m.x00 + x01 * m.x10 + x02 * m.x20 + x03 * m.x30,
+        y01 = x00 * m.x01 + x01 * m.x11 + x02 * m.x21 + x03 * m.x31,
+        y02 = x00 * m.x02 + x01 * m.x12 + x02 * m.x22 + x03 * m.x32,
+        y03 = x00 * m.x03 + x01 * m.x13 + x02 * m.x23 + x03 * m.x33,
 
-        y10 = x00 * m.x10 + x10 * m.x11 + x20 * m.x12 + x30 * m.x13,
-        y11 = x01 * m.x10 + x11 * m.x11 + x21 * m.x12 + x31 * m.x13,
-        y12 = x02 * m.x10 + x12 * m.x11 + x22 * m.x12 + x32 * m.x13,
-        y13 = x03 * m.x10 + x13 * m.x11 + x23 * m.x12 + x33 * m.x13,
+        y10 = x10 * m.x00 + x11 * m.x10 + x12 * m.x20 + x13 * m.x30,
+        y11 = x10 * m.x01 + x11 * m.x11 + x12 * m.x21 + x13 * m.x31,
+        y12 = x10 * m.x02 + x11 * m.x12 + x12 * m.x22 + x13 * m.x32,
+        y13 = x10 * m.x03 + x11 * m.x13 + x12 * m.x23 + x13 * m.x33,
 
-        y20 = x00 * m.x20 + x10 * m.x21 + x20 * m.x22 + x30 * m.x23,
-        y21 = x01 * m.x20 + x11 * m.x21 + x21 * m.x22 + x31 * m.x23,
-        y22 = x02 * m.x20 + x12 * m.x21 + x22 * m.x22 + x32 * m.x23,
-        y23 = x03 * m.x20 + x13 * m.x21 + x23 * m.x22 + x33 * m.x23,
+        y20 = x20 * m.x00 + x21 * m.x10 + x22 * m.x20 + x23 * m.x30,
+        y21 = x20 * m.x01 + x21 * m.x11 + x22 * m.x21 + x23 * m.x31,
+        y22 = x20 * m.x02 + x21 * m.x12 + x22 * m.x22 + x23 * m.x32,
+        y23 = x20 * m.x03 + x21 * m.x13 + x22 * m.x23 + x23 * m.x33,
 
-        y30 = x00 * m.x30 + x10 * m.x31 + x20 * m.x32 + x30 * m.x33,
-        y31 = x01 * m.x30 + x11 * m.x31 + x21 * m.x32 + x31 * m.x33,
-        y32 = x02 * m.x30 + x12 * m.x31 + x22 * m.x32 + x32 * m.x33,
-        y33 = x03 * m.x30 + x13 * m.x31 + x23 * m.x32 + x33 * m.x33
+        y30 = x30 * m.x00 + x31 * m.x10 + x32 * m.x20 + x33 * m.x30,
+        y31 = x30 * m.x01 + x31 * m.x11 + x32 * m.x21 + x33 * m.x31,
+        y32 = x30 * m.x02 + x31 * m.x12 + x32 * m.x22 + x33 * m.x32,
+        y33 = x30 * m.x03 + x31 * m.x13 + x32 * m.x23 + x33 * m.x33
       )
 
     def ×(v: HVector): HVector =
@@ -332,7 +335,7 @@ trait TransformationMatrix[T: Numeric : Trig : Precision]
 
 
   case class StandardPerspectiveProjection private(planeDistance: T)
-    extends AffineTransformation :
+    extends Matrix :
     override val x00 = __1
     override val x01 = _0
     override val x02 = _0
@@ -346,7 +349,12 @@ trait TransformationMatrix[T: Numeric : Trig : Precision]
     override val x20 = _0
     override val x21 = _0
     override val x22 = _0
-    override val x23 = __1 / planeDistance
+    override val x23 = _0
+
+    override val x30 = _0
+    override val x31 = _0
+    override val x32 = __1 / planeDistance
+    override val x33 = _1
 
   object StandardPerspectiveProjection:
     def safe(planeDistance: T): Option[StandardPerspectiveProjection] =

@@ -17,8 +17,9 @@ import spire.implicits.*
  * @author gweinbach on 06/06/2022
  */
 case class Precision[T: Numeric](value: T):
+  val precision = value.abs
   inline def ~=(t1: T, t2: T): Boolean =
-    (t1 - t2).abs <= value
+    (t1 - t2).abs <= precision
 
 extension [T: Numeric](t1: T)
 

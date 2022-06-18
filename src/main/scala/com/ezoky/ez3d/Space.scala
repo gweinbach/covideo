@@ -23,7 +23,7 @@ trait Space[T: Numeric : Precision]:
   private val _SpatialNumeric: Numeric[T] = summon[Numeric[T]]
 
   private val _0: T = _SpatialNumeric.zero
-  private val _1: T = _SpatialNumeric.one
+  private val __1: T = _SpatialNumeric.one // double '_' to avoid conflict with Product<X>._1
 
   sealed trait Axis:
     def base: NonNullVector
@@ -60,9 +60,9 @@ trait Space[T: Numeric : Precision]:
   object Point:
     val Zero = Point(_0, _0, _0)
 
-    val OneX = Point(_1, _0, _0)
-    val OneY = Point(_0, _1, _0)
-    val OneZ = Point(_0, _0, _1)
+    val OneX = Point(__1, _0, _0)
+    val OneY = Point(_0, __1, _0)
+    val OneZ = Point(_0, _0, __1)
 
 
   sealed trait Vector
@@ -81,7 +81,7 @@ trait Space[T: Numeric : Precision]:
       _SpatialNumeric.sqrt(this ⋅ this)
 
     final lazy val isNormalized: Boolean =
-      magnitude == _1
+      magnitude == __1
 
     final def dest(origin: Point = Point.Zero): Point =
       Point(origin.x + x, origin.y + y, origin.z + z)
@@ -183,7 +183,7 @@ trait Space[T: Numeric : Precision]:
       if (x ~= _0) || (y ~= _0) || (z ~= _0) then
         None
       else
-        Some(NonNullVector(_1 / x, _1 / y, _1 / z))
+        Some(NonNullVector(__1 / x, __1 / y, __1 / z))
 
     override def *(n: T): Vector =
       if n == _0 then
@@ -284,9 +284,9 @@ trait Space[T: Numeric : Precision]:
 
     val Null = NullVector
 
-    val OneX = NonNullVector(_1, _0, _0)
-    val OneY = NonNullVector(_0, _1, _0)
-    val OneZ = NonNullVector(_0, _0, _1)
+    val OneX = NonNullVector(__1, _0, _0)
+    val OneY = NonNullVector(_0, __1, _0)
+    val OneZ = NonNullVector(_0, _0, __1)
 
 
   /**

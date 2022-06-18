@@ -24,7 +24,7 @@ trait H[T: Numeric : Precision]
   private val _Numeric = summon[Numeric[T]]
 
   private val _0 = _Numeric.zero
-  private val _1 = _Numeric.one
+  private val __1 = _Numeric.one // double '_' to avoid conflict with Product<X>._1
 
   case class Quaternion(a: T,
                         b: T,
@@ -101,7 +101,7 @@ trait H[T: Numeric : Precision]
       ).normalized
 
     val Zero = Quaternion(_0, _0, _0, _0)
-    val One = Quaternion(_1, _0, _0, _0)
-    val I = Quaternion(_0, _1, _0, _0)
-    val J = Quaternion(_0, _0, _1, _0)
-    val K = Quaternion(_0, _0, _0, _1)
+    val One = Quaternion(__1, _0, _0, _0)
+    val I = Quaternion(_0, __1, _0, _0)
+    val J = Quaternion(_0, _0, __1, _0)
+    val K = Quaternion(_0, _0, _0, __1)
