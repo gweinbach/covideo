@@ -16,8 +16,12 @@ import spire.math.*
  * @since 0.2.0
  * @author gweinbach on 12/06/2022
  */
-trait Projection3D[T: Numeric : Trig : Precision]
-  extends Space[T] with Plane[T] with TransformationMatrix[T] with Angles[T] :
+trait Cameras[T: Numeric : Trig : Precision]
+  extends Space[T]
+    with Plane[T]
+    with Transformation3D[T]
+    with Model3D[T]
+    with Angles[T] :
 
   private val _Numeric = summon[Numeric[T]]
   private val _0 = _Numeric.zero
@@ -27,17 +31,17 @@ trait Projection3D[T: Numeric : Trig : Precision]
   sealed trait ProjectionViewFrustum:
     lazy val near: T
     lazy val far: T
+    lazy val projectionMatrix: Matrix
 
   sealed trait ProjectionCamera:
     val position: Point
-    val target: Point
     val look: NonNullVector
     val up: NonNullVector
     val right: NonNullVector
     val viewFrustum: ProjectionViewFrustum
 
-    val eye = Vector(position)
-
+    final lazy val eye: Vector = Vector(position)
+    final lazy val target: Point = look.dest(position)
 
 //  object Parallel:
 
@@ -163,29 +167,29 @@ trait Projection3D[T: Numeric : Trig : Precision]
               final override lazy val right = aspectRatio * top
 
               // used for control
-              final lazy val alternateProjectionMatrix =
-                Matrix(
-                  y00 = focalLength / aspectRatio,
-                  y01 = _0,
-                  y02 = _0,
-                  y03 = _0,
-
-                  y10 = _0,
-                  y11 = focalLength,
-                  y12 = _0,
-                  y13 = _0,
-
-                  y20 = _0,
-                  y21 = _0,
-                  y22 = (far + near) / (near - far),
-                  y23 = __2 * far * near / (near - far),
-
-                  y30 = _0,
-                  y31 = _0,
-                  y32 = -__1,
-                  y33 = _0
-                )
-              assert(projectionMatrix == alternateProjectionMatrix)
+//              final lazy val alternateProjectionMatrix =
+//                Matrix(
+//                  y00 = focalLength / aspectRatio,
+//                  y01 = _0,
+//                  y02 = _0,
+//                  y03 = _0,
+//
+//                  y10 = _0,
+//                  y11 = focalLength,
+//                  y12 = _0,
+//                  y13 = _0,
+//
+//                  y20 = _0,
+//                  y21 = _0,
+//                  y22 = (far + near) / (near - far),
+//                  y23 = __2 * far * near / (near - far),
+//
+//                  y30 = _0,
+//                  y31 = _0,
+//                  y32 = -__1,
+//                  y33 = _0
+//                )
+//              assert(projectionMatrix == alternateProjectionMatrix)
           )
 
     case class LookAtCamera private(position: Point,
@@ -194,19 +198,8 @@ trait Projection3D[T: Numeric : Trig : Precision]
                                     right: NonNullVector,
                                     basis: OrthonormalBasis,
                                     viewFrustum: PerspectiveViewFrustum)
-      extends ProjectionCamera :
+      extends ProjectionCamera
 
-      def project(p: Point): PlanePoint = ???
-
-      override val target = look.dest(position)
-
-      lazy val translation = AffineTranslation(eye).inverse
-      lazy val orientation = BasisRotation(basis).inverse
-
-      lazy val viewMatrix = orientation ×: translation
-
-      // allowed because nearDistance is always strictly positive
-      lazy val projection = viewFrustum.projectionMatrix
 
 
     object LookAtCamera:
@@ -222,3 +215,13 @@ trait Projection3D[T: Numeric : Trig : Precision]
           basis <- Basis.orthogonal(right, up, -look)
         yield
           LookAtCamera(position, look, up, right, basis.normalized, viewFrustum)
+
+
+    case class LookAtCameraModel(camera: LookAtCamera)
+      extends Model[LookAtCamera]:
+      final override val position: Point = camera.position
+      final override val basis: Basis = camera.basis
+
+    case class LookAtCameraFrustum(camera: LookAtCamera)
+      extends ProjectionView[LookAtCamera]:
+      final override def projectionMatrix: Matrix = camera.viewFrustum.projectionMatrix

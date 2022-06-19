@@ -18,7 +18,7 @@ import spire.math.*
  * @author gweinbach on 10/06/2022
  */
 class Ez3D[T: Numeric : Trig : Precision]
-  extends Space[T] with H[T] :
+  extends Model3D[T] with Cameras[T]:
 
   // Vector Transformations
   case class VectorRotation(angle: T,

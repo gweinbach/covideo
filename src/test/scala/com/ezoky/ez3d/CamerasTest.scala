@@ -16,50 +16,50 @@ import spire.math.*
  * @since 0.2.0
  * @author gweinbach on 16/06/2022
  */
-class Projection3DTest extends AnyFlatSpec :
+class CamerasTest extends AnyFlatSpec :
 
   given Precision[Double] = Precision(1E-10)
 
-  val projection3D = new Projection3D[Double] {}
+  val projection3D = new Cameras[Double] {}
 
   import projection3D.*
 
   "View Frustrum" can "define plane projection of a volume of space" in {
     //    val perspectiveViewFrustum =
     //      Perspective.ViewFrustum.fromFieldOfView(10.0, 50.0, 1.0, 90.0 degrees).get
-        val perspectiveViewFrustum =
-          Perspective.ViewFrustum.fromSymetricPlanes(25.0, 150.0, 20.0, 20.0).get
+    val perspectiveViewFrustum =
+      Perspective.ViewFrustum.fromSymetricPlanes(25.0, 150.0, 20.0, 20.0).get
     val projection = perspectiveViewFrustum.projectionMatrix
 
-//    assert(perspectiveViewFrustum.alternateProjectionMatrix === projection)
+    // assert(perspectiveViewFrustum.alternateProjectionMatrix === projection)
 
-    val testPoints = List[Object3D](
-      perspectiveViewFrustum.nearBottomLeft,
-      perspectiveViewFrustum.nearTopLeft,
-      perspectiveViewFrustum.nearBottomRight,
-      perspectiveViewFrustum.nearTopRight,
-
-      Point(0,0,0),
-
-      perspectiveViewFrustum.farBottomLeft,
-      perspectiveViewFrustum.farTopLeft,
-      perspectiveViewFrustum.farBottomRight,
-      perspectiveViewFrustum.farTopRight,
-
-      Point(0,0,0),
-
-      perspectiveViewFrustum.center,
-
-      Point(0,0,0),
-
-      Point(0, 0, perspectiveViewFrustum.middleZ +13.33333333333333),
-
-    )
-    testPoints.foreach {
-      point =>
-        val proj = projection × point.homogeneous
-        println(s"$point\t->${proj}\t->${proj.cartesian.fold(None)(p => p)}")
-    }
+    //    val testPoints = List[Object3D](
+    //      perspectiveViewFrustum.nearBottomLeft,
+    //      perspectiveViewFrustum.nearTopLeft,
+    //      perspectiveViewFrustum.nearBottomRight,
+    //      perspectiveViewFrustum.nearTopRight,
+    //
+    //      Point(0,0,0),
+    //
+    //      perspectiveViewFrustum.farBottomLeft,
+    //      perspectiveViewFrustum.farTopLeft,
+    //      perspectiveViewFrustum.farBottomRight,
+    //      perspectiveViewFrustum.farTopRight,
+    //
+    //      Point(0,0,0),
+    //
+    //      perspectiveViewFrustum.center,
+    //
+    //      Point(0,0,0),
+    //
+    //      Point(0, 0, perspectiveViewFrustum.middleZ +13.33333333333333),
+    //
+    //    )
+    //    testPoints.foreach {
+    //      point =>
+    //        val proj = projection × point.homogeneous
+    //        println(s"$point\t->${proj}\t->${proj.cartesian.fold(None)(p => p)}")
+    //    }
 
     assert((projection × perspectiveViewFrustum.nearBottomLeft.homogeneous).cartesian === Some(Point(-1,-1,-1)))
     assert((projection × perspectiveViewFrustum.nearTopLeft.homogeneous).cartesian === Some(Point(-1,1,-1)))

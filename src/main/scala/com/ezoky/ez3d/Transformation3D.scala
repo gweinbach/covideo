@@ -18,17 +18,17 @@ import scala.annotation.targetName
  * @since 0.2.0
  * @author gweinbach on 14/06/2022
  */
-trait TransformationMatrix[T: Numeric : Trig : Precision]
+trait Transformation3D[T: Numeric : Trig : Precision]
   extends Space[T] with H[T] :
 
   private val _Numeric = Numeric[T]
   private val _0: T = _Numeric.zero
   private val __1: T = _Numeric.one // double '_' to avoid conflict with Product<X>._1
 
-  case class HVector(x: T,
-                     y: T,
-                     z: T,
-                     w: T):
+  case class HVector3D(x: T,
+                       y: T,
+                       z: T,
+                       w: T):
 
     lazy val cartesian: Option[Point] =
       if isAtInfinity then
@@ -39,8 +39,8 @@ trait TransformationMatrix[T: Numeric : Trig : Precision]
     lazy val isAtInfinity: Boolean =
       w == 0
 
-    def ×(m: Matrix): HVector =
-      HVector(
+    def ×(m: Matrix): HVector3D =
+      HVector3D(
         x * m.x00 + y * m.x10 + z * m.x20 + w * m.x30,
         x * m.x01 + y * m.x11 + z * m.x21 + w * m.x31,
         x * m.x02 + y * m.x12 + z * m.x22 + w * m.x32,
@@ -49,7 +49,7 @@ trait TransformationMatrix[T: Numeric : Trig : Precision]
     
     override def equals(obj: Any): Boolean =
       obj match
-        case that: HVector if (that != null) =>
+        case that: HVector3D if (that != null) =>
           (this.x ~= that.x) &&
             (this.y ~= that.y) &&
             (this.z ~= that.z) &&
@@ -57,26 +57,24 @@ trait TransformationMatrix[T: Numeric : Trig : Precision]
         case _ =>
           false
 
-  object HVector:
-    def point(p: Point): HVector =
-      HVector(p.x, p.y, p.z, __1)
+  object HVector3D:
+    def point(p: Point): HVector3D =
+      HVector3D(p.x, p.y, p.z, __1)
 
-    def vector(v: Vector): HVector =
-      HVector(v.x, v.y, v.z, _0)
+    def vector(v: Vector): HVector3D =
+      HVector3D(v.x, v.y, v.z, _0)
 
-    val Zero = HVector(_0, _0, _0, _0)
-    val One = HVector(__1, __1, __1, __1)
+    val Zero = HVector3D(_0, _0, _0, _0)
+    val One = HVector3D(__1, __1, __1, __1)
 
-
-  type Object3D = Point|Vector
 
   extension (o: Object3D)
-    def homogeneous: HVector =
+    def homogeneous: HVector3D =
       o match
         case p: Point =>
-          HVector.point(p)
+          HVector3D.point(p)
         case v:Vector =>
-          HVector.vector(v)
+          HVector3D.vector(v)
 
   /**
    * We use Column major convention
@@ -116,8 +114,32 @@ trait TransformationMatrix[T: Numeric : Trig : Precision]
         y33 = x30 * m.x03 + x31 * m.x13 + x32 * m.x23 + x33 * m.x33
       )
 
-    def ×(v: HVector): HVector =
-      HVector(
+    @targetName("add")
+    infix def +(m: Matrix): Matrix =
+      Matrix(
+        y00 = x00 * m.x00,
+        y01 = x01 * m.x01,
+        y02 = x02 * m.x02,
+        y03 = x03 * m.x03,
+
+        y10 = x10 * m.x10,
+        y11 = x11 * m.x11,
+        y12 = x12 * m.x12,
+        y13 = x13 * m.x13,
+
+        y20 = x20 * m.x20,
+        y21 = x21 * m.x21,
+        y22 = x22 * m.x22,
+        y23 = x23 * m.x23,
+
+        y30 = x30 * m.x30,
+        y31 = x31 * m.x31,
+        y32 = x32 * m.x32,
+        y33 = x33 * m.x33
+      )
+
+    def ×(v: HVector3D): HVector3D =
+      HVector3D(
         x00 * v.x + x01 * v.y + x02 * v.z + x03 * v.w,
         x10 * v.x + x11 * v.y + x12 * v.z + x13 * v.w,
         x20 * v.x + x21 * v.y + x22 * v.z + x23 * v.w,
@@ -370,7 +392,7 @@ trait TransformationMatrix[T: Numeric : Trig : Precision]
     override val x23 = _0
 
 
-  case class BasisRotation(basis: OrthonormalBasis)
+  case class BasisTransformation(basis: Basis)
     extends AffineRotation:
     override val x00 = basis.i.x
     override val x01 = basis.i.y

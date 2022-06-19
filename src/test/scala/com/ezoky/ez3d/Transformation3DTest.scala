@@ -15,17 +15,17 @@ import spire.math.*
  * @since 0.2.0
  * @author gweinbach on 16/06/2022
  */
-class TransformationMatrixTest extends AnyFlatSpec :
+class Transformation3DTest extends AnyFlatSpec :
 
   given Precision[Double] = Precision(1E-10)
 
-  val transformationMatrix = new TransformationMatrix[Double] {}
+  val transformationMatrix = new Transformation3D[Double] {}
 
   import transformationMatrix.*
 
   "Normal Basis" can "be rotated" in {
     val rotatedBasis = Basis.orthonormal(Axis.Y.base, Axis.Z.base).get
-    val rotation = BasisRotation(rotatedBasis)
+    val rotation = BasisTransformation(rotatedBasis)
 
     assert((rotation × Point.OneX.homogeneous) === Point.OneZ.homogeneous)
     assert((rotation × Vector.OneX.homogeneous) === Vector.OneZ.homogeneous)

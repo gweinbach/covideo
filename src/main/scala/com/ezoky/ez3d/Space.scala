@@ -25,6 +25,8 @@ trait Space[T: Numeric : Precision]:
   private val _0: T = _SpatialNumeric.zero
   private val __1: T = _SpatialNumeric.one // double '_' to avoid conflict with Product<X>._1
 
+  type Object3D = Point|Vector
+
   sealed trait Axis:
     def base: NonNullVector
 
