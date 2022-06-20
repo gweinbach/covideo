@@ -2,7 +2,7 @@ package com.ezoky.ezgames.covideo
 
 import com.ezoky.ezgames.covideo.component.*
 import com.ezoky.ezgames.covideo.component.Dimension.*
-import com.ezoky.ezgames.covideo.component.Screen.*
+import com.ezoky.ez3d.Screen.*
 import com.ezoky.ezgames.covideo.entity.*
 import com.ezoky.ezgames.covideo.entity.People.*
 
@@ -39,10 +39,10 @@ object Config:
     )
   val Game =
     GameConfig(
-      populationSize = 20,
+      populationSize = 10,
       Person, World
     )
   val Loop =
     GameLoopConfig(
-      fps = 60
+      fps = 30
     )

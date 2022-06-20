@@ -1,15 +1,11 @@
 /*
- * @author gweinbach on $today.date
+ * @author gweinbach on 19/06/2022 04:33
  * @since 0.2.0
- *
  */
 
-package com.ezoky.ezgames.covideo.component
+package com.ezoky.ez3d
 
-import com.ezoky.ezgames.covideo.component.Dimension.*
-import spire.*
-import spire.implicits.*
-import spire.math.*
+import spire.math.Numeric
 
 /**
  * @since 0.2.0
@@ -27,11 +23,20 @@ object Screen:
     def -(other: Pixel): Pixel =
       pixel - other
 
+    def /[N: Numeric](other: N): Pixel =
+      summon[Numeric[N]].div(pixel, other) px
+
+    def *[N: Numeric](other: N): Pixel =
+      summon[Numeric[N]].times(pixel, other) px
+
     def asInt: Int =
       pixel
 
   extension[N: Numeric] (n: N)
     def px: Pixel = summon[Numeric[N]].toInt(n)
+
+  given [N: Numeric]: Conversion[Pixel, N] with
+    def apply(pixel: Pixel): N = summon[Numeric[N]].fromInt(pixel.asInt)
 
   case class ScreenDimension(width: Pixel,
                              height: Pixel):
@@ -54,3 +59,11 @@ object Screen:
                     left: Pixel = 0 px,
                     bottom: Pixel = 0 px,
                     right: Pixel = 0 px)
+
+  
+  type ScreenVertices = Iterable[ScreenVertex]
+
+  case class ScreenVertex(s: ScreenPosition,
+                          t: ScreenPosition)
+  
+  case class ScreenShape(vertices: ScreenVertices)

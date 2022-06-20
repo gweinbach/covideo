@@ -25,7 +25,7 @@ trait Space[T: Numeric : Precision]:
   private val _0: T = _SpatialNumeric.zero
   private val __1: T = _SpatialNumeric.one // double '_' to avoid conflict with Product<X>._1
 
-  type Object3D = Point|Vector
+  type Object3D = SpacePoint|Vector
 
   sealed trait Axis:
     def base: NonNullVector
@@ -41,17 +41,17 @@ trait Space[T: Numeric : Precision]:
     case object Z extends Axis :
       override def base: NonNullVector = Vector.OneZ
 
-  case class Point(x: T,
-                   y: T,
-                   z: T)
-    extends Transformable[Point] :
+  case class SpacePoint(x: T,
+                        y: T,
+                        z: T)
+    extends Transformable[SpacePoint] :
 
-    infix def +(v: Vector): Point =
-      Point(x + v.x, y + v.y, z + v.z)
+    infix def +(v: Vector): SpacePoint =
+      SpacePoint(x + v.x, y + v.y, z + v.z)
 
     override def equals(obj: Any): Boolean =
       obj match
-        case that: Point if (that != null) =>
+        case that: SpacePoint if (that != null) =>
           (this.x ~= that.x) &&
             (this.y ~= that.y) &&
             (this.z ~= that.z)
@@ -59,12 +59,12 @@ trait Space[T: Numeric : Precision]:
           false
 
 
-  object Point:
-    val Zero = Point(_0, _0, _0)
+  object SpacePoint:
+    val Zero = SpacePoint(_0, _0, _0)
 
-    val OneX = Point(__1, _0, _0)
-    val OneY = Point(_0, __1, _0)
-    val OneZ = Point(_0, _0, __1)
+    val OneX = SpacePoint(__1, _0, _0)
+    val OneY = SpacePoint(_0, __1, _0)
+    val OneZ = SpacePoint(_0, _0, __1)
 
 
   sealed trait Vector
@@ -85,8 +85,8 @@ trait Space[T: Numeric : Precision]:
     final lazy val isNormalized: Boolean =
       magnitude == __1
 
-    final def dest(origin: Point = Point.Zero): Point =
-      Point(origin.x + x, origin.y + y, origin.z + z)
+    final def dest(origin: SpacePoint = SpacePoint.Zero): SpacePoint =
+      SpacePoint(origin.x + x, origin.y + y, origin.z + z)
 
     def unary_- : Vector
 
@@ -127,7 +127,7 @@ trait Space[T: Numeric : Precision]:
     override val y: T = _0
     override val z: T = _0
 
-    override inline def unary_- = NullVector
+    override def unary_- = NullVector
 
     override def isCollinear(v: Vector): Boolean =
       true
@@ -170,12 +170,12 @@ trait Space[T: Numeric : Precision]:
   case class NonNullVector(x: T,
                            y: T,
                            z: T)
-    extends Vector :
+    extends Vector:
 
     lazy val normalized: NonNullVector =
       divideBy(magnitude)
 
-    override inline def unary_- =
+    override def unary_- : NonNullVector =
       NonNullVector(-x, -y, -z)
 
     override def isCollinear(v: Vector): Boolean =
@@ -224,11 +224,11 @@ trait Space[T: Numeric : Precision]:
     inline def apply(x: T, y: T, z: T): Vector =
       nonNull(x, y, z).fold(NullVector)(v => v)
 
-    inline def apply(start: Point,
-                     end: Point): Vector =
+    inline def apply(start: SpacePoint,
+                     end: SpacePoint): Vector =
       nonNull(start, end).fold(NullVector)(v => v)
 
-    inline def apply(end: Point): Vector =
+    inline def apply(end: SpacePoint): Vector =
       nonNull(end).fold(NullVector)(v => v)
 
     inline def apply(magnitude: T,
@@ -243,15 +243,15 @@ trait Space[T: Numeric : Precision]:
       else
         Some(NonNullVector(x, y, z))
 
-    def nonNull(start: Point,
-                       end: Point): Option[NonNullVector] =
+    def nonNull(start: SpacePoint,
+                end: SpacePoint): Option[NonNullVector] =
       if start == end then
         None
       else
         Some(NonNullVector(end.x - start.x, end.y - start.y, end.z - start.z))
 
-    def nonNull(end: Point): Option[NonNullVector] =
-      nonNull(Point.Zero, end)
+    def nonNull(end: SpacePoint): Option[NonNullVector] =
+      nonNull(SpacePoint.Zero, end)
 
     def nonNull(v: Vector): Option[NonNullVector] =
       if v.isNull then
@@ -311,7 +311,7 @@ trait Space[T: Numeric : Precision]:
       Basis.normalized(i, j, k)
 
     lazy val isOrthogonal: Boolean =
-      Basis.orthogonal(i, j, k)
+      Basis.isOrthogonal(i, j, k)
 
     override def equals(obj: Any): Boolean =
       obj match
@@ -321,6 +321,16 @@ trait Space[T: Numeric : Precision]:
             (this.k == that.k)
         case _ =>
           false
+
+    override def hashCode(): Int =
+      31 * (
+        31 * (
+          i.##
+        ) + j.##
+      ) + k.##
+
+    override def toString: String =
+      s"Basis($i, $j, $k)"
 
   trait NormalizedBasis extends Basis :
     override lazy val normalized: NormalizedBasis =
@@ -345,9 +355,9 @@ trait Space[T: Numeric : Precision]:
                  k: NonNullVector): Boolean =
       ((i ∧ j) ∧ (i ∧ k)).isNull
 
-    def orthogonal(i: NonNullVector,
-                   j: NonNullVector,
-                   k: NonNullVector): Boolean =
+    def isOrthogonal(i: NonNullVector,
+                     j: NonNullVector,
+                     k: NonNullVector): Boolean =
       (i ⋅ j == _0) && (i ⋅ k == _0) && (k ⋅ j == _0)
 
     def normalized(i: NonNullVector,
@@ -375,7 +385,7 @@ trait Space[T: Numeric : Precision]:
         baseI <- Vector.nonNull(i)
         baseJ <- Vector.nonNull(j)
         baseK <- Vector.nonNull(k)
-        if (!coplanar(baseI, baseJ, baseK)) && orthogonal(baseI, baseJ, baseK)
+        if (!coplanar(baseI, baseJ, baseK)) && isOrthogonal(baseI, baseJ, baseK)
       yield
         new OrthogonalBasis :
           override lazy val i: NonNullVector = baseI
@@ -416,15 +426,27 @@ trait Space[T: Numeric : Precision]:
 
   type Vertices = Iterable[Vertex]
 
-  case class Vertex(s: Point,
-                    t: Point)
+  case class Vertex(s: SpacePoint,
+                    t: SpacePoint)
     extends Transformable[Vertex] :
 
     infix def +(v: Vector): Vertex =
       Vertex(s + v, t + v)
 
-
   object Vertex:
-    def apply(s: Point, v: Vector): Vertex =
+    def apply(s: SpacePoint,
+              v: Vector): Vertex =
       Vertex(s, v.dest(s))
 
+  trait Shape:
+    val vertices: Vertices
+
+    override def toString: String =
+      s"Shape(${vertices.mkString(",")})"
+
+  object Shape:
+    def apply(vertices: Vertices): Shape =
+      SimpleShape(vertices)
+
+  private case class SimpleShape(vertices: Vertices)
+    extends Shape

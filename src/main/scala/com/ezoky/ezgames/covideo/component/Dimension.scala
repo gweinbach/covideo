@@ -42,11 +42,11 @@ object Dimension:
 
   given Precision[_DimensionType] = Precision(1E-12)
 
+  // This means that _DimensionType is the same in 3D libraries
   val Ez3D: Ez3D[_DimensionType] = new Double3D()
   import Ez3D.*
 
   // end of _DimensionType choice's dependencies
-
 
   private val _Zero: _DimensionType = _DimensionNumeric.zero
   private val _One: _DimensionType = _DimensionNumeric.one
@@ -88,6 +88,18 @@ object Dimension:
 
     inline def isNotNull: Boolean =
       !isNull
+
+    @targetName("sizeToInt")
+    def intValue: Int =
+      _DimensionNumeric.toInt(sizeValue)
+
+    @targetName("sizeToLong")
+    def longValue: Long =
+      _DimensionNumeric.toLong(sizeValue)
+
+    @targetName("sizeToDouble")
+    def doubleValue: Double =
+      _DimensionNumeric.toDouble(sizeValue)
 
     def relativePosition[N: Numeric](n: N)
                                     (using geometry: Geometry): PositionValue =
@@ -178,10 +190,15 @@ object Dimension:
 
   extension (position: PositionValue)
 
+    @targetName("positionToInt")
     def intValue: Int =
       _DimensionNumeric.toInt(position)
+
+    @targetName("positionToLong")
     def longValue: Long =
       _DimensionNumeric.toLong(position)
+
+    @targetName("positionToDouble")
     def doubleValue: Double =
       _DimensionNumeric.toDouble(position)
 

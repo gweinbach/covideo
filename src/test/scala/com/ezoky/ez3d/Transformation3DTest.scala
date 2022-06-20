@@ -27,9 +27,9 @@ class Transformation3DTest extends AnyFlatSpec :
     val rotatedBasis = Basis.orthonormal(Axis.Y.base, Axis.Z.base).get
     val rotation = BasisTransformation(rotatedBasis)
 
-    assert((rotation × Point.OneX.homogeneous) === Point.OneZ.homogeneous)
+    assert((rotation × SpacePoint.OneX.homogeneous) === SpacePoint.OneZ.homogeneous)
     assert((rotation × Vector.OneX.homogeneous) === Vector.OneZ.homogeneous)
 
-    assert((rotation.inverse × Point.OneX.homogeneous) === Point.OneY.homogeneous)
+    assert((rotation.inverse × SpacePoint.OneX.homogeneous) === SpacePoint.OneY.homogeneous)
     assert((rotation.inverse × Vector.OneX.homogeneous) === Vector.OneY.homogeneous)
   }

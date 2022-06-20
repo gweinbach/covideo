@@ -21,7 +21,7 @@ class Ez3D[T: Numeric : Trig : Precision]
   extends Model3D[T] with Cameras[T]:
 
   // Vector Transformations
-  case class VectorRotation(angle: T,
+  case class VectorRotation(angle: Radians,
                             axis: Vector) extends Rotation[Vector] :
 
     private val quaternion = Quaternion.fromRotationVector(axis, angle)
@@ -39,30 +39,30 @@ class Ez3D[T: Numeric : Trig : Precision]
 
 
   // Point Transformations
-  case class PointRotation(center: Point,
-                           angle: T,
-                           axis: Vector) extends Rotation[Point] :
+  case class PointRotation(center: SpacePoint,
+                           angle: Radians,
+                           axis: Vector) extends Rotation[SpacePoint] :
 
     private val quaternion = Quaternion.fromRotationVector(axis, angle)
 
-    final override def rotate(v: Point): Option[Point] =
+    final override def rotate(v: SpacePoint): Option[SpacePoint] =
       for
         vr <- quaternion.flatMap(_.rotate(Vector(center, v)))
       yield
         vr.dest(center)
 
   case class PointTranslation(translation: Vector)
-    extends Translation[Point] :
+    extends Translation[SpacePoint] :
 
-    final override def translate(v: Point): Point =
+    final override def translate(v: SpacePoint): SpacePoint =
       v + translation
 
   // end Point Transformations
 
 
   // Vertex Transformations
-  case class VertexRotation(center: Point,
-                            angle: T,
+  case class VertexRotation(center: SpacePoint,
+                            angle: Radians,
                             axis: Vector) extends Rotation[Vertex] :
 
     private val quaternion = Quaternion.fromRotationVector(axis, angle)
@@ -83,6 +83,19 @@ class Ez3D[T: Numeric : Trig : Precision]
 
 // end Vertex Transformations
 
+
+  import Perspective.*
+
+  given Model[Camera] with
+    extension (camera: Camera)
+      override def position: SpacePoint = camera.position
+      override def basis: Basis = camera.basis
+
+  given ProjectionView[Camera] with
+    extension (camera: Camera)
+      override def projectionMatrix: Matrix = camera.viewFrustum.projectionMatrix
+
+ 
 
 class Double3D(using Precision[Double]) extends Ez3D[Double]
 

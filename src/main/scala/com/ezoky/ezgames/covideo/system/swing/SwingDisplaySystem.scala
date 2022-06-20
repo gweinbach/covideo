@@ -2,12 +2,14 @@ package com.ezoky.ezgames.covideo.system.swing
 
 import com.ezoky.ezcategory.IO
 import com.ezoky.ezgames.covideo.component.*
+import com.ezoky.ezgames.covideo.component.Dimension.Ez3D.*
 import com.ezoky.ezgames.covideo.component.Generate.*
 import com.ezoky.ezgames.covideo.component.HealthCondition.*
-import com.ezoky.ezgames.covideo.component.Screen.*
+import com.ezoky.ez3d.Screen.*
 import com.ezoky.ezgames.covideo.component.swing.SwingSprite
 import com.ezoky.ezgames.covideo.entity.*
 import com.ezoky.ezgames.covideo.entity.People.{PersonId, Population}
+import com.ezoky.ezgames.covideo.entity.given
 import com.ezoky.ezgames.covideo.system.DisplaySystem
 
 import java.awt.image.BufferedImage as AWTImage
@@ -123,25 +125,58 @@ private class DrawingPanel()
   private def doDrawing(g: Graphics): Unit =
     val g2d = g.asInstanceOf[Graphics2D]
     for
-      scene <- optScene.toSeq
-      sprite <- scene.sprites.values
+      scene <- optScene
     yield
-      val awtImage = sprite.image.asInstanceOf[AWTImage]
+      val pipeline3D = new Pipeline3D(scene.camera, scene)
+      g2d.setColor(AWTColor.white)
+      for
+        component <- scene.components
+      yield
+        println(component)
+        val componentTransformation = new ComponentTransformation(component) with ModelTransformation(component) {}
+        val worldShape = componentTransformation.shapeToWorld(component.shape)
+        println(worldShape)
+        val viewShape = pipeline3D.shapeToView(worldShape)
+        println(viewShape)
+        val clipShape = pipeline3D.shapeToClip(viewShape)
+        println(clipShape)
 
-      //            for
-      //              previousPosition <- sprite.previousPosition
-      //            yield
-      //              val previousScenePosition = scene.project(previousPosition)
-      //              g2d.clearRect(
-      //                previousScenePosition.x,
-      //                previousScenePosition.y,
-      ////                awtImage.getWidth(this),
-      ////                awtImage.getHeight(this)
-      //                20,20
-      //              )
+//        val clipShape =
+//          shapeToX((pipeline3D.worldToView andThen (o => o.get)) andThen pipeline3D.viewToClip)(worldShape)
+        val windowShape = pipeline3D.shapeToWindow(clipShape)
+        println(windowShape)
 
-      val spritePosition = scene.project(sprite.position)
-      g2d.drawImage(awtImage, spritePosition.x, spritePosition.y, this)
+        val screenShape = pipeline3D.run(component)
+        for
+          vertex <- windowShape.vertices
+        yield
+          println(vertex)
+          g2d.drawLine(
+            vertex.s.x,
+            vertex.s.y,
+            vertex.t.x,
+            vertex.t.y,
+          )
+
+//      for
+//        sprite <- scene.sprites.values
+//      yield
+//        val awtImage = sprite.image.asInstanceOf[AWTImage]
+
+        //            for
+        //              previousPosition <- sprite.previousPosition
+        //            yield
+        //              val previousScenePosition = scene.project(previousPosition)
+        //              g2d.clearRect(
+        //                previousScenePosition.x,
+        //                previousScenePosition.y,
+        ////                awtImage.getWidth(this),
+        ////                awtImage.getHeight(this)
+        //                20,20
+        //              )
+
+//        val spritePosition = scene.project(sprite.position)
+//        g2d.drawImage(awtImage, spritePosition.x, spritePosition.y, this)
 
     g2d.dispose()
 

@@ -20,7 +20,6 @@ trait Cameras[T: Numeric : Trig : Precision]
   extends Space[T]
     with Plane[T]
     with Transformation3D[T]
-    with Model3D[T]
     with Angles[T] :
 
   private val _Numeric = summon[Numeric[T]]
@@ -28,20 +27,21 @@ trait Cameras[T: Numeric : Trig : Precision]
   private val __1 = _Numeric.one // double '_' to avoid conflict with Product<X>._1
   private val __2 = _Numeric.fromInt(2) // double '_' to avoid conflict with Product<X>._1
 
-  sealed trait ProjectionViewFrustum:
+  sealed trait ViewFrustum:
     lazy val near: T
     lazy val far: T
     lazy val projectionMatrix: Matrix
 
-  sealed trait ProjectionCamera:
-    val position: Point
+  sealed trait Camera:
+    val position: SpacePoint
     val look: NonNullVector
     val up: NonNullVector
     val right: NonNullVector
-    val viewFrustum: ProjectionViewFrustum
+    val basis: OrthonormalBasis
+    val viewFrustum: ViewFrustum
 
     final lazy val eye: Vector = Vector(position)
-    final lazy val target: Point = look.dest(position)
+    final lazy val target: SpacePoint = look.dest(position)
 
 //  object Parallel:
 
@@ -63,7 +63,7 @@ trait Cameras[T: Numeric : Trig : Precision]
   object Perspective:
 
     trait PerspectiveViewFrustum
-      extends ProjectionViewFrustum :
+      extends ViewFrustum :
 
       lazy val top: T
       lazy val bottom: T
@@ -107,17 +107,17 @@ trait Cameras[T: Numeric : Trig : Precision]
       final lazy val maxZ: T = -near
       final lazy val middleZ: T =  -(__2 * far * near) / (far + near)
 
-      final lazy val nearBottomLeft = Point(minXn, minYn, maxZ)
-      final lazy val nearTopLeft = Point(minXn, maxYn, maxZ)
-      final lazy val nearBottomRight = Point(maxXn, minYn, maxZ)
-      final lazy val nearTopRight = Point(maxXn, maxYn, maxZ)
+      final lazy val nearBottomLeft = SpacePoint(minXn, minYn, maxZ)
+      final lazy val nearTopLeft = SpacePoint(minXn, maxYn, maxZ)
+      final lazy val nearBottomRight = SpacePoint(maxXn, minYn, maxZ)
+      final lazy val nearTopRight = SpacePoint(maxXn, maxYn, maxZ)
 
-      final lazy val farBottomLeft = Point(minXf, minYf, minZ)
-      final lazy val farTopLeft = Point(minXf, maxYf, minZ)
-      final lazy val farBottomRight = Point(maxXf, minYf, minZ)
-      final lazy val farTopRight = Point(maxXf, maxYf, minZ)
+      final lazy val farBottomLeft = SpacePoint(minXf, minYf, minZ)
+      final lazy val farTopLeft = SpacePoint(minXf, maxYf, minZ)
+      final lazy val farBottomRight = SpacePoint(maxXf, minYf, minZ)
+      final lazy val farTopRight = SpacePoint(maxXf, maxYf, minZ)
 
-      final lazy val center = Point(_0, _0, middleZ)
+      final lazy val center = SpacePoint(_0, _0, middleZ)
 
 
     trait SymetricViewFrustum
@@ -192,20 +192,20 @@ trait Cameras[T: Numeric : Trig : Precision]
 //              assert(projectionMatrix == alternateProjectionMatrix)
           )
 
-    case class LookAtCamera private(position: Point,
+    case class LookAtCamera private(position: SpacePoint,
                                     look: NonNullVector,
                                     up: NonNullVector,
                                     right: NonNullVector,
                                     basis: OrthonormalBasis,
                                     viewFrustum: PerspectiveViewFrustum)
-      extends ProjectionCamera
+      extends Camera
 
 
 
     object LookAtCamera:
 
-      def safe(position: Point,
-               target: Point,
+      def safe(position: SpacePoint,
+               target: SpacePoint,
                upVector: Vector,
                viewFrustum: PerspectiveViewFrustum): Option[LookAtCamera] =
         for
@@ -216,12 +216,3 @@ trait Cameras[T: Numeric : Trig : Precision]
         yield
           LookAtCamera(position, look, up, right, basis.normalized, viewFrustum)
 
-
-    case class LookAtCameraModel(camera: LookAtCamera)
-      extends Model[LookAtCamera]:
-      final override val position: Point = camera.position
-      final override val basis: Basis = camera.basis
-
-    case class LookAtCameraFrustum(camera: LookAtCamera)
-      extends ProjectionView[LookAtCamera]:
-      final override def projectionMatrix: Matrix = camera.viewFrustum.projectionMatrix

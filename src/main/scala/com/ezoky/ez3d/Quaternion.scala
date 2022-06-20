@@ -19,7 +19,7 @@ import scala.annotation.targetName
  * @author gweinbach on 01/06/2022
  */
 trait H[T: Numeric : Precision]
-  extends Space[T] :
+  extends Space[T] with Angles[T]:
 
   private val _Numeric = summon[Numeric[T]]
 
@@ -61,8 +61,8 @@ trait H[T: Numeric : Precision]
     lazy val normalized: Option[Quaternion] = this / magnitude
     lazy val inverse: Option[Quaternion] = conjugate / squareMagnitude
 
-    def rotationAngle(using trig: Trig[T]): T =
-      acos(a) / 2
+    def rotationAngle(using trig: Trig[T]): Radians =
+      acos[Radians](a) / 2
 
     def rotationAxis: Option[NonNullVector] =
       Vector.nonNull(b, c, d).map(_.normalized)
@@ -90,7 +90,7 @@ trait H[T: Numeric : Precision]
       new Quaternion(real, imaginary.x, imaginary.y, imaginary.z)
 
     def fromRotationVector(axis: Vector,
-                           angle: T)
+                           angle: Radians)
                           (using Trig[T]): Option[Quaternion] =
       val sinA = sin(angle / 2)
       val cosA = cos(angle / 2)

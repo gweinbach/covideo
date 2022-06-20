@@ -5,6 +5,8 @@
 package com.ezoky.ezgames.covideo.entity
 
 import com.ezoky.ezgames.covideo.component.*
+import com.ezoky.ezgames.covideo.component.Dimension.*
+import com.ezoky.ezgames.covideo.component.Dimension.Ez3D.*
 
 import java.util.UUID
 
@@ -15,31 +17,48 @@ import java.util.UUID
  */
 object People:
 
+  opaque type PersonId = UUID
+  opaque type Population[T] = Map[PersonId, T]
+
   case class Person(id: PersonId,
-                    mobile: Mobile,
+                    solid: Solid,
                     healthCondition: HealthCondition,
-                    sprite: Sprite)
-    extends Entity[PersonId]:
+                    sprite: Sprite,
+                    shape: Shape)
+    extends Entity[PersonId] :
 
     def move: Person =
-      val movedMobile = mobile.move
-      copy(mobile = movedMobile, sprite = sprite.moveTo(movedMobile.position))
+      val movedSolid = solid.move
+      copy(
+        solid = movedSolid,
+        sprite = sprite.moveTo(solid.mobile.position)
+      )
 
     def accelerate: Person =
-      copy(mobile = mobile.accelerate)
+      copy(solid = solid.accelerate)
 
     def turn(newAcceleration: Acceleration): Person =
-      copy(mobile = mobile.turn(newAcceleration))
+      copy(solid = solid.turn(newAcceleration))
 
-
-  opaque type PersonId = UUID
+  case class PersonConfig(mobileConfig: MobileConfig)
 
   object PersonId:
     def apply(): PersonId =
       UUID.randomUUID()
 
+  extension[A] (population: Population[A])
 
-  opaque type Population[T] = Map[PersonId, T]
+    def values: Iterable[A] =
+      population.values
+
+    def add(kv: (PersonId, A)): Population[A] =
+      population + kv
+
+    def map[B](f: A => B): Population[B] =
+      Population.map(population)(f)
+
+    def foldLeft[B](z: B)(op: (B, (PersonId, A)) => B): B =
+      Population.foldLeft(population)(z)(op)
 
   object Population:
 
@@ -59,23 +78,5 @@ object People:
           (id, b)
       }
 
-    def foldLeft[A,B](population: Population[A])(z: B)(op: (B, (PersonId, A)) => B): B =
+    def foldLeft[A, B](population: Population[A])(z: B)(op: (B, (PersonId, A)) => B): B =
       population.foldLeft(z)(op)
-
-  extension [A](population: Population[A])
-
-    def values: Iterable[A] =
-      population.values
-
-    def add(kv: (PersonId, A)): Population[A] =
-      population + kv
-
-    def map[B](f: A => B): Population[B] =
-      Population.map(population)(f)
-
-    def foldLeft[B](z: B)(op: (B, (PersonId, A)) => B): B =
-      Population.foldLeft(population)(z)(op)
-
-
-
-  case class PersonConfig(mobileConfig: MobileConfig)

@@ -85,7 +85,3 @@ trait Plane[T: Numeric : Precision]:
         case _ =>
           false
 
-
-  case class ViewPort(width: Int,
-                      height: Int)
-

@@ -74,6 +74,8 @@ private trait AngleTypes[T: Trig: Numeric]:
     def toRadians(a: Degrees): Radians = _trig.toRadians(a)
     def toDegrees(a: Degrees): Degrees = a
 
+//  given [U <: Angle]: Conversion[U, T] with
+//    def apply(angle: U): T = angle
 
 trait Angles[T: Trig: Numeric] extends AngleTypes[T]:
 

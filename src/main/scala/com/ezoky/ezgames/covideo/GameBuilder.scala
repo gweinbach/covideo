@@ -3,9 +3,10 @@ package com.ezoky.ezgames.covideo
 
 import com.ezoky.ezgames.covideo.component.*
 import com.ezoky.ezgames.covideo.component.Dimension.*
+import com.ezoky.ezgames.covideo.component.Dimension.Ez3D.*
 import com.ezoky.ezgames.covideo.component.Generate.*
 import com.ezoky.ezgames.covideo.component.HealthCondition.*
-import com.ezoky.ezgames.covideo.component.Screen.*
+import com.ezoky.ez3d.Screen.*
 import com.ezoky.ezgames.covideo.entity.*
 import com.ezoky.ezgames.covideo.entity.People.*
 import com.ezoky.ezgames.covideo.system.DisplaySystem
@@ -79,7 +80,17 @@ private case class SceneBuilder(sceneConfig: SceneConfig)
         name = sceneConfig.name,
         dimension = sceneDimension,
         margins = sceneConfig.margin,
-        zoomRatio = sceneConfig.zoomRatio
+        zoomRatio = sceneConfig.zoomRatio,
+        camera = Perspective.LookAtCamera.safe(
+                    position = SpacePoint(sceneDimension.width / 2.0d, sceneDimension.height/2.0d, -20),
+                    target = SpacePoint(sceneDimension.width / 2.0d, sceneDimension.height/2.0d, 0),
+//                    position = SpacePoint(sceneDimension.width , sceneDimension.height, -20),
+//                    target = SpacePoint(sceneDimension.width , sceneDimension.height, 0),
+//          position = SpacePoint(0, 0, -20),
+//          target = SpacePoint(0, 0, 0),
+          upVector = Vector.OneY,
+          viewFrustum = Perspective.ViewFrustum.fromSymetricPlanes(20, 220, sceneDimension.height/2, sceneDimension.width/2).get
+        ).get
       )
     )
 
@@ -103,6 +114,20 @@ case class MobileBuilder(area: Box,
         mobileConfig.accelerationRange
       )
 
+case class SolidBuilder(area: Box,
+                        mobileConfig: MobileConfig)
+  extends Builder[Solid] :
+
+  override def build: Generated[Solid] =
+    for
+      mobile <- MobileBuilder(area, mobileConfig).build
+    yield
+      Solid(
+        mobile,
+        Basis.Normal
+      )
+
+
 case class PersonBuilder(area: Box,
                          personConfig: PersonConfig)
                         (using DisplaySystem)
@@ -110,13 +135,20 @@ case class PersonBuilder(area: Box,
 
   override def build: Generated[Person] =
     for
-      mobile <- MobileBuilder(area, personConfig.mobileConfig).build
+      solid <- SolidBuilder(area, personConfig.mobileConfig).build
     yield
       Person(
         id = PersonId(),
-        mobile,
+        solid,
         Healthy,
-        summon[DisplaySystem].spriteByHealthCondition(Healthy)
+        summon[DisplaySystem].spriteByHealthCondition(Healthy),
+        Parallelepiped(
+          Box(
+            Width(10 size)(using Geometry.Bounded),
+            Height(10 size)(using Geometry.Bounded),
+            Depth(10 size)(using Geometry.Bounded),
+          )
+        )
       )
 
 

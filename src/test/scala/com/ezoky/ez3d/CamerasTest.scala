@@ -61,15 +61,15 @@ class CamerasTest extends AnyFlatSpec :
     //        println(s"$point\t->${proj}\t->${proj.cartesian.fold(None)(p => p)}")
     //    }
 
-    assert((projection × perspectiveViewFrustum.nearBottomLeft.homogeneous).cartesian === Some(Point(-1,-1,-1)))
-    assert((projection × perspectiveViewFrustum.nearTopLeft.homogeneous).cartesian === Some(Point(-1,1,-1)))
-    assert((projection × perspectiveViewFrustum.nearBottomRight.homogeneous).cartesian === Some(Point(1,-1,-1)))
-    assert((projection × perspectiveViewFrustum.nearTopRight.homogeneous).cartesian === Some(Point(1,1,-1)))
+    assert((projection × perspectiveViewFrustum.nearBottomLeft.homogeneous).cartesian === Some(SpacePoint(-1,-1,-1)))
+    assert((projection × perspectiveViewFrustum.nearTopLeft.homogeneous).cartesian === Some(SpacePoint(-1,1,-1)))
+    assert((projection × perspectiveViewFrustum.nearBottomRight.homogeneous).cartesian === Some(SpacePoint(1,-1,-1)))
+    assert((projection × perspectiveViewFrustum.nearTopRight.homogeneous).cartesian === Some(SpacePoint(1,1,-1)))
 
-    assert((projection × perspectiveViewFrustum.farBottomLeft.homogeneous).cartesian === Some(Point(-1,-1,1)))
-    assert((projection × perspectiveViewFrustum.farTopLeft.homogeneous).cartesian === Some(Point(-1,1,1)))
-    assert((projection × perspectiveViewFrustum.farBottomRight.homogeneous).cartesian === Some(Point(1,-1,1)))
-    assert((projection × perspectiveViewFrustum.farTopRight.homogeneous).cartesian === Some(Point(1,1,1)))
+    assert((projection × perspectiveViewFrustum.farBottomLeft.homogeneous).cartesian === Some(SpacePoint(-1,-1,1)))
+    assert((projection × perspectiveViewFrustum.farTopLeft.homogeneous).cartesian === Some(SpacePoint(-1,1,1)))
+    assert((projection × perspectiveViewFrustum.farBottomRight.homogeneous).cartesian === Some(SpacePoint(1,-1,1)))
+    assert((projection × perspectiveViewFrustum.farTopRight.homogeneous).cartesian === Some(SpacePoint(1,1,1)))
 
-    assert((projection × perspectiveViewFrustum.center.homogeneous).cartesian === Some(Point(0, 0, 0)))
+    assert((projection × perspectiveViewFrustum.center.homogeneous).cartesian === Some(SpacePoint(0, 0, 0)))
   }

@@ -14,11 +14,6 @@ import com.ezoky.ezgames.covideo.component.Dimension.Ez3D.*
  * @since 0.2.0
  * @author gweinbach on 31/05/2022
  */
-trait Shape
-  extends Transformable[Shape] :
-  val vertices: Vertices
-
-
 class ShapeRotation(using Rotation[Vertex])
   extends Rotation[Shape] :
 
@@ -38,11 +33,6 @@ class ShapeTranslation(using Translation[Vertex])
     Shape(v.vertices.map(_.translate))
 
 
-object Shape:
-  def apply(shapeVertices: Vertices): Shape =
-    new Shape :
-      override val vertices = shapeVertices
-
 case class Parallelepiped(box: Box)
   extends Shape :
   override val vertices: Vertices =
@@ -51,13 +41,13 @@ case class Parallelepiped(box: Box)
     val depthVector = box.depth.vector
     val diagonal = VertexTranslation(widthVector + heightVector + depthVector)
     scala.Vector(
-      Vertex(Point.Zero, widthVector), Vertex(Point.Zero, heightVector), Vertex(Point.Zero, depthVector),
+      Vertex(SpacePoint.Zero, widthVector), Vertex(SpacePoint.Zero, heightVector), Vertex(SpacePoint.Zero, depthVector),
       Vertex(widthVector.dest(), heightVector), Vertex(widthVector.dest(), depthVector),
       Vertex(heightVector.dest(), widthVector), Vertex(heightVector.dest(), depthVector),
       Vertex(depthVector.dest(), widthVector), Vertex(depthVector.dest(), heightVector),
-      Vertex(Point.Zero, -widthVector).translate(using diagonal),
-      Vertex(Point.Zero, -heightVector).translate(using diagonal),
-      Vertex(Point.Zero, -depthVector).translate(using diagonal)
+      Vertex(SpacePoint.Zero, -widthVector).translate(using diagonal),
+      Vertex(SpacePoint.Zero, -heightVector).translate(using diagonal),
+      Vertex(SpacePoint.Zero, -depthVector).translate(using diagonal)
     )
 
 

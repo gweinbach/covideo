@@ -184,6 +184,6 @@ class DimensionTest {
   }
 
   @Test def rotateTest: Unit =
-    val oneQuarter = VectorRotation((math.Pi/2), Vector.OneZ)
-    assertEquals(Vector.OneX.rotate(using oneQuarter), Some(Vector.OneY))
+    val oneQuarter = VectorRotation(90.0 degrees, Vector.OneZ)
+    assertEquals(Some(Vector.OneY), Vector.OneX.rotate(using oneQuarter))
 }

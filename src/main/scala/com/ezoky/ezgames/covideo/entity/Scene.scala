@@ -1,10 +1,11 @@
 package com.ezoky.ezgames.covideo.entity
 
+import com.ezoky.ez3d.Screen.*
 import com.ezoky.ezcategory.IO
 import com.ezoky.ezgames.covideo.component.*
 import com.ezoky.ezgames.covideo.component.Dimension.*
-import com.ezoky.ezgames.covideo.component.Screen.*
-import com.ezoky.ezgames.covideo.entity.People.{PersonId, Population}
+import com.ezoky.ezgames.covideo.component.Dimension.Ez3D.*
+import com.ezoky.ezgames.covideo.entity.People.{PersonId, Population, given}
 
 import spire.*
 import spire.implicits.*
@@ -21,6 +22,8 @@ case class Scene(id: SceneId = SceneId(),
                  dimension: ScreenDimension = ScreenDimension.Empty,
                  margins: Margin = Margin(),
                  sprites: Population[Sprite] = Population.empty,
+                 components: Population[Component3D] = Population.empty,
+                 camera: Camera,
                  zoomRatio: ZoomRatio)
   extends Entity[SceneId] :
 
@@ -57,6 +60,16 @@ case class Scene(id: SceneId = SceneId(),
         scene.withSprite(id, sprite)
     }
 
+  def withComponent(id: PersonId,
+                    component: Component3D): Scene =
+    copy(components = components.add(id -> component))
+
+  def withComponents(components: Population[Component3D]): Scene =
+    components.foldLeft(this) {
+      case (scene, (id: PersonId, component)) =>
+        scene.withComponent(id, component)
+    }
+
   def withMargins(margins: Margin): Scene =
     copy(margins = margins)
 
@@ -78,3 +91,22 @@ case class SceneConfig(name: String,
                        sceneSize: SceneSize = DefaultScreenSize,
                        margin: Margin = Margin(),
                        zoomRatio: ZoomRatio)
+
+given WindowView[Scene] with
+  extension (scene: Scene)
+    def windowOrigin: PlanePoint = PlanePoint(-1, -1)
+    def flipX: Boolean = true
+    def flipY: Boolean = false
+    def screenDimension: ScreenDimension = scene.dimension
+
+
+case class Component3D(position: SpacePoint,
+                       basis: Basis,
+                       shape: Shape)
+
+given ComponentModel[Component3D] with
+  extension (component: Component3D)
+    override def position = component.position
+    override def basis = component.basis
+    override def shape: Shape = component.shape
+
