@@ -27,9 +27,27 @@ class Transformation3DTest extends AnyFlatSpec :
     val rotatedBasis = Basis.orthonormal(Axis.Y.base, Axis.Z.base).get
     val rotation = BasisTransformation(rotatedBasis)
 
-    assert((rotation × SpacePoint.OneX.homogeneous) === SpacePoint.OneZ.homogeneous)
-    assert((rotation × Vector.OneX.homogeneous) === Vector.OneZ.homogeneous)
+    assert(rotation × SpacePoint.OneX.homogeneous === SpacePoint.OneZ.homogeneous)
+    assert(rotation × Vector.OneX.homogeneous === Vector.OneZ.homogeneous)
 
-    assert((rotation.inverse × SpacePoint.OneX.homogeneous) === SpacePoint.OneY.homogeneous)
-    assert((rotation.inverse × Vector.OneX.homogeneous) === Vector.OneY.homogeneous)
+    assert(rotation.inverse × SpacePoint.OneX.homogeneous === SpacePoint.OneY.homogeneous)
+    assert(rotation.inverse × Vector.OneX.homogeneous === Vector.OneY.homogeneous)
+  }
+
+  "Point" can "be translated" in {
+
+    val translation = AffineTranslation(Vector.OneZ + Vector.OneY)
+
+    assert(translation × SpacePoint.OneX.homogeneous === SpacePoint(1, 1, 1).homogeneous)
+    assert(translation.inverse × SpacePoint.OneX.homogeneous === SpacePoint(1, -1, -1).homogeneous)
+  }
+
+  "Point" can "be translated and rotated or the opposite" in {
+
+    val rotatedBasis = Basis.orthonormal(Axis.Y.base, Axis.Z.base).get
+    val rotation = BasisTransformation(rotatedBasis)
+    val translation = AffineTranslation(Vector.OneZ + Vector.OneY)
+
+    assert((translation ×: rotation) × SpacePoint.OneX.homogeneous === SpacePoint(1, 1, 1).homogeneous)
+    assert((rotation ×: translation) × SpacePoint.OneX.homogeneous === SpacePoint(0, 1, 2).homogeneous)
   }

@@ -32,7 +32,7 @@ trait Model3D[T: Numeric : Precision]
   /**
    * For test purposes
    */
-  final def shapeToX(pointToPoint: SpacePoint => Option[SpacePoint]): Shape => Shape =
+  private def shapeToX(pointToPoint: SpacePoint => Option[SpacePoint]): Shape => Shape =
     shape =>
       Shape(
         shape.vertices.flatMap(vertex =>
@@ -48,9 +48,9 @@ trait Model3D[T: Numeric : Precision]
     private val _translation = AffineTranslation(Vector(modeled.position))
     private val _orientation = BasisTransformation(modeled.basis)
 
-    // They are lazy because only one minght be useful depending on the usage of the view (for camera or for component)
-//    final lazy val modelMatrix: Matrix = _translation ×: _orientation
-//    final lazy val viewMatrix: Matrix = _orientation.inverse ×: _translation.inverse
+    // They are lazy because only one might be useful depending on the usage of the view (for camera or for component)
+//    final lazy val modelMatrix: Matrix = _translation.inverse ×: _orientation.inverse
+//    final lazy val viewMatrix: Matrix = _orientation ×: _translation
     final lazy val modelMatrix: Matrix = _translation ×: _orientation
     final lazy val viewMatrix: Matrix = _orientation.inverse ×: _translation.inverse
 

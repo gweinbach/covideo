@@ -161,18 +161,18 @@ trait Transformation3D[T: Numeric : Trig : Precision]
       )
 
     def ×(v: HVector3D): HVector3D =
-          HVector3D(
-            x00 * v.x + x01 * v.y + x02 * v.z + x03 * v.w,
-            x10 * v.x + x11 * v.y + x12 * v.z + x13 * v.w,
-            x20 * v.x + x21 * v.y + x22 * v.z + x23 * v.w,
-            x30 * v.x + x31 * v.y + x32 * v.z + x33 * v.w
-          )
-//          HVector3D(
-//            x00 * v.x + x10 * v.y + x20 * v.z + x30 * v.w,
-//            x01 * v.x + x11 * v.y + x21 * v.z + x31 * v.w,
-//            x02 * v.x + x12 * v.y + x22 * v.z + x32 * v.w,
-//            x03 * v.x + x13 * v.y + x23 * v.z + x33 * v.w
-//          )
+      HVector3D(
+        x00 * v.x + x01 * v.y + x02 * v.z + x03 * v.w,
+        x10 * v.x + x11 * v.y + x12 * v.z + x13 * v.w,
+        x20 * v.x + x21 * v.y + x22 * v.z + x23 * v.w,
+        x30 * v.x + x31 * v.y + x32 * v.z + x33 * v.w
+      )
+//      HVector3D(
+//        x00 * v.x + x10 * v.y + x20 * v.z + x30 * v.w,
+//        x01 * v.x + x11 * v.y + x21 * v.z + x31 * v.w,
+//        x02 * v.x + x12 * v.y + x22 * v.z + x32 * v.w,
+//        x03 * v.x + x13 * v.y + x23 * v.z + x33 * v.w
+//      )
 
 
     lazy val transpose: Matrix =
