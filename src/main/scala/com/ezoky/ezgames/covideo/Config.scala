@@ -13,7 +13,7 @@ object Config:
   val AreaHeight = 600
   val AreaDepth = 200
   
-  val NearDistance = 800
+  val NearDistance = 200
 
   val Area =
     AreaConfig(

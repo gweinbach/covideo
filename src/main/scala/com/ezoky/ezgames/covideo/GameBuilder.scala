@@ -102,8 +102,8 @@ case class CameraBuilder(cameraConfig: CameraConfig)
             rightDistance = cameraConfig.right
           )
           camera <- Perspective.LookAtCamera.safe(
-            position = cameraConfig.position.withZ(0),
-            target = cameraConfig.position.withZ(-cameraConfig.near), // always looking towards center of near plan
+            position = cameraConfig.position.withZ(cameraConfig.near),
+            target = cameraConfig.position.withZ(0), // always looking towards center of near plan
             upVector = SpaceVector.OneY,
             viewFrustum = viewFrustum
           )
