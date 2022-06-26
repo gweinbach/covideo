@@ -8,7 +8,7 @@ import com.ezoky.ezgames.covideo.component.Dimension.*
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Prop.{delay, propBoolean}
 import org.scalacheck.{Arbitrary, Gen, Prop, Properties}
-import Ordering.Implicits.*
+//import Ordering.Implicits.*
 
 import spire.*
 import spire.math.*

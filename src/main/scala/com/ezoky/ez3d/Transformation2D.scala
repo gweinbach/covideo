@@ -203,21 +203,21 @@ trait Transformation2D[T: Numeric : Trig : Precision]
     final override val x21: T = _0
     final override val x22: T = __1
 
-  case class Homothety2D(ratio: T)
-    extends AffineTransformation2D :
-    override val x00 = ratio
-    override val x01 = _0
-    override val x02 = _0
-
-    override val x10 = _0
-    override val x11 = ratio
-    override val x12 = _0
-
-    def inverse: Option[Homothety2D] =
-      if ratio == _0 then
-        None
-      else
-        Some(Homothety2D(_1 / ratio))
+//  case class Homothety2D(ratio: T)
+//    extends AffineTransformation2D :
+//    override val x00 = ratio
+//    override val x01 = _0
+//    override val x02 = _0
+//
+//    override val x10 = _0
+//    override val x11 = ratio
+//    override val x12 = _0
+//
+//    def inverse: Option[Homothety2D] =
+//      if ratio == _0 then
+//        None
+//      else
+//        Some(Homothety2D(_1 / ratio))
 
   case class Scaling2D(ratio: PlaneVector)
     extends AffineTransformation2D :
@@ -237,7 +237,7 @@ trait Transformation2D[T: Numeric : Trig : Precision]
       Scaling2D(PlaneVector.fill(ratio))
 
 
-  case class AffineTranslation2D(vector: PlaneVector)
+  case class Translation2D(vector: PlaneVector)
     extends AffineTransformation2D :
     override val x00 = __1
     override val x01 = _0
@@ -247,8 +247,8 @@ trait Transformation2D[T: Numeric : Trig : Precision]
     override val x11 = __1
     override val x12 = vector.y
 
-    def inverse: AffineTranslation2D =
-      AffineTranslation2D(-vector)
+    def inverse: Translation2D =
+      Translation2D(-vector)
 
 
 

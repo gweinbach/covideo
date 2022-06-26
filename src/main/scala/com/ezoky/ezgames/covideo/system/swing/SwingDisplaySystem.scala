@@ -132,25 +132,26 @@ private class DrawingPanel()
       for
         component <- scene.components
       yield
-        println(component)
+        println(s"component=$component")
         val componentTransformation = new ComponentTransformation(component) with ModelTransformation(component) {}
         val worldShape = componentTransformation.shapeToWorld(component.shape)
-        println(worldShape)
+        println(s"worldShape=$worldShape")
         val viewShape = pipeline3D.shapeToView(worldShape)
-        println(viewShape)
+        println(s"viewShape=$viewShape")
         val clipShape = pipeline3D.shapeToClip(viewShape)
-        println(clipShape)
+        println(s"clipShape=$clipShape")
 
 //        val clipShape =
 //          shapeToX((pipeline3D.worldToView andThen (o => o.get)) andThen pipeline3D.viewToClip)(worldShape)
         val windowShape = pipeline3D.shapeToWindow(clipShape)
-        println(windowShape)
+        println(s"windowShape=$windowShape")
 
         val screenShape = pipeline3D.run(component)
         for
-          vertex <- windowShape.vertices
+          vertex <- screenShape.vertices
+//          vertex <- windowShape.vertices
         yield
-          println(vertex)
+          println(s"vertex=$vertex")
           g2d.drawLine(
             vertex.s.x,
             vertex.s.y,

@@ -23,31 +23,64 @@ class Transformation3DTest extends AnyFlatSpec :
 
   import transformationMatrix.*
 
+  "Points" can "be translated" in {
+    val translation0 = Translation3D(SpaceVector.OneX)
+    val translation1 = Translation3D(SpaceVector.OneZ + SpaceVector.OneY)
+
+    assert(translation0 × SpacePoint.OneX.homogeneous === SpacePoint(2,0,0).homogeneous)
+    assert(translation0.inverse × SpacePoint(2,0,0).homogeneous === SpacePoint.OneX.homogeneous)
+
+    assert(translation1 × SpacePoint.OneX.homogeneous === SpacePoint(1,1,1).homogeneous)
+    assert(translation1.inverse × SpacePoint(1,1,1).homogeneous === SpacePoint.OneX.homogeneous)
+    assert(translation1.inverse × SpacePoint.OneX.homogeneous === SpacePoint(1, -1, -1).homogeneous)
+  }
+
   "Normal Basis" can "be rotated" in {
     val rotatedBasis = Basis.orthonormal(Axis.Y.base, Axis.Z.base).get
     val rotation = BasisTransformation(rotatedBasis)
 
-    assert(rotation × SpacePoint.OneX.homogeneous === SpacePoint.OneZ.homogeneous)
-    assert(rotation × Vector.OneX.homogeneous === Vector.OneZ.homogeneous)
+    assert(rotation × SpacePoint.OneX.homogeneous === SpacePoint.OneY.homogeneous)
+    assert(rotation × SpaceVector.OneX.homogeneous === SpaceVector.OneY.homogeneous)
 
-    assert(rotation.inverse × SpacePoint.OneX.homogeneous === SpacePoint.OneY.homogeneous)
-    assert(rotation.inverse × Vector.OneX.homogeneous === Vector.OneY.homogeneous)
-  }
-
-  "Point" can "be translated" in {
-
-    val translation = AffineTranslation(Vector.OneZ + Vector.OneY)
-
-    assert(translation × SpacePoint.OneX.homogeneous === SpacePoint(1, 1, 1).homogeneous)
-    assert(translation.inverse × SpacePoint.OneX.homogeneous === SpacePoint(1, -1, -1).homogeneous)
+    assert(rotation.inverse × SpacePoint.OneX.homogeneous === SpacePoint.OneZ.homogeneous)
+    assert(rotation.inverse × SpaceVector.OneX.homogeneous === SpaceVector.OneZ.homogeneous)
   }
 
   "Point" can "be translated and rotated or the opposite" in {
 
     val rotatedBasis = Basis.orthonormal(Axis.Y.base, Axis.Z.base).get
     val rotation = BasisTransformation(rotatedBasis)
-    val translation = AffineTranslation(Vector.OneZ + Vector.OneY)
+    val translation = Translation3D(SpaceVector.OneZ + SpaceVector.OneY)
 
+    assert((rotation ×: translation) × SpacePoint.OneX.homogeneous === SpacePoint(0, 2, 1).homogeneous)
+    assert((translation.inverse ×: rotation.inverse) × SpacePoint(0, 2, 1).homogeneous === SpacePoint.OneX.homogeneous)
+  }
+
+  "Point rotation and translation combination" should "not be commutative" in {
+
+    val rotatedBasis = Basis.orthonormal(Axis.Y.base, Axis.Z.base).get
+
+    val rotation = BasisTransformation(rotatedBasis)
+    val translation = Translation3D(SpaceVector.OneZ + SpaceVector.OneY)
+
+    assert((rotation ×: translation) × SpacePoint.OneX.homogeneous === SpacePoint(0, 2, 1).homogeneous)
     assert((translation ×: rotation) × SpacePoint.OneX.homogeneous === SpacePoint(1, 1, 1).homogeneous)
-    assert((rotation ×: translation) × SpacePoint.OneX.homogeneous === SpacePoint(0, 1, 2).homogeneous)
+  }
+
+  "A Coordinate System Transformation" should "be equivalent to the combination of a translation and a rotation" in {
+
+    val rotatedBasis = Basis.orthonormal(Axis.Y.base, Axis.Z.base).get
+
+    val coordinateSystemTransformation = CoordinateSystemTransformation(SpacePoint(0, 1, 1), rotatedBasis)
+
+    val rotation = BasisTransformation(rotatedBasis)
+    val translation = Translation3D(SpaceVector.OneZ + SpaceVector.OneY)
+
+    assert(coordinateSystemTransformation × SpacePoint.OneX.homogeneous === (rotation ×: translation) × SpacePoint.OneX.homogeneous)
+    assert(coordinateSystemTransformation.inverse × SpacePoint.OneX.homogeneous === (rotation.inverse ×: translation.inverse) × SpacePoint.OneX.homogeneous)
+
+    assert((rotation ×: translation) × SpacePoint.OneX.homogeneous === SpacePoint(0, 2, 1).homogeneous)
+    assert((translation.inverse ×: rotation.inverse) × SpacePoint(0, 2, 1).homogeneous === SpacePoint.OneX.homogeneous)
+
+
   }

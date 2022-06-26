@@ -24,3 +24,15 @@ class PrecisionTest extends AnyFlatSpec:
     assert(0.0 ~= 0.00001)
     assert(!(0.0 ~= 0.0001))
   }
+
+  "Epsilon" should "be something very small but not null" in {
+
+    assert(1f + ε[Float] != 1f)
+    assert(1d + ε[Double] != 1d)
+
+    given Precision[Float] = Precision(10f * ε[Float])
+    given Precision[Double] = Precision(10d * ε[Double])
+
+    assert(1f + ε[Float] ~= 1f)
+    assert(1d + ε[Double] ~= 1d)
+  }

@@ -6,7 +6,6 @@ import com.ezoky.ezgames.covideo.component.*
 import com.ezoky.ezgames.covideo.component.Dimension.*
 import com.ezoky.ezgames.covideo.component.Dimension.Ez3D.*
 import com.ezoky.ezgames.covideo.entity.People.{PersonId, Population, given}
-
 import spire.*
 import spire.implicits.*
 import spire.math.*
@@ -90,12 +89,19 @@ type SceneSize = DefaultScreenSize.type | ScreenDimension
 case class SceneConfig(name: String,
                        sceneSize: SceneSize = DefaultScreenSize,
                        margin: Margin = Margin(),
-                       zoomRatio: ZoomRatio)
+                       zoomRatio: ZoomRatio,
+                       camera: CameraConfig)
+
+case class CameraConfig(position: PlanePoint,
+                        near: DimensionBase,
+                        far: DimensionBase,
+                        top: DimensionBase,
+                        right: DimensionBase)
 
 given WindowView[Scene] with
   extension (scene: Scene)
-    def windowOrigin: PlanePoint = PlanePoint(-1, -1)
-    def flipX: Boolean = true
+    def windowOrigin: PlanePoint = PlanePoint(-1, -1) // TopLeft = PlanePoint(-1, 1)
+    def flipX: Boolean = false
     def flipY: Boolean = false
     def screenDimension: ScreenDimension = scene.dimension
 

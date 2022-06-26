@@ -25,28 +25,27 @@ trait Space[T: Numeric : Precision]:
   private val _0: T = _SpatialNumeric.zero
   private val __1: T = _SpatialNumeric.one // double '_' to avoid conflict with Product<X>._1
 
-  type Object3D = SpacePoint|Vector
+  type Object3D = SpacePoint|SpaceVector
 
   sealed trait Axis:
-    def base: NonNullVector
+    def base: NonNullSpaceVector
 
   object Axis:
 
     case object X extends Axis :
-      override def base: NonNullVector = Vector.OneX
+      override def base: NonNullSpaceVector = SpaceVector.OneX
 
     case object Y extends Axis :
-      override def base: NonNullVector = Vector.OneY
+      override def base: NonNullSpaceVector = SpaceVector.OneY
 
     case object Z extends Axis :
-      override def base: NonNullVector = Vector.OneZ
+      override def base: NonNullSpaceVector = SpaceVector.OneZ
 
   case class SpacePoint(x: T,
                         y: T,
-                        z: T)
-    extends Transformable[SpacePoint] :
+                        z: T):
 
-    infix def +(v: Vector): SpacePoint =
+    infix def +(v: SpaceVector): SpacePoint =
       SpacePoint(x + v.x, y + v.y, z + v.z)
 
     override def equals(obj: Any): Boolean =
@@ -60,15 +59,14 @@ trait Space[T: Numeric : Precision]:
 
 
   object SpacePoint:
-    val Zero = SpacePoint(_0, _0, _0)
+    val Origin = SpacePoint(_0, _0, _0)
 
     val OneX = SpacePoint(__1, _0, _0)
     val OneY = SpacePoint(_0, __1, _0)
     val OneZ = SpacePoint(_0, _0, __1)
 
 
-  sealed trait Vector
-    extends Transformable[Vector] :
+  sealed trait SpaceVector:
     val x: T
     val y: T
     val z: T
@@ -77,7 +75,7 @@ trait Space[T: Numeric : Precision]:
       (x, y, z)
 
     final lazy val isNull: Boolean =
-      Vector.isNullTuple(x, y, z)
+      SpaceVector.isNullTuple(x, y, z)
 
     final lazy val magnitude: T =
       _SpatialNumeric.sqrt(this ⋅ this)
@@ -85,35 +83,35 @@ trait Space[T: Numeric : Precision]:
     final lazy val isNormalized: Boolean =
       magnitude == __1
 
-    final def dest(origin: SpacePoint = SpacePoint.Zero): SpacePoint =
+    final def dest(origin: SpacePoint = SpacePoint.Origin): SpacePoint =
       SpacePoint(origin.x + x, origin.y + y, origin.z + z)
 
-    def unary_- : Vector
+    def unary_- : SpaceVector
 
-    def isCollinear(v: Vector): Boolean
+    def isCollinear(v: SpaceVector): Boolean
 
-    lazy val inverse: Option[Vector]
+    lazy val inverse: Option[SpaceVector]
 
-    infix def +(v: Vector): Vector =
-      Vector(x + v.x, y + v.y, z + v.z)
+    infix def +(v: SpaceVector): SpaceVector =
+      SpaceVector(x + v.x, y + v.y, z + v.z)
 
-    infix def -(v: Vector): Vector =
-      Vector(x - v.x, y - v.y, z - v.z)
+    infix def -(v: SpaceVector): SpaceVector =
+      SpaceVector(x - v.x, y - v.y, z - v.z)
 
-    infix def *(n: T): Vector
+    infix def *(n: T): SpaceVector
 
-    protected def divideBy(n: T): Vector
+    protected def divideBy(n: T): SpaceVector
 
-    infix def /(n: T): Option[Vector]
+    infix def /(n: T): Option[SpaceVector]
 
-    infix def ⋅(v: Vector): T =
+    infix def ⋅(v: SpaceVector): T =
       x * v.x + y * v.y + z * v.z
 
-    infix def ∧(v: Vector): Vector
+    infix def ∧(v: SpaceVector): SpaceVector
 
     override def equals(obj: Any): Boolean =
       obj match
-        case that: Vector if (that != null) =>
+        case that: SpaceVector if (that != null) =>
           (this.x ~= that.x) &&
             (this.y ~= that.y) &&
             (this.z ~= that.z)
@@ -121,90 +119,90 @@ trait Space[T: Numeric : Precision]:
           false
 
 
-  case object NullVector
-    extends Vector :
+  case object NullSpaceVector
+    extends SpaceVector :
     override val x: T = _0
     override val y: T = _0
     override val z: T = _0
 
-    override def unary_- = NullVector
+    override def unary_- = NullSpaceVector
 
-    override def isCollinear(v: Vector): Boolean =
+    override def isCollinear(v: SpaceVector): Boolean =
       true
 
     override lazy val inverse: None.type =
       None
 
-    override def +(v: Vector): Vector =
+    override def +(v: SpaceVector): SpaceVector =
       v match
-        case NullVector =>
-          NullVector
+        case NullSpaceVector =>
+          NullSpaceVector
         case _ =>
           v
 
-    override def -(v: Vector): Vector =
+    override def -(v: SpaceVector): SpaceVector =
       v match
-        case NullVector =>
-          NullVector
+        case NullSpaceVector =>
+          NullSpaceVector
         case _ =>
           -v
 
-    override def *(n: T): NullVector.type =
-      NullVector
+    override def *(n: T): NullSpaceVector.type =
+      NullSpaceVector
 
-    override protected def divideBy(n: T): NullVector.type =
-      NullVector
+    override protected def divideBy(n: T): NullSpaceVector.type =
+      NullSpaceVector
 
-    override def /(n: T): Option[NullVector.type] =
+    override def /(n: T): Option[NullSpaceVector.type] =
       if n == _0 then
         None
       else
-        Some(NullVector)
+        Some(NullSpaceVector)
 
-    override infix def ⋅(v: Vector): T =
+    override infix def ⋅(v: SpaceVector): T =
       _0
 
-    override infix def ∧(v: Vector): NullVector.type =
-      NullVector
+    override infix def ∧(v: SpaceVector): NullSpaceVector.type =
+      NullSpaceVector
 
-  case class NonNullVector(x: T,
-                           y: T,
-                           z: T)
-    extends Vector:
+  case class NonNullSpaceVector(x: T,
+                                y: T,
+                                z: T)
+    extends SpaceVector:
 
-    lazy val normalized: NonNullVector =
+    lazy val normalized: NonNullSpaceVector =
       divideBy(magnitude)
 
-    override def unary_- : NonNullVector =
-      NonNullVector(-x, -y, -z)
+    override def unary_- : NonNullSpaceVector =
+      NonNullSpaceVector(-x, -y, -z)
 
-    override def isCollinear(v: Vector): Boolean =
+    override def isCollinear(v: SpaceVector): Boolean =
       (this ∧ v).isNull
 
-    override lazy val inverse: Option[NonNullVector] =
+    override lazy val inverse: Option[NonNullSpaceVector] =
       if (x ~= _0) || (y ~= _0) || (z ~= _0) then
         None
       else
-        Some(NonNullVector(__1 / x, __1 / y, __1 / z))
+        Some(NonNullSpaceVector(__1 / x, __1 / y, __1 / z))
 
-    override def *(n: T): Vector =
+    override def *(n: T): SpaceVector =
       if n == _0 then
-        NullVector
+        NullSpaceVector
       else
-        NonNullVector(
+        NonNullSpaceVector(
           x * n,
           y * n,
           z * n
         )
 
-    override protected def divideBy(n: T): NonNullVector =
-      NonNullVector(
+    override protected def divideBy(n: T): NonNullSpaceVector =
+      NonNullSpaceVector(
         x / n,
         y / n,
         z / n
       )
 
-    override final def /(n: T): Option[NonNullVector] =
+    override final def /(n: T): Option[NonNullSpaceVector] =
       if n == _0 then
         None
       else
@@ -212,83 +210,87 @@ trait Space[T: Numeric : Precision]:
           divideBy(n)
         )
 
-    override final infix def ∧(v: Vector): Vector =
-      Vector.nonNullCrossProduct(this, v).fold(NullVector)(v => v)
+    override final infix def ∧(v: SpaceVector): SpaceVector =
+      SpaceVector.nonNullCrossProduct(this, v).fold(NullSpaceVector)(v => v)
 
+  object NonNullSpaceVector:
+    val OneX = NonNullSpaceVector(__1, _0, _0)
+    val OneY = NonNullSpaceVector(_0, __1, _0)
+    val OneZ = NonNullSpaceVector(_0, _0, __1)
 
-  object Vector:
+  object SpaceVector:
 
     def isNullTuple(x: T, y: T, z: T): Boolean =
       (x ~= _0) && (y ~= _0) && (z ~= _0)
 
-    inline def apply(x: T, y: T, z: T): Vector =
-      nonNull(x, y, z).fold(NullVector)(v => v)
+    inline def apply(x: T, y: T, z: T): SpaceVector =
+      nonNull(x, y, z).fold(NullSpaceVector)(v => v)
 
     inline def apply(start: SpacePoint,
-                     end: SpacePoint): Vector =
-      nonNull(start, end).fold(NullVector)(v => v)
+                     end: SpacePoint): SpaceVector =
+      nonNull(start, end).fold(NullSpaceVector)(v => v)
 
-    inline def apply(end: SpacePoint): Vector =
-      nonNull(end).fold(NullVector)(v => v)
+    inline def apply(end: SpacePoint): SpaceVector =
+      nonNull(end).fold(NullSpaceVector)(v => v)
 
     inline def apply(magnitude: T,
-                     axis: Axis): Vector =
-      nonNull(magnitude, axis).fold(NullVector)(v => v)
+                     axis: Axis): SpaceVector =
+      nonNull(magnitude, axis).fold(NullSpaceVector)(v => v)
 
     def nonNull(x: T,
                        y: T,
-                       z: T): Option[NonNullVector] =
+                       z: T): Option[NonNullSpaceVector] =
       if isNullTuple(x, y, z) then
         None
       else
-        Some(NonNullVector(x, y, z))
+        Some(NonNullSpaceVector(x, y, z))
 
     def nonNull(start: SpacePoint,
-                end: SpacePoint): Option[NonNullVector] =
+                end: SpacePoint): Option[NonNullSpaceVector] =
       if start == end then
         None
       else
-        Some(NonNullVector(end.x - start.x, end.y - start.y, end.z - start.z))
+        Some(NonNullSpaceVector(end.x - start.x, end.y - start.y, end.z - start.z))
 
-    def nonNull(end: SpacePoint): Option[NonNullVector] =
-      nonNull(SpacePoint.Zero, end)
+    def nonNull(end: SpacePoint): Option[NonNullSpaceVector] =
+      nonNull(SpacePoint.Origin, end)
 
-    def nonNull(v: Vector): Option[NonNullVector] =
+    def nonNull(v: SpaceVector): Option[NonNullSpaceVector] =
       if v.isNull then
         None
       else
-        Some(NonNullVector(v.x, v.y, v.z))
+        Some(NonNullSpaceVector(v.x, v.y, v.z))
 
     def nonNull(magnitude: T,
-                       axis: Axis): Option[NonNullVector] =
+                       axis: Axis): Option[NonNullSpaceVector] =
       if magnitude == _0 then
         None
       else
         Some(
           axis match
-            case Axis.X => NonNullVector(magnitude, _0, _0)
-            case Axis.Y => NonNullVector(_0, magnitude, _0)
-            case Axis.Z => NonNullVector(_0, _0, magnitude)
+            case Axis.X => NonNullSpaceVector(magnitude, _0, _0)
+            case Axis.Y => NonNullSpaceVector(_0, magnitude, _0)
+            case Axis.Z => NonNullSpaceVector(_0, _0, magnitude)
         )
 
-    def nonNullCrossProduct(v1: Vector,
-                            v2: Vector): Option[NonNullVector] =
+    def nonNullCrossProduct(v1: SpaceVector,
+                            v2: SpaceVector): Option[NonNullSpaceVector] =
       val nx = v1.y * v2.z - v1.z * v2.y
       val ny = v1.z * v2.x - v1.x * v2.z
       val nz = v1.x * v2.y - v1.y * v2.x
-      if Vector.isNullTuple(nx, ny, nz) then
+      if SpaceVector.isNullTuple(nx, ny, nz) then
         None
       else
-        Some(NonNullVector(nx, ny, nz))
+        Some(NonNullSpaceVector(nx, ny, nz))
 
-    def fill(t: T): Vector =
-      Vector(t, t, t)
+    def fill(t: T): SpaceVector =
+      SpaceVector(t, t, t)
 
-    val Null = NullVector
+    val Null = NullSpaceVector
 
-    val OneX = NonNullVector(__1, _0, _0)
-    val OneY = NonNullVector(_0, __1, _0)
-    val OneZ = NonNullVector(_0, _0, __1)
+    val OneX = NonNullSpaceVector.OneX
+    val OneY = NonNullSpaceVector.OneY
+    val OneZ = NonNullSpaceVector.OneZ
 
 
   /**
@@ -297,15 +299,15 @@ trait Space[T: Numeric : Precision]:
   sealed trait Basis:
     self =>
 
-    lazy val i: NonNullVector
-    lazy val j: NonNullVector
-    lazy val k: NonNullVector
+    lazy val i: NonNullSpaceVector
+    lazy val j: NonNullSpaceVector
+    lazy val k: NonNullSpaceVector
 
     lazy val normalized: Basis =
       new Basis :
-        override lazy val i: NonNullVector = self.i.normalized
-        override lazy val j: NonNullVector = self.j.normalized
-        override lazy val k: NonNullVector = self.k.normalized
+        override lazy val i: NonNullSpaceVector = self.i.normalized
+        override lazy val j: NonNullSpaceVector = self.j.normalized
+        override lazy val k: NonNullSpaceVector = self.k.normalized
 
     lazy val isNormalized: Boolean =
       Basis.normalized(i, j, k)
@@ -340,9 +342,9 @@ trait Space[T: Numeric : Precision]:
     self =>
     override lazy val normalized: OrthonormalBasis =
       new OrthonormalBasis :
-        override lazy val i: NonNullVector = self.i.normalized
-        override lazy val j: NonNullVector = self.j.normalized
-        override lazy val k: NonNullVector = self.k.normalized
+        override lazy val i: NonNullSpaceVector = self.i.normalized
+        override lazy val j: NonNullSpaceVector = self.j.normalized
+        override lazy val k: NonNullSpaceVector = self.k.normalized
 
   trait OrthonormalBasis extends OrthogonalBasis with NormalizedBasis :
     override lazy val normalized: OrthonormalBasis =
@@ -350,103 +352,130 @@ trait Space[T: Numeric : Precision]:
 
   object Basis:
 
-    def coplanar(i: NonNullVector,
-                 j: NonNullVector,
-                 k: NonNullVector): Boolean =
+    def coplanar(i: NonNullSpaceVector,
+                 j: NonNullSpaceVector,
+                 k: NonNullSpaceVector): Boolean =
       ((i ∧ j) ∧ (i ∧ k)).isNull
 
-    def isOrthogonal(i: NonNullVector,
-                     j: NonNullVector,
-                     k: NonNullVector): Boolean =
+    def isOrthogonal(i: NonNullSpaceVector,
+                     j: NonNullSpaceVector,
+                     k: NonNullSpaceVector): Boolean =
       (i ⋅ j == _0) && (i ⋅ k == _0) && (k ⋅ j == _0)
 
-    def normalized(i: NonNullVector,
-                   j: NonNullVector,
-                   k: NonNullVector): Boolean =
+    def normalized(i: NonNullSpaceVector,
+                   j: NonNullSpaceVector,
+                   k: NonNullSpaceVector): Boolean =
       i.isNormalized && j.isNormalized && k.isNormalized
 
-    def safe(i: Vector,
-             j: Vector,
-             k: Vector): Option[Basis] =
+    def safe(i: SpaceVector,
+             j: SpaceVector,
+             k: SpaceVector): Option[Basis] =
       for
-        baseI <- Vector.nonNull(i)
-        baseJ <- Vector.nonNull(j)
-        baseK <- Vector.nonNull(k) if (!coplanar(baseI, baseJ, baseK))
+        baseI <- SpaceVector.nonNull(i)
+        baseJ <- SpaceVector.nonNull(j)
+        baseK <- SpaceVector.nonNull(k) if (!coplanar(baseI, baseJ, baseK))
       yield
         new Basis :
-          override lazy val i: NonNullVector = baseI
-          override lazy val j: NonNullVector = baseJ
-          override lazy val k: NonNullVector = baseK
+          override lazy val i: NonNullSpaceVector = baseI
+          override lazy val j: NonNullSpaceVector = baseJ
+          override lazy val k: NonNullSpaceVector = baseK
 
-    def orthogonal(i: Vector,
-                   j: Vector,
-                   k: Vector): Option[OrthogonalBasis] =
+    def orthogonal(i: SpaceVector,
+                   j: SpaceVector,
+                   k: SpaceVector): Option[OrthogonalBasis] =
       for
-        baseI <- Vector.nonNull(i)
-        baseJ <- Vector.nonNull(j)
-        baseK <- Vector.nonNull(k)
+        baseI <- SpaceVector.nonNull(i)
+        baseJ <- SpaceVector.nonNull(j)
+        baseK <- SpaceVector.nonNull(k)
         if (!coplanar(baseI, baseJ, baseK)) && isOrthogonal(baseI, baseJ, baseK)
       yield
         new OrthogonalBasis :
-          override lazy val i: NonNullVector = baseI
-          override lazy val j: NonNullVector = baseJ
-          override lazy val k: NonNullVector = baseK
+          override lazy val i: NonNullSpaceVector = baseI
+          override lazy val j: NonNullSpaceVector = baseJ
+          override lazy val k: NonNullSpaceVector = baseK
 
-    def normalized(i: Vector,
-                   j: Vector,
-                   k: Vector): Option[NormalizedBasis] =
+    def normalized(i: SpaceVector,
+                   j: SpaceVector,
+                   k: SpaceVector): Option[NormalizedBasis] =
       for
-        baseI <- Vector.nonNull(i)
-        baseJ <- Vector.nonNull(j)
-        baseK <- Vector.nonNull(k) if (!coplanar(baseI, baseJ, baseK))
+        baseI <- SpaceVector.nonNull(i)
+        baseJ <- SpaceVector.nonNull(j)
+        baseK <- SpaceVector.nonNull(k) if (!coplanar(baseI, baseJ, baseK))
       yield
         new NormalizedBasis :
-          override lazy val i: NonNullVector = baseI.normalized
-          override lazy val j: NonNullVector = baseJ.normalized
-          override lazy val k: NonNullVector = baseK.normalized
+          override lazy val i: NonNullSpaceVector = baseI.normalized
+          override lazy val j: NonNullSpaceVector = baseJ.normalized
+          override lazy val k: NonNullSpaceVector = baseK.normalized
 
-    def orthonormal(i: Vector,
-                    j: Vector): Option[OrthonormalBasis] =
+    def orthonormal(i: SpaceVector,
+                    j: SpaceVector): Option[OrthonormalBasis] =
       for
-        baseI <- Vector.nonNull(i)
-        baseJ <- Vector.nonNull(j) if (baseI ⋅ baseJ == _0)
-        baseK <- Vector.nonNullCrossProduct(baseI, baseJ)
+        baseI <- SpaceVector.nonNull(i)
+        baseJ <- SpaceVector.nonNull(j) if (baseI ⋅ baseJ == _0)
+        baseK <- SpaceVector.nonNullCrossProduct(baseI, baseJ)
       yield
         new OrthonormalBasis :
-          override lazy val i: NonNullVector = baseI
-          override lazy val j: NonNullVector = baseJ
-          override lazy val k: NonNullVector = baseK
+          override lazy val i: NonNullSpaceVector = baseI
+          override lazy val j: NonNullSpaceVector = baseJ
+          override lazy val k: NonNullSpaceVector = baseK
 
     val Normal: OrthonormalBasis =
       new OrthonormalBasis :
-        override lazy val i: NonNullVector = Axis.X.base
-        override lazy val j: NonNullVector = Axis.Y.base
-        override lazy val k: NonNullVector = Axis.Z.base
+        override lazy val i: NonNullSpaceVector = Axis.X.base
+        override lazy val j: NonNullSpaceVector = Axis.Y.base
+        override lazy val k: NonNullSpaceVector = Axis.Z.base
 
 
   type Vertices = Iterable[Vertex]
 
   case class Vertex(s: SpacePoint,
-                    t: SpacePoint)
-    extends Transformable[Vertex] :
+                    t: SpacePoint):
 
-    infix def +(v: Vector): Vertex =
+    infix def +(v: SpaceVector): Vertex =
       Vertex(s + v, t + v)
 
   object Vertex:
     def apply(s: SpacePoint,
-              v: Vector): Vertex =
+              v: SpaceVector): Vertex =
       Vertex(s, v.dest(s))
 
   trait Shape:
     val vertices: Vertices
 
+    inline def +(s2: Shape): Shape =
+      Shape.add(this, s2)
+
     override def toString: String =
       s"Shape(${vertices.mkString(",")})"
+
+    override def equals(obj: Any): Boolean =
+      obj match
+        case that: Shape if that != null =>
+          that.vertices == this.vertices
+        case _ =>
+          false
+
+    override def hashCode(): Int =
+      43 * vertices.hashCode()
 
   object Shape:
     def apply(vertices: Vertices): Shape =
       SimpleShape(vertices)
+
+    def apply(vertices: Vertex*): Shape =
+      SimpleShape(vertices)
+
+    lazy val Empty: Shape =
+      new Shape:
+        override val vertices: Vertices =
+          Iterable.empty[Vertex]
+
+    def add(s1: Shape,
+            s2: Shape): Shape =
+      new Shape :
+        override val vertices: Vertices =
+          s1.vertices ++ s2.vertices
+
 
   private case class SimpleShape(vertices: Vertices)
     extends Shape

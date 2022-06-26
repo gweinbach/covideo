@@ -2,28 +2,44 @@ package com.ezoky.ezgames.covideo
 
 import com.ezoky.ezgames.covideo.component.*
 import com.ezoky.ezgames.covideo.component.Dimension.*
+import com.ezoky.ezgames.covideo.component.Dimension.Ez3D.*
 import com.ezoky.ez3d.Screen.*
 import com.ezoky.ezgames.covideo.entity.*
 import com.ezoky.ezgames.covideo.entity.People.*
 
 object Config:
+  
+  val AreaWidth = 800
+  val AreaHeight = 600
+  val AreaDepth = 200
+  
+  val NearDistance = 800
 
   val Area =
     AreaConfig(
-      800 size,
+      AreaWidth size,
       xGeometry = Geometry.Toric,
-      600 size,
+      AreaHeight size,
       yGeometry = Geometry.Toric,
-      200 size,
+      AreaDepth size,
       zGeometry = Geometry.Toric
+    )
+  val Camera =
+    CameraConfig(
+      position = PlanePoint(AreaWidth / 2, AreaHeight / 2),
+      near = NearDistance,
+      far = NearDistance + AreaDepth,
+      top = AreaHeight * 8,
+      right = AreaWidth * 8
     )
   val Scene =
     SceneConfig(
       name = "COVIDEO",
 //      sceneSize = SceneDimension(width = 1200 px, height = 800 px), // DefaultScreenSize
-      sceneSize = ScreenDimension(width = 800 px, height = 600 px), // DefaultScreenSize
+      sceneSize = ScreenDimension(width = AreaWidth px, height = AreaHeight px), // DefaultScreenSize
 //      margin = Margin(top = 100 px, left = 100 px, bottom = 100 px, right = 100 px)
-      zoomRatio = 1.5
+      zoomRatio = 1.0,
+      camera = Camera
     )
   val World =
     WorldConfig(
@@ -39,7 +55,7 @@ object Config:
     )
   val Game =
     GameConfig(
-      populationSize = 10,
+      populationSize = 20,
       Person, World
     )
   val Loop =

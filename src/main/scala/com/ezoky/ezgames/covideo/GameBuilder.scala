@@ -1,12 +1,12 @@
 
 package com.ezoky.ezgames.covideo
 
+import com.ezoky.ez3d.Screen.*
 import com.ezoky.ezgames.covideo.component.*
 import com.ezoky.ezgames.covideo.component.Dimension.*
 import com.ezoky.ezgames.covideo.component.Dimension.Ez3D.*
 import com.ezoky.ezgames.covideo.component.Generate.*
 import com.ezoky.ezgames.covideo.component.HealthCondition.*
-import com.ezoky.ez3d.Screen.*
 import com.ezoky.ezgames.covideo.entity.*
 import com.ezoky.ezgames.covideo.entity.People.*
 import com.ezoky.ezgames.covideo.system.DisplaySystem
@@ -75,23 +75,41 @@ private case class SceneBuilder(sceneConfig: SceneConfig)
 
 
   override def build: Generated[Scene] =
-    Generated(
+    for
+      camera <- CameraBuilder(sceneConfig.camera).build
+    yield
       Scene(
         name = sceneConfig.name,
         dimension = sceneDimension,
         margins = sceneConfig.margin,
         zoomRatio = sceneConfig.zoomRatio,
-        camera = Perspective.LookAtCamera.safe(
-                    position = SpacePoint(sceneDimension.width / 2.0d, sceneDimension.height/2.0d, -20),
-                    target = SpacePoint(sceneDimension.width / 2.0d, sceneDimension.height/2.0d, 0),
-//                    position = SpacePoint(sceneDimension.width , sceneDimension.height, -20),
-//                    target = SpacePoint(sceneDimension.width , sceneDimension.height, 0),
-//          position = SpacePoint(0, 0, -20),
-//          target = SpacePoint(0, 0, 0),
-          upVector = Vector.OneY,
-          viewFrustum = Perspective.ViewFrustum.fromSymetricPlanes(20, 220, sceneDimension.height/2, sceneDimension.width/2).get
-        ).get
+        camera = camera
       )
+
+    
+
+case class CameraBuilder(cameraConfig: CameraConfig)
+  extends Builder[Camera] :
+
+  override def build: Generated[Camera] =
+    Generated.unit(
+      (
+        for
+          viewFrustum <- Perspective.ViewFrustum.fromSymetricPlanes(
+            nearDistance = cameraConfig.near,
+            farDistance = cameraConfig.far,
+            topDistance = cameraConfig.top,
+            rightDistance = cameraConfig.right
+          )
+          camera <- Perspective.LookAtCamera.safe(
+            position = cameraConfig.position.withZ(0),
+            target = cameraConfig.position.withZ(-cameraConfig.near), // always looking towards center of near plan
+            upVector = SpaceVector.OneY,
+            viewFrustum = viewFrustum
+          )
+        yield
+          camera
+      ).getOrElse(Camera.Default)
     )
 
 
@@ -142,13 +160,16 @@ case class PersonBuilder(area: Box,
         solid,
         Healthy,
         summon[DisplaySystem].spriteByHealthCondition(Healthy),
-        Parallelepiped(
-          Box(
-            Width(10 size)(using Geometry.Bounded),
-            Height(10 size)(using Geometry.Bounded),
-            Depth(10 size)(using Geometry.Bounded),
-          )
-        )
+        Cube(10)
+//        Parallelepiped(10, 20, 30)
+
+        //        Parallelepiped(
+//          Box(
+//            Width(10 size)(using Geometry.Bounded),
+//            Height(10 size)(using Geometry.Bounded),
+//            Depth(10 size)(using Geometry.Bounded),
+//          )
+//        )
       )
 
 

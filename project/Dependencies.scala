@@ -20,7 +20,7 @@ object Dependencies {
 
     // Typelevel
     val Cats = "2.7.0"
-    val Spire = "0.18.0-M3"
+    val Spire = "0.18.0"
 
     object Test {
 

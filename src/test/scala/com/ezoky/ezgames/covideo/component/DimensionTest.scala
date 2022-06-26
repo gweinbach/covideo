@@ -58,29 +58,29 @@ class DimensionTest {
     {
       given Geometry = Geometry.Flat
 
-      assertEquals(PositionValue.Zero, (0.0 size).minPosition)
-      assertEquals(PositionValue.Zero, (0.0 size).maxPosition)
+      assertEquals((0.0 size).minPosition, PositionValue.Zero)
+      assertEquals((0.0 size).maxPosition, PositionValue.Zero)
 
-      assertEquals(PositionValue.Zero, (10.0 size).minPosition)
-      assertEquals(PositionValue.Zero, (10.0 size).maxPosition)
+      assertEquals((10.0 size).minPosition, PositionValue.Zero)
+      assertEquals((10.0 size).maxPosition, PositionValue.Zero)
     }
     {
       given Geometry = Geometry.Toric
 
-      assertEquals(PositionValue.Zero, (0.0 size).minPosition)
-      assertEquals(PositionValue.Zero, (0.0 size).maxPosition)
+      assertEquals((0.0 size).minPosition, PositionValue.Zero)
+      assertEquals((0.0 size).maxPosition, PositionValue.Zero)
 
-      assertEquals(PositionValue.Zero, (10.0 size).minPosition)
-      assertEquals(10.0, (10.0 size).maxPosition.doubleValue, 1E-14)
+      assertEquals((10.0 size).minPosition, PositionValue.Zero)
+      assertEquals(10.0, (10.0 size).maxPosition.doubleValue,1E-13)
     }
     {
       given Geometry = Geometry.Bounded
 
-      assertEquals(PositionValue.Zero, (0.0 size).minPosition)
-      assertEquals(PositionValue.Zero, (0.0 size).maxPosition)
+      assertEquals((0.0 size).minPosition, PositionValue.Zero)
+      assertEquals((0.0 size).maxPosition, PositionValue.Zero)
 
-      assertEquals(PositionValue.Zero, (10.0 size).minPosition)
-      assertEquals(10.0, (10.0 size).maxPosition.doubleValue, 1E-14)
+      assertEquals((10.0 size).minPosition, PositionValue.Zero)
+      assertEquals((10.0 size).maxPosition.doubleValue, 10.0, 1E-13)
     }
   }
 
@@ -184,6 +184,6 @@ class DimensionTest {
   }
 
   @Test def rotateTest: Unit =
-    val oneQuarter = VectorRotation(90.0 degrees, Vector.OneZ)
-    assertEquals(Some(Vector.OneY), Vector.OneX.rotate(using oneQuarter))
+    val oneQuarter = VectorRotation(90.0 degrees, SpaceVector.OneZ)
+    assertEquals(Some(SpaceVector.OneY), oneQuarter.rotate(SpaceVector.OneX))
 }

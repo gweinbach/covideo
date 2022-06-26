@@ -67,3 +67,6 @@ object Screen:
                           t: ScreenPosition)
   
   case class ScreenShape(vertices: ScreenVertices)
+  
+  object ScreenShape:
+    def apply(vertices: ScreenVertex*): ScreenShape = ScreenShape(vertices)

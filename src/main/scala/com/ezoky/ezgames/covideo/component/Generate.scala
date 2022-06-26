@@ -24,6 +24,12 @@ object Generate:
   val GeneratedLong: Generated[Long] =
     _.generateLong
 
+  given Generated[Double] = GeneratedDouble
+  given Generated[Float] = GeneratedDouble.map(_.toFloat)
+  given Generated[Long] = GeneratedLong
+  given Generated[Int] = GeneratedLong.map(_.toInt)
+  given Generated[Short] = GeneratedLong.map(_.toShort)
+  given Generated[Byte] = GeneratedLong.map(_.toByte)
 
   object Generated:
     

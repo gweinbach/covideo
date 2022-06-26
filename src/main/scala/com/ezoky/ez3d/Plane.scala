@@ -6,13 +6,12 @@
 package com.ezoky.ez3d
 
 import com.ezoky.eznumber.*
-import com.sun.management.VMOption.Origin
 import spire.*
 import spire.implicits.*
 import spire.math.*
 
 /**
- * @since $NEXT_VERSION
+ * @since 0.2.0
  * @author gweinbach on 15/06/2022
  */
 trait Plane[T: Numeric : Precision]:
@@ -74,6 +73,9 @@ trait Plane[T: Numeric : Precision]:
     def fill(t: T): PlaneVector =
       PlaneVector(t, t)
 
+
+  case class PlaneVertex(s: PlanePoint,
+                         t: PlanePoint)
 
   case class ClippingWindow(width: T,
                             height: T):

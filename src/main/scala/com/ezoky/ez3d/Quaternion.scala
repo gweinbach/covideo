@@ -43,9 +43,9 @@ trait H[T: Numeric : Precision]
 
     @targetName("times")
     infix def ×(q2: Quaternion): Option[Quaternion] =
-      val v1 = Vector(b, c, d)
+      val v1 = SpaceVector(b, c, d)
       val w1 = a
-      val v2 = Vector(q2.b, q2.c, q2.d)
+      val v2 = SpaceVector(q2.b, q2.c, q2.d)
       val w2 = q2.a
       Quaternion(
         (w1 * w2) - (v1 ⋅ v2),
@@ -53,7 +53,7 @@ trait H[T: Numeric : Precision]
       ).normalized
 
     lazy val real: T = a
-    lazy val imaginary: Vector = Vector(b, c, d)
+    lazy val imaginary: SpaceVector = SpaceVector(b, c, d)
 
     lazy val conjugate: Quaternion = Quaternion(a, b = -b, c = -c, d = -d)
     lazy val squareMagnitude: T = a * a + b * b + c * c + d * d
@@ -64,10 +64,10 @@ trait H[T: Numeric : Precision]
     def rotationAngle(using trig: Trig[T]): Radians =
       acos[Radians](a) / 2
 
-    def rotationAxis: Option[NonNullVector] =
-      Vector.nonNull(b, c, d).map(_.normalized)
+    def rotationAxis: Option[NonNullSpaceVector] =
+      SpaceVector.nonNull(b, c, d).map(_.normalized)
 
-    def rotate(vector: Vector): Option[Vector] =
+    def rotate(vector: SpaceVector): Option[SpaceVector] =
       for
         q1 <- this × Quaternion(_0, vector)
         q2 <- q1 × conjugate
@@ -86,10 +86,10 @@ trait H[T: Numeric : Precision]
 
   object Quaternion:
     def apply(real: T,
-              imaginary: Vector): Quaternion =
+              imaginary: SpaceVector): Quaternion =
       new Quaternion(real, imaginary.x, imaginary.y, imaginary.z)
 
-    def fromRotationVector(axis: Vector,
+    def fromRotationVector(axis: SpaceVector,
                            angle: Radians)
                           (using Trig[T]): Option[Quaternion] =
       val sinA = sin(angle / 2)

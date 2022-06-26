@@ -18,21 +18,21 @@ import spire.math.*
  * @author gweinbach on 10/06/2022
  */
 class Ez3D[T: Numeric : Trig : Precision]
-  extends Model3D[T] with Cameras[T]:
+  extends Model3D[T] with Cameras[T] with Shapes[T]:
 
   // Vector Transformations
   case class VectorRotation(angle: Radians,
-                            axis: Vector) extends Rotation[Vector] :
+                            axis: SpaceVector) extends Rotation[SpaceVector] :
 
     private val quaternion = Quaternion.fromRotationVector(axis, angle)
 
-    final override def rotate(v: Vector): Option[Vector] =
+    final override def rotate(v: SpaceVector): Option[SpaceVector] =
       quaternion.flatMap(_.rotate(v))
 
-  case class VectorTranslation(translation: Vector)
-    extends Translation[Vector] :
+  case class VectorTranslation(translation: SpaceVector)
+    extends Translation[SpaceVector] :
 
-    final override def translate(v: Vector): Vector =
+    final override def translate(v: SpaceVector): SpaceVector =
       v + translation
 
   // end Vector Transformations
@@ -41,17 +41,17 @@ class Ez3D[T: Numeric : Trig : Precision]
   // Point Transformations
   case class PointRotation(center: SpacePoint,
                            angle: Radians,
-                           axis: Vector) extends Rotation[SpacePoint] :
+                           axis: SpaceVector) extends Rotation[SpacePoint] :
 
     private val quaternion = Quaternion.fromRotationVector(axis, angle)
 
     final override def rotate(v: SpacePoint): Option[SpacePoint] =
       for
-        vr <- quaternion.flatMap(_.rotate(Vector(center, v)))
+        vr <- quaternion.flatMap(_.rotate(SpaceVector(center, v)))
       yield
         vr.dest(center)
 
-  case class PointTranslation(translation: Vector)
+  case class PointTranslation(translation: SpaceVector)
     extends Translation[SpacePoint] :
 
     final override def translate(v: SpacePoint): SpacePoint =
@@ -63,25 +63,25 @@ class Ez3D[T: Numeric : Trig : Precision]
   // Vertex Transformations
   case class VertexRotation(center: SpacePoint,
                             angle: Radians,
-                            axis: Vector) extends Rotation[Vertex] :
+                            axis: SpaceVector) extends Rotation[Vertex] :
 
     private val quaternion = Quaternion.fromRotationVector(axis, angle)
 
     final override def rotate(v: Vertex): Option[Vertex] =
       for
-        vs <- quaternion.flatMap(_.rotate(Vector(center, v.s)))
-        vt <- quaternion.flatMap(_.rotate(Vector(center, v.t)))
+        vs <- quaternion.flatMap(_.rotate(SpaceVector(center, v.s)))
+        vt <- quaternion.flatMap(_.rotate(SpaceVector(center, v.t)))
       yield
         Vertex(vs.dest(center), vt.dest(center))
 
 
-  case class VertexTranslation(translation: Vector)
+  case class VertexTranslation(translation: SpaceVector)
     extends Translation[Vertex] :
 
     final override def translate(v: Vertex): Vertex =
       v + translation
 
-// end Vertex Transformations
+  // end Vertex Transformations
 
 
   import Perspective.*
@@ -95,12 +95,5 @@ class Ez3D[T: Numeric : Trig : Precision]
     extension (camera: Camera)
       override def projectionMatrix: Matrix = camera.viewFrustum.projectionMatrix
 
- 
 
-class Double3D(using Precision[Double]) extends Ez3D[Double]
-
-class Float3D(using Precision[Float]) extends Ez3D[Float]
-
-class BigDecimal3D(using Precision[BigDecimal]) extends Ez3D[BigDecimal]
-
-class Real3D(using Precision[Real]) extends Ez3D[Real]
+given [T: Numeric: Trig: Precision]:Ez3D[T] = new Ez3D[T]

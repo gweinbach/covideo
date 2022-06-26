@@ -32,9 +32,9 @@ sealed trait Size[C <: Coord](val value: SizeValue)(using val geometry: Geometry
     else
       Some(coord(relativePosition(numericN.div(numericN.one, n))))
 
-  @deprecated("Use generatedCoord instead")
-  final def randomCoord: C =
-    coord(value.randomPosition)
+//  @deprecated("Use generatedCoord instead")
+//  final def randomCoord: C =
+//    coord(value.randomPosition)
 
   final def minCoord: C =
     coord(value.minPosition)
@@ -48,7 +48,7 @@ sealed trait Size[C <: Coord](val value: SizeValue)(using val geometry: Geometry
   // 3D extensions
   lazy val axis: Axis
 
-  lazy val vector: Vector =
+  lazy val vector: SpaceVector =
     value.axisVector(axis)
 
 // end 3D extensions
