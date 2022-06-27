@@ -148,10 +148,10 @@ abstract class Dimension[_DimensionType: Precision: Numeric: Trig: Generated: Ez
         _0
       }
       else if (dimensionValue < _0) {
-        (sizeValue + (dimensionValue % sizeValue)) % sizeValue
+        (sizeValue + (dimensionValue fmod sizeValue)) fmod sizeValue
       }
       else {
-        dimensionValue % sizeValue
+        dimensionValue fmod sizeValue
       }
 
     @tailrec
@@ -162,7 +162,7 @@ abstract class Dimension[_DimensionType: Precision: Numeric: Trig: Generated: Ez
         bounce(-dimensionValue)
 
       else if (dimensionValue >= sizeValue)
-        val remainder = (dimensionValue - sizeValue) % sizeValue
+        val remainder = (dimensionValue - sizeValue) fmod sizeValue
         println(s"dimensionValue=$dimensionValue")
         println(s"sizeValue=$sizeValue")
         println(s"(dimensionValue - sizeValue)=${(dimensionValue - sizeValue)}")
@@ -308,8 +308,14 @@ abstract class Dimension[_DimensionType: Precision: Numeric: Trig: Generated: Ez
     (x: AccelerationValue, y: AccelerationValue) => x.compare(y)
 
 
+  def modulo(a: _DimensionType, b: _DimensionType): _DimensionType
+
   /** Utilities methods added to [[_DimensionType]] */
   extension (lhs: _DimensionType)
+
+    // % operqtor is not defined for floating numbers in spire
+    infix def fmod(rhs: _DimensionType): _DimensionType =
+      modulo(lhs, rhs)
 
     def size: SizeValue =
       SizeValue(lhs)
@@ -323,19 +329,18 @@ abstract class Dimension[_DimensionType: Precision: Numeric: Trig: Generated: Ez
     def acceleration: AccelerationValue =
       AccelerationValue(lhs)
 
-    infix def %(rhs: _DimensionType): _DimensionType =
-      lhs - rhs * math.floor(lhs / rhs)
-
-
   /** Utilities methods added to [[_StepType]] */
   extension (durationValue: _StepType)
 
     def steps: DurationValue =
       DurationValue(durationValue)
 
-given Precision[Double] = Precision(1E-12d)
+given Precision[Double] = Precision(1E-10d)
 
 object Dimension extends Dimension[Double]:
+
+  override def modulo(a: Double, b: Double): Double = a % b
+
   final override protected def _NumberToDimensionConverter[N: Numeric]: (N) => Double =
     (n: N) => summon[Numeric[N]].toDouble(n)
 

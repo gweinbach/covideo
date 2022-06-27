@@ -11,9 +11,9 @@ object Config:
   
   val AreaWidth = 800
   val AreaHeight = 600
-  val AreaDepth = 200
+  val AreaDepth = 300
   
-  val NearDistance = 200
+  val NearDistance = 500
 
   val Area =
     AreaConfig(
@@ -29,8 +29,8 @@ object Config:
       position = PlanePoint(AreaWidth / 2, AreaHeight / 2),
       near = NearDistance,
       far = NearDistance + AreaDepth,
-      top = AreaHeight * 8,
-      right = AreaWidth * 8
+      top = AreaHeight ,
+      right = AreaWidth
     )
   val Scene =
     SceneConfig(
