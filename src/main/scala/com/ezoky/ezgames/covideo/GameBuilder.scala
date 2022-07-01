@@ -18,7 +18,7 @@ import com.ezoky.ezgames.covideo.system.swing.*
  */
 case class GameBuilder(gameConfig: GameConfig)
                       (using DisplaySystem)
-  extends Builder[Game] :
+  extends Builder[Game]:
 
   override def build: Generated[Game] =
     for
@@ -33,7 +33,7 @@ case class GameBuilder(gameConfig: GameConfig)
 
 case class WorldBuilder(worldConfig: WorldConfig)
                        (using DisplaySystem)
-  extends Builder[World] :
+  extends Builder[World]:
 
   override def build: Generated[World] =
     for
@@ -51,7 +51,7 @@ case class WorldBuilder(worldConfig: WorldConfig)
 
 
 private case class AreaBuilder(areaConfig: AreaConfig)
-  extends Builder[Box] :
+  extends Builder[Box]:
 
   override def build: Generated[Box] =
     Generated(
@@ -64,7 +64,7 @@ private case class AreaBuilder(areaConfig: AreaConfig)
 
 private case class SceneBuilder(sceneConfig: SceneConfig)
                                (using DisplaySystem)
-  extends Builder[Scene] :
+  extends Builder[Scene]:
 
   lazy val sceneDimension =
     sceneConfig.sceneSize match
@@ -89,7 +89,7 @@ private case class SceneBuilder(sceneConfig: SceneConfig)
     
 
 case class CameraBuilder(cameraConfig: CameraConfig)
-  extends Builder[Camera] :
+  extends Builder[Camera]:
 
   override def build: Generated[Camera] =
     Generated.unit(
@@ -115,7 +115,7 @@ case class CameraBuilder(cameraConfig: CameraConfig)
 
 case class MobileBuilder(area: Box,
                          mobileConfig: MobileConfig)
-  extends Builder[Mobile] :
+  extends Builder[Mobile]:
 
   override def build: Generated[Mobile] =
     for
@@ -133,12 +133,12 @@ case class MobileBuilder(area: Box,
       )
 
 case class SolidBuilder(area: Box,
-                        mobileConfig: MobileConfig)
-  extends Builder[Solid] :
+                        solidConfig: SolidConfig)
+  extends Builder[Solid]:
 
   override def build: Generated[Solid] =
     for
-      mobile <- MobileBuilder(area, mobileConfig).build
+      mobile <- MobileBuilder(area, solidConfig.mobileConfig).build
     yield
       Solid(
         mobile,
@@ -149,11 +149,11 @@ case class SolidBuilder(area: Box,
 case class PersonBuilder(area: Box,
                          personConfig: PersonConfig)
                         (using DisplaySystem)
-  extends Builder[Person] :
+  extends Builder[Person]:
 
   override def build: Generated[Person] =
     for
-      solid <- SolidBuilder(area, personConfig.mobileConfig).build
+      solid <- SolidBuilder(area, personConfig.solidConfig).build
     yield
       Person(
         id = PersonId(),
@@ -161,15 +161,6 @@ case class PersonBuilder(area: Box,
         Healthy,
         summon[DisplaySystem].spriteByHealthCondition(Healthy),
         Cube(10)
-//        Parallelepiped(10, 20, 30)
-
-        //        Parallelepiped(
-//          Box(
-//            Width(10 size)(using Geometry.Bounded),
-//            Height(10 size)(using Geometry.Bounded),
-//            Depth(10 size)(using Geometry.Bounded),
-//          )
-//        )
       )
 
 

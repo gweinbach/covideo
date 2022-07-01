@@ -11,7 +11,10 @@ import com.ezoky.ezgames.covideo.entity.People.{Person, PersonConfig, Population
  * @since 0.1.0
  */
 case class Game(world: World,
-                people: Population[Person])
+                people: Population[Person]):
+  
+  def withWorld(world: World): Game =
+    copy(world = world)
 
 
 case class GameConfig(populationSize: Int,

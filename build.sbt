@@ -28,6 +28,7 @@ lazy val root = project
     scalaVersion := Versions.scala3,
 
     libraryDependencies += Dependencies.spire,
+    // libraryDependencies += Dependencies.`refined-mini`,
 
     libraryDependencies += Dependencies.Test.`junit-interface`,
     libraryDependencies += Dependencies.Test.scalatest,

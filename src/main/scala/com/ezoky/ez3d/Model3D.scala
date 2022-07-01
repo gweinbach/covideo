@@ -215,17 +215,17 @@ trait Model3D[T: Numeric : Precision]
           //          t <-  transformVertex(clippingMatrix, v)
           for
             worldV <- modelModelMatrix(v)
-            _ = println(s"worldV=$worldV")
+//            _ = println(s"worldV=$worldV")
             cameraV <- viewMatrix(worldV)
-            _ = println(s"cameraV=$cameraV")
+//            _ = println(s"cameraV=$cameraV")
             projectionV <- projectionMatrix(cameraV)
-            _ = println(s"projectionV=$projectionV")
+//            _ = println(s"projectionV=$projectionV")
             flippedV <- windowFlip(projectionV)
-            _ = println(s"flippedV=$flippedV")
+//            _ = println(s"flippedV=$flippedV")
             planeV <- windowTranslation(flippedV)
-            _ = println(s"planeV=$planeV")
+//            _ = println(s"planeV=$planeV")
             windowV <- windowScaling(planeV)
-            _ = println(s"windowV=$windowV")
+//            _ = println(s"windowV=$windowV")
           yield
             windowV.toScreen
       }

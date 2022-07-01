@@ -29,8 +29,14 @@ trait Cameras[T: Numeric : Trig : Precision]
 
   sealed trait ViewFrustum:
 
-    lazy val near: T
-    lazy val far: T
+    val near: T
+
+    def withNear(near: T): ViewFrustum
+
+    val far: T
+
+    def withFar(far: T): ViewFrustum
+
     lazy val projectionMatrix: Matrix
 
     lazy val minXn: T
@@ -79,27 +85,43 @@ trait Cameras[T: Numeric : Trig : Precision]
         )
       )
 
+  private[ez3d] trait DefaultViewFrustum
+    extends ViewFrustum :
+
+    override lazy val projectionMatrix: Matrix = Matrix.Identity
+
+    final lazy val minXn: T = -__1
+    final lazy val minXf: T = -__1
+    final lazy val maxXn: T = __1
+    final lazy val maxXf: T = __1
+
+    final lazy val minYn: T = -__1
+    final lazy val minYf: T = -__1
+    final lazy val maxYn: T = __1
+    final lazy val maxYf: T = __1
+
+    final lazy val minZ: T = -near
+    final lazy val maxZ: T = -far
+    final lazy val middleZ: T = (minZ + maxZ) / __2
 
   object ViewFrustum:
-    val Default = new ViewFrustum :
-      override lazy val near: T = __1
-      override lazy val far: T = __2
-      override lazy val projectionMatrix: Matrix = Matrix.Identity
+    private[ez3d] case class SimpleViewFrustum(near: T,
+                                               far: T)
+      extends DefaultViewFrustum :
+      final override def withNear(newNear: T): SimpleViewFrustum =
+        copy(near =
+          if (newNear > _0) then newNear else near
+        )
 
-      final lazy val minXn: T = -__1
-      final lazy val minXf: T = -__1
-      final lazy val maxXn: T = __1
-      final lazy val maxXf: T = __1
+      final override def withFar(newFar: T): SimpleViewFrustum =
+        copy(far =
+          if (newFar > near) then newFar else newFar
+        )
 
-      final lazy val minYn: T = -__1
-      final lazy val minYf: T = -__1
-      final lazy val maxYn: T = __1
-      final lazy val maxYf: T = __1
-
-      final lazy val minZ: T = -near
-      final lazy val maxZ: T = -far
-      final lazy val middleZ: T = (minZ + maxZ) / __2
-
+    val Default = SimpleViewFrustum(
+      near = __1,
+      far = __2
+    )
 
   sealed trait Camera:
     val position: SpacePoint
@@ -107,7 +129,10 @@ trait Cameras[T: Numeric : Trig : Precision]
     val up: NonNullSpaceVector
     val right: NonNullSpaceVector
     val basis: OrthonormalBasis
+
     val viewFrustum: ViewFrustum
+
+    def withViewFrustum(newViewFrustum: ViewFrustum): Camera
 
     final lazy val eye: SpaceVector = SpaceVector(position)
     final lazy val target: SpacePoint = look.dest(position)
@@ -129,24 +154,28 @@ trait Cameras[T: Numeric : Trig : Precision]
   //      override val target = look.dest(position)
 
   object Camera:
-    val Default: Camera =
-      new Camera :
-        override val position: SpacePoint = SpacePoint.Origin
-        override val look: NonNullSpaceVector = -NonNullSpaceVector.OneZ
-        override val up: NonNullSpaceVector = NonNullSpaceVector.OneY
-        override val right: NonNullSpaceVector = NonNullSpaceVector.OneX
-        override val basis: OrthonormalBasis = Basis.Normal
-        override val viewFrustum: ViewFrustum = ViewFrustum.Default
+
+    private case class SimpleCamera(position: SpacePoint = SpacePoint.Origin,
+                                    look: NonNullSpaceVector = -NonNullSpaceVector.OneZ,
+                                    up: NonNullSpaceVector = NonNullSpaceVector.OneY,
+                                    right: NonNullSpaceVector = NonNullSpaceVector.OneX,
+                                    basis: OrthonormalBasis = Basis.Normal,
+                                    viewFrustum: ViewFrustum = ViewFrustum.Default)
+      extends Camera:
+      final override def withViewFrustum(newViewFrustum: ViewFrustum): Camera =
+        copy(viewFrustum = newViewFrustum)
+
+    val Default: Camera =SimpleCamera()
 
   object Perspective:
 
     trait PerspectiveViewFrustum
       extends ViewFrustum :
 
-      lazy val top: T
-      lazy val bottom: T
-      lazy val right: T
-      lazy val left: T
+      val top: T
+      val bottom: T
+      val right: T
+      val left: T
 
       final lazy val projectionMatrix =
         Matrix(
@@ -186,10 +215,23 @@ trait Cameras[T: Numeric : Trig : Precision]
       final lazy val middleZ: T = -(__2 * far * near) / (far + near)
 
 
-    trait SymetricViewFrustum
+    case class SymetricViewFrustum(near: T,
+                                   far: T,
+                                   top: T,
+                                   right: T)
       extends PerspectiveViewFrustum :
-      final override lazy val bottom = -top
-      final override lazy val left = -right
+      final override val bottom = -top
+      final override val left = -right
+
+      final override def withNear(newNear: T): SymetricViewFrustum =
+        copy(near =
+          if (newNear > _0) then newNear else near
+        )
+
+      final override def withFar(newFar: T): SymetricViewFrustum =
+        copy(far =
+          if (newFar > near) then newFar else newFar
+        )
 
 
     object ViewFrustum:
@@ -204,11 +246,12 @@ trait Cameras[T: Numeric : Trig : Precision]
           None
         else
           Some(
-            new SymetricViewFrustum :
-              final override lazy val near = nearDistance
-              final override lazy val far = farDistance
-              final override lazy val top = topDistance
-              final override lazy val right = rightDistance
+            SymetricViewFrustum(
+              near = nearDistance,
+              far = farDistance,
+              top = topDistance,
+              right = rightDistance
+            )
           )
 
       def fromSymetricFieldOfView(nearDistance: T,
@@ -222,15 +265,24 @@ trait Cameras[T: Numeric : Trig : Precision]
           (height >= pi[Radians]) then
           None
         else
+          val focalLength = __1 / tan(height / (__2 radians))
+          val topDistance = nearDistance / focalLength
+          val rightDistance = aspectRatio * topDistance
           Some(
-            new SymetricViewFrustum :
-              final override lazy val near = nearDistance
-              final override lazy val far = farDistance
-
-              final lazy val focalLength = __1 / tan(height / (__2 radians))
-
-              final override lazy val top = near / focalLength
-              final override lazy val right = aspectRatio * top
+            SymetricViewFrustum(
+              near = nearDistance,
+              far = farDistance,
+              top = topDistance,
+              right = rightDistance
+            )
+            //            new SymetricViewFrustum :
+            //              final override lazy val near = nearDistance
+            //              final override lazy val far = farDistance
+            //
+            //              final lazy val focalLength = __1 / tan(height / (__2 radians))
+            //
+            //              final override lazy val top = near / focalLength
+            //              final override lazy val right = aspectRatio * top
 
             // used for control
             //              final lazy val alternateProjectionMatrix =
@@ -263,9 +315,10 @@ trait Cameras[T: Numeric : Trig : Precision]
                                     up: NonNullSpaceVector,
                                     right: NonNullSpaceVector,
                                     basis: OrthonormalBasis,
-                                    viewFrustum: PerspectiveViewFrustum)
-      extends Camera
-
+                                    viewFrustum: ViewFrustum)
+      extends Camera:
+      final override def withViewFrustum(newViewFrustum: ViewFrustum): Camera =
+        copy(viewFrustum = newViewFrustum)
 
     object LookAtCamera:
 

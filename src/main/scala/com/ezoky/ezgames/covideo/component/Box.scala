@@ -16,10 +16,6 @@ case class Box(width: Width,
                height: Height,
                depth: Depth):
 
-//  @deprecated("Use 'generatedPosition' instead")
-//  def randomPosition: Position =
-//    Position(width.randomCoord, height.randomCoord, depth.randomCoord)
-
   def minPosition: Position =
     Position(width.minCoord, height.minCoord, depth.minCoord)
     

@@ -11,25 +11,25 @@ object Config:
   
   val AreaWidth = 800
   val AreaHeight = 600
-  val AreaDepth = 300
+  val AreaDepth = 600
   
   val NearDistance = 500
 
   val Area =
     AreaConfig(
       AreaWidth size,
-      xGeometry = Geometry.Toric,
+      xGeometry = Geometry.Bounded,
       AreaHeight size,
-      yGeometry = Geometry.Toric,
+      yGeometry = Geometry.Bounded,
       AreaDepth size,
-      zGeometry = Geometry.Toric
+      zGeometry = Geometry.Bounded
     )
   val Camera =
     CameraConfig(
       position = PlanePoint(AreaWidth / 2, AreaHeight / 2),
       near = NearDistance,
       far = NearDistance + AreaDepth,
-      top = AreaHeight ,
+      top = AreaHeight,
       right = AreaWidth
     )
   val Scene =
@@ -49,16 +49,20 @@ object Config:
     speedRange = SpeedRange(-3.0 speed, 3.0 speed),
     accelerationRange = AccelerationRange(-1.5 acceleration, 1.5 acceleration)
   )
+  val Solid =
+    SolidConfig(
+      mobileConfig = Mobile
+    )
   val Person =
     PersonConfig(
-      mobileConfig = Mobile
+      solidConfig = Solid
     )
   val Game =
     GameConfig(
-      populationSize = 20,
+      populationSize = 10,
       Person, World
     )
   val Loop =
     GameLoopConfig(
-      fps = 30
+      fps = 60
     )

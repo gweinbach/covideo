@@ -53,9 +53,11 @@ abstract class Dimension[_DimensionType: Precision: Numeric: Trig: Generated: Ez
 
   private val _0: _DimensionType = _DimensionNumeric.zero
   private val __1: _DimensionType = _DimensionNumeric.one
+  private val __2: _DimensionType = _DimensionNumeric.fromInt(2)
 
-  val Zero = _0
-  val One = __1
+  val Zero: DimensionBase = _0
+  val One: DimensionBase = __1
+  val Two: DimensionBase = __2
 
   enum Geometry:
 
@@ -106,6 +108,10 @@ abstract class Dimension[_DimensionType: Precision: Numeric: Trig: Generated: Ez
     @targetName("sizeToDouble")
     def doubleValue: Double =
       _DimensionNumeric.toDouble(sizeValue)
+
+    @targetName("sizeToBase")
+    def baseValue: DimensionBase =
+      sizeValue
 
     def relativePosition[N: Numeric](n: N)
                                     (using geometry: Geometry): PositionValue =
@@ -163,12 +169,12 @@ abstract class Dimension[_DimensionType: Precision: Numeric: Trig: Generated: Ez
 
       else if (dimensionValue >= sizeValue)
         val remainder = (dimensionValue - sizeValue) fmod sizeValue
-        println(s"dimensionValue=$dimensionValue")
-        println(s"sizeValue=$sizeValue")
-        println(s"(dimensionValue - sizeValue)=${(dimensionValue - sizeValue)}")
-        println(s"remainder=$remainder")
+//        println(s"dimensionValue=$dimensionValue")
+//        println(s"sizeValue=$sizeValue")
+//        println(s"(dimensionValue - sizeValue)=${(dimensionValue - sizeValue)}")
+//        println(s"remainder=$remainder")
         if (((dimensionValue - sizeValue) / sizeValue).floor.toInt % 2 == 0)
-          println(s"sizeValue - remainder=${sizeValue - remainder}")
+//          println(s"sizeValue - remainder=${sizeValue - remainder}")
           sizeValue - remainder
         else
           remainder
@@ -193,12 +199,6 @@ abstract class Dimension[_DimensionType: Precision: Numeric: Trig: Generated: Ez
               usingGeometry: Geometry): PositionValue =
       usingGeometry.normalizePosition(position, withinBoundary)
 
-//    @deprecated("Use Generated[PositionValue] instead")
-//    def random(withinBoundary: SizeValue,
-//               usingGeometry: Geometry): PositionValue =
-//      withinBoundary.randomPosition(using usingGeometry)
-
-
   extension (position: PositionValue)
 
     @targetName("positionToInt")
@@ -212,6 +212,10 @@ abstract class Dimension[_DimensionType: Precision: Numeric: Trig: Generated: Ez
     @targetName("positionToDouble")
     def doubleValue: Double =
       _DimensionNumeric.toDouble(position)
+
+    @targetName("positionToBase")
+    def baseValue: DimensionBase =
+      position
 
     @targetName("zoom_PositionValue")
     def zoom[N: Numeric](ratio: N): PositionValue =
@@ -317,6 +321,7 @@ abstract class Dimension[_DimensionType: Precision: Numeric: Trig: Generated: Ez
     infix def fmod(rhs: _DimensionType): _DimensionType =
       modulo(lhs, rhs)
 
+    @targetName("baseToSize")
     def size: SizeValue =
       SizeValue(lhs)
 

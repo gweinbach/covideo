@@ -25,6 +25,7 @@ case class Solid(mobile: Mobile,
   def turn(newAcceleration: Acceleration): Solid =
     copy(mobile = mobile.turn(newAcceleration))
 
-  def transform: Solid = ???
+  def spin(newBasis: Basis): Solid =
+    copy(basis = newBasis)
 
-
+case class SolidConfig(mobileConfig: MobileConfig)

@@ -72,6 +72,9 @@ case class Scene(id: SceneId = SceneId(),
   def withMargins(margins: Margin): Scene =
     copy(margins = margins)
 
+  def withCamera(camera: Camera): Scene =
+    copy(camera = camera)
+
 
 opaque type SceneId = UUID
 

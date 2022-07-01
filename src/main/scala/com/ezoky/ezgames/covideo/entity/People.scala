@@ -9,6 +9,7 @@ import com.ezoky.ezgames.covideo.component.Dimension.*
 import com.ezoky.ezgames.covideo.component.Dimension.Ez3D.*
 
 import java.util.UUID
+import scala.annotation.targetName
 
 
 /**
@@ -40,7 +41,7 @@ object People:
     def turn(newAcceleration: Acceleration): Person =
       copy(solid = solid.turn(newAcceleration))
 
-  case class PersonConfig(mobileConfig: MobileConfig)
+  case class PersonConfig(solidConfig: SolidConfig)
 
   object PersonId:
     def apply(): PersonId =
@@ -48,11 +49,18 @@ object People:
 
   extension[A] (population: Population[A])
 
+    @targetName("populationSize")
+    def number: Int =
+      population.size
+
     def values: Iterable[A] =
       population.values
 
     def add(kv: (PersonId, A)): Population[A] =
       population + kv
+
+    def merge(other: Population[A]): Population[A] =
+      population ++ other
 
     def map[B](f: A => B): Population[B] =
       Population.map(population)(f)
@@ -67,6 +75,9 @@ object People:
         case (map, person) =>
           map + (person.id -> person)
       }
+
+    def apply[T](people: (PersonId, T)*): Population[T] =
+      Map.from(people)
 
     def empty[T]: Population[T] =
       Map.empty[PersonId, T]
