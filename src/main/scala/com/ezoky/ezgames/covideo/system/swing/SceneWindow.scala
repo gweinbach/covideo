@@ -112,9 +112,9 @@ private class DrawingPanel()
         component <- scene.components
       yield
         //        println(s"component=$component")
-        val componentTransformation =
-          new ComponentTransformation(component)
-            with ModelTransformation(component) {}
+//        val componentTransformation =
+//          new ComponentTransformation(component)
+//            with ModelTransformation(component) {}
 
         val screenShape = pipeline3D.run(component)
         for

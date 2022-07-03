@@ -13,7 +13,7 @@ object Config:
   val AreaHeight = 600
   val AreaDepth = 600
   
-  val NearDistance = 500
+  val NearDistance = 1500
 
   val Area =
     AreaConfig(
@@ -38,7 +38,7 @@ object Config:
 //      sceneSize = SceneDimension(width = 1200 px, height = 800 px), // DefaultScreenSize
       sceneSize = ScreenDimension(width = AreaWidth px, height = AreaHeight px), // DefaultScreenSize
 //      margin = Margin(top = 100 px, left = 100 px, bottom = 100 px, right = 100 px)
-      zoomRatio = 1.0,
+      zoomRatio = 1.0, // not used in 3D
       camera = Camera
     )
   val World =

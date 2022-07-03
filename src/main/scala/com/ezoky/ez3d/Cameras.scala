@@ -37,6 +37,8 @@ trait Cameras[T: Numeric : Trig : Precision]
 
     def withFar(far: T): ViewFrustum
 
+    lazy val depth: T = far - near
+
     lazy val projectionMatrix: Matrix
 
     lazy val minXn: T
@@ -132,6 +134,8 @@ trait Cameras[T: Numeric : Trig : Precision]
 
     val viewFrustum: ViewFrustum
 
+    def withPosition(newPosition: SpacePoint): Camera
+
     def withViewFrustum(newViewFrustum: ViewFrustum): Camera
 
     final lazy val eye: SpaceVector = SpaceVector(position)
@@ -161,11 +165,13 @@ trait Cameras[T: Numeric : Trig : Precision]
                                     right: NonNullSpaceVector = NonNullSpaceVector.OneX,
                                     basis: OrthonormalBasis = Basis.Normal,
                                     viewFrustum: ViewFrustum = ViewFrustum.Default)
-      extends Camera:
+      extends Camera :
+      final override def withPosition(newPosition: SpacePoint): Camera =
+        copy(position = newPosition)
       final override def withViewFrustum(newViewFrustum: ViewFrustum): Camera =
         copy(viewFrustum = newViewFrustum)
 
-    val Default: Camera =SimpleCamera()
+    val Default: Camera = SimpleCamera()
 
   object Perspective:
 
@@ -223,15 +229,22 @@ trait Cameras[T: Numeric : Trig : Precision]
       final override val bottom = -top
       final override val left = -right
 
+      println(s"camera: near=$near, far=$far, depth = $depth")
       final override def withNear(newNear: T): SymetricViewFrustum =
-        copy(near =
-          if (newNear > _0) then newNear else near
-        )
+        if newNear == this.near then
+          this
+        else
+          val near = if (newNear > _0) then newNear else this.near
+          val far = near + depth
+          copy(near = near, far = far)
 
       final override def withFar(newFar: T): SymetricViewFrustum =
-        copy(far =
-          if (newFar > near) then newFar else newFar
-        )
+        if newFar == this.far then
+          this
+        else
+          val far = if (newFar - depth > _0) then newFar else this.far
+          val near = far - depth
+          copy(near = near, far = far)
 
 
     object ViewFrustum:
@@ -316,7 +329,10 @@ trait Cameras[T: Numeric : Trig : Precision]
                                     right: NonNullSpaceVector,
                                     basis: OrthonormalBasis,
                                     viewFrustum: ViewFrustum)
-      extends Camera:
+      extends Camera :
+      final override def withPosition(newPosition: SpacePoint): Camera =
+        copy(position = newPosition)
+
       final override def withViewFrustum(newViewFrustum: ViewFrustum): Camera =
         copy(viewFrustum = newViewFrustum)
 

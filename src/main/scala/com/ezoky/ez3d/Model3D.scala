@@ -212,22 +212,24 @@ trait Model3D[T: Numeric : Precision]
 
       val screenVertices = shape.vertices.map {
         v =>
-          //          t <-  transformVertex(clippingMatrix, v)
-          for
-            worldV <- modelModelMatrix(v)
-//            _ = println(s"worldV=$worldV")
-            cameraV <- viewMatrix(worldV)
-//            _ = println(s"cameraV=$cameraV")
-            projectionV <- projectionMatrix(cameraV)
-//            _ = println(s"projectionV=$projectionV")
-            flippedV <- windowFlip(projectionV)
-//            _ = println(s"flippedV=$flippedV")
-            planeV <- windowTranslation(flippedV)
-//            _ = println(s"planeV=$planeV")
-            windowV <- windowScaling(planeV)
-//            _ = println(s"windowV=$windowV")
-          yield
-            windowV.toScreen
+           for
+//             projectedV <- clippingMatrix(v)
+//             windowV <- windowMatrix(projectedV)
+
+             worldV <- modelModelMatrix(v)
+//             _ = println(s"worldV=$worldV")
+             cameraV <- viewMatrix(worldV)
+//             _ = println(s"cameraV=$cameraV")
+             projectionV <- projectionMatrix(cameraV)
+//             _ = println(s"projectionV=$projectionV")
+             flippedV <- windowFlip(projectionV)
+//             _ = println(s"flippedV=$flippedV")
+             planeV <- windowTranslation(flippedV)
+//             _ = println(s"planeV=$planeV")
+             windowV <- windowScaling(planeV)
+//             _ = println(s"windowV=$windowV")
+           yield
+             windowV.toScreen
       }
 
 
@@ -239,16 +241,23 @@ trait Model3D[T: Numeric : Precision]
     private def transformVertex(clippingMatrix: Matrix,
                                 vertex: Vertex): Option[ScreenVertex] =
       for
-        sourcePosition <- transformPoint(clippingMatrix, vertex.s)
-        targetPosition <- transformPoint(clippingMatrix, vertex.t)
+        projectedVertex <- clippingMatrix(vertex)
+        windowVertex <- windowMatrix(projectedVertex)
       yield
-        ScreenVertex(sourcePosition, targetPosition)
+        windowVertex.toScreen
 
-    private def transformPoint(clippingMatrix: Matrix,
-                               point: SpacePoint): Option[ScreenPosition] =
-      for
-        clipPoint <- (clippingMatrix × point.homogeneous).cartesian
-        windowPoint <- (windowMatrix × clipPoint.toXY.homogeneous).cartesian
-      yield
-        ScreenPosition(windowPoint.x px, windowPoint.y px)
+//
+//      for
+//        sourcePosition <- transformPoint(clippingMatrix, vertex.s)
+//        targetPosition <- transformPoint(clippingMatrix, vertex.t)
+//      yield
+//        ScreenVertex(sourcePosition, targetPosition)
+//
+//    private def transformPoint(clippingMatrix: Matrix,
+//                               point: SpacePoint): Option[ScreenPosition] =
+//      for
+//        clipPoint <- (clippingMatrix × point.homogeneous).cartesian
+//        windowPoint <- (windowMatrix × clipPoint.toXY.homogeneous).cartesian
+//      yield
+//        ScreenPosition(windowPoint.x px, windowPoint.y px)
 

@@ -85,3 +85,27 @@ trait Shapes[T: Numeric: Precision]
         Vertex(SpacePoint(halfWidth, -halfHeight, -halfDepth), SpacePoint(halfWidth, -halfHeight, halfDepth)),
         Vertex(SpacePoint(halfWidth, halfHeight, -halfDepth), SpacePoint(halfWidth, halfHeight, halfDepth)),
       )
+      
+  case class Cross(width: T,
+                   height: T,
+                   depth: T)
+    extends Shape:
+
+    val halfWidth = width / __2
+    val halfHeight = height / __2
+    val halfDepth = depth / __2
+
+    override val vertices: Vertices =
+      scala.Vector(
+        Vertex(SpacePoint(-halfWidth, _0, _0), SpacePoint(halfWidth, _0, _0)),
+        Vertex(SpacePoint(_0, -halfHeight, _0), SpacePoint(_0, halfHeight, _0)),
+        Vertex(SpacePoint(_0, _0, -halfDepth), SpacePoint(_0, _0, halfDepth))
+      )
+      
+  object Cross:
+    
+    def Uniform(size: T): Cross =
+      Cross(size, size, size)
+      
+    lazy val Normal: Cross =
+      Uniform(__1)

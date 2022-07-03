@@ -48,6 +48,15 @@ trait Space[T: Numeric : Precision]:
     infix def +(v: SpaceVector): SpacePoint =
       SpacePoint(x + v.x, y + v.y, z + v.z)
 
+    def withX(x: T): SpacePoint =
+      copy(x = x)
+
+    def withY(y: T): SpacePoint =
+      copy(y = y)
+
+    def withZ(z: T): SpacePoint =
+      copy(z = z)
+
     override def equals(obj: Any): Boolean =
       obj match
         case that: SpacePoint if (that != null) =>

@@ -16,7 +16,7 @@ case class Game(world: World,
   def withWorld(world: World): Game =
     copy(world = world)
 
-
 case class GameConfig(populationSize: Int,
                       personConfig: PersonConfig,
                       worldConfig: WorldConfig)
+

@@ -56,10 +56,12 @@ object People:
     def values: Iterable[A] =
       population.values
 
-    def add(kv: (PersonId, A)): Population[A] =
+    @targetName("add")
+    infix def +(kv: (PersonId, A)): Population[A] =
       population + kv
 
-    def merge(other: Population[A]): Population[A] =
+    @targetName("populationMerge")
+    infix def ++(other: Population[A]): Population[A] =
       population ++ other
 
     def map[B](f: A => B): Population[B] =

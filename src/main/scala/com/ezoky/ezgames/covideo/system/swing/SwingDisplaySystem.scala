@@ -25,15 +25,22 @@ object SwingDisplaySystem
     ScreenDimension(screenWidth, screenHeight)
 
 
-  override def controlModel: ControlModel =
-    ControlWindow().model
+  override def controlModel: IO[ControlModel] =
+    IO {
+      ControlWindow().getModel()
+    }
 
-  override def initUI(): IO[Unit] =
+  override def updateControlModel(model: ControlModel): IO[Unit] =
+    IO {
+      ControlWindow().updateModel(model)
+    }
+
+  override def displayControl(): IO[Unit] =
     IO {
       ControlWindow().display
     }
 
-  override def drawScene(scene: Scene): IO[Unit] =
+  override def displayScene(scene: Scene): IO[Unit] =
     IO {
       // side effects, not pure
       val mainWindow = SceneWindow(scene.id)
@@ -46,3 +53,4 @@ object SwingDisplaySystem
     healthCondition match
       case HealthCondition.Healthy => SwingSprite.SmileySunglasses
       case HealthCondition.Sick => SwingSprite.SmileySick
+      case _ => SwingSprite.SmileySunglasses

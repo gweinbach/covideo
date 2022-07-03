@@ -11,9 +11,13 @@ package com.ezoky.ezgames.covideo.component
 trait HealthCondition 
 
 object HealthCondition:
+  
+  trait Alive extends HealthCondition
 
-  case object Healthy extends HealthCondition
+  case object Healthy extends Alive
 
-  case object Sick extends HealthCondition
+  case object Sick extends Alive
 
-  case object Healed extends HealthCondition
+  case object Healed extends Alive
+
+  case object Dead extends HealthCondition

@@ -51,7 +51,7 @@ case class Scene(id: SceneId = SceneId(),
 
   def withSprite(id: PersonId,
                  sprite: Sprite): Scene =
-    copy(sprites = sprites.add(id -> sprite))
+    copy(sprites = sprites + (id -> sprite))
 
   def withSprites(sprites: Population[Sprite]): Scene =
     sprites.foldLeft(this) {
@@ -61,7 +61,7 @@ case class Scene(id: SceneId = SceneId(),
 
   def withComponent(id: PersonId,
                     component: Component3D): Scene =
-    copy(components = components.add(id -> component))
+    copy(components = components + (id -> component))
 
   def withComponents(components: Population[Component3D]): Scene =
     components.foldLeft(this) {
@@ -103,7 +103,8 @@ case class CameraConfig(position: PlanePoint,
 
 given WindowView[Scene] with
   extension (scene: Scene)
-    def windowOrigin: PlanePoint = PlanePoint(-1, -1) // TopLeft = PlanePoint(-1, 1)
+    // Scene is projected on a square between -1 & 1
+    def windowOrigin: PlanePoint = PlanePoint(-1, -1) // TopLeft = PlanePoint(-1, -1)
     def flipX: Boolean = false
     def flipY: Boolean = false
     def screenDimension: ScreenDimension = scene.dimension

@@ -16,25 +16,11 @@ import com.ezoky.ezgames.covideo.entity.People.{PersonId, Population}
  */
 case class World(area: Box,
                  scene: Scene,
-                 id: PersonId = PersonId()):
+                 id: PersonId = PersonId())
+  extends Entity[PersonId]:
 
   def withScene(scene: Scene): World =
-    copy(scene = scene.withComponents(worldBoundaries))
-
-  lazy val worldBoundaries: Population[Component3D] =
-    val boundaries =
-      Parallelepiped(
-        width = area.width.value.baseValue,
-        height = area.height.value.baseValue,
-        depth = area.depth.value.baseValue
-      )
-    Population(
-      id -> Component3D(
-        SpacePoint(area.width.value.baseValue / Two, area.height.value.baseValue / 2, -boundaries.depth / Two),
-        Basis.Normal,
-        boundaries
-      )
-    )
+    copy(scene = scene)
 
 case class WorldConfig(areaConfig: AreaConfig,
                        sceneConfig: SceneConfig)
