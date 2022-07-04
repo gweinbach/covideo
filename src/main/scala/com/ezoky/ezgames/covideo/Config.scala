@@ -9,9 +9,9 @@ import com.ezoky.ezgames.covideo.entity.People.*
 
 object Config:
   
-  val AreaWidth = 800
-  val AreaHeight = 600
-  val AreaDepth = 600
+  val AreaWidth = 1200
+  val AreaHeight = 1000
+  val AreaDepth = 800
   
   val NearDistance = 1500
 
@@ -51,7 +51,8 @@ object Config:
   )
   val Solid =
     SolidConfig(
-      mobileConfig = Mobile
+      mobileConfig = Mobile,
+      spinRange = SpinRange(-0.1 spin, 0.1 spin)
     )
   val Person =
     PersonConfig(

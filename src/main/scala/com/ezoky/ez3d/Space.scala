@@ -86,6 +86,9 @@ trait Space[T: Numeric : Precision]:
     final lazy val isNull: Boolean =
       SpaceVector.isNullTuple(x, y, z)
 
+    final lazy val nonNull: Option[NonNullSpaceVector] =
+      SpaceVector.nonNull(this)
+
     final lazy val magnitude: T =
       _SpatialNumeric.sqrt(this ⋅ this)
 

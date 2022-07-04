@@ -14,7 +14,8 @@ import com.ezoky.ezgames.covideo.component.Dimension.Ez3D.*
  * @author gweinbach on 19/06/2022
  */
 case class Solid(mobile: Mobile,
-                 basis: Basis):
+                 basis: Basis,
+                 spin: Spin):
 
   def move: Solid =
     copy(mobile = mobile.move)
@@ -25,7 +26,8 @@ case class Solid(mobile: Mobile,
   def turn(newAcceleration: Acceleration): Solid =
     copy(mobile = mobile.turn(newAcceleration))
 
-  def spin(newBasis: Basis): Solid =
-    copy(basis = newBasis)
+  def rotate: Solid =
+    copy(basis = spin.rotate(basis))
 
-case class SolidConfig(mobileConfig: MobileConfig)
+case class SolidConfig(mobileConfig: MobileConfig,
+                       spinRange: SpinRange)

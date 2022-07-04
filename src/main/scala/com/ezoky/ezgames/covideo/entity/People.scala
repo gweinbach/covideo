@@ -40,6 +40,9 @@ object People:
 
     def turn(newAcceleration: Acceleration): Person =
       copy(solid = solid.turn(newAcceleration))
+      
+    def rotate: Person =
+      copy(solid = solid.rotate)
 
   case class PersonConfig(solidConfig: SolidConfig)
 

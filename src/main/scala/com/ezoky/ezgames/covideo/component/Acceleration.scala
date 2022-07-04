@@ -3,7 +3,9 @@ package com.ezoky.ezgames.covideo.component
 import Generate.*
 import Dimension.{AccelerationValue, SpeedValue}
 
-import scala.math.Ordering.Implicits.*
+import spire.*
+import spire.math.*
+import spire.implicits.*
 
 case class Acceleration(xAcceleration: XAcceleration,
                         yAcceleration: YAcceleration,

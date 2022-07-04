@@ -89,16 +89,26 @@ trait H[T: Numeric : Precision]
               imaginary: SpaceVector): Quaternion =
       new Quaternion(real, imaginary.x, imaginary.y, imaginary.z)
 
-    def fromRotationVector(axis: SpaceVector,
-                           angle: Radians)
-                          (using Trig[T]): Option[Quaternion] =
+    def fromRotationVectorAndAngle(axis: NonNullSpaceVector,
+                                   angle: Radians)
+                                  (using Trig[T]): Quaternion =
       val sinA = sin(angle / 2)
       val cosA = cos(angle / 2)
 
       Quaternion(
         cosA,
         axis * sinA
-      ).normalized
+      ).normalized.get // if axis is not null quaternion cannot be null
+
+    /**
+     * The rotation angle is the magnitude of the rotation axis
+     */
+    def fromRotationVector(axis: NonNullSpaceVector)
+                          (using Trig[T]): Quaternion =
+
+      val angle = (axis.magnitude radians)
+      fromRotationVectorAndAngle(axis.normalized, angle)
+
 
     val Zero = Quaternion(_0, _0, _0, _0)
     val One = Quaternion(__1, _0, _0, _0)

@@ -21,39 +21,33 @@ import scala.util.Random
  * @author gweinbach on 15/11/2020
  * @since 0.1.0
  */
-abstract class Dimension[_DimensionType: Precision: Numeric: Trig: Generated: Ez3D: Epsilon]:
+abstract class Dimension[T: Precision: Numeric: Trig: Generated: Ez3D: Epsilon]:
 
-  type DimensionBase = _DimensionType
+  type DimensionBase = T
 
-  // everything is this section depends on the choice made for _DimensionType
-  // and must be updated if this changes
-//  private type _DimensionType = Double
-//  private val _DimensionNumeric: Fractional[_DimensionType] = summon[Fractional[_DimensionType]]
-  private val _DimensionNumeric: Numeric[_DimensionType] = summon[Numeric[_DimensionType]]
-  private val _DimensionOrder: Order[_DimensionType] = summon[Order[_DimensionType]]
-//  private val _Epsilon: _DimensionType = 1E-16 // 17 significant digits for Double
-
-//  private def _Random: _DimensionType = Random().nextDouble()
+  // Depends on actual Dimension type and must be specialized therefore
+  def modulo(a: T, b: T): T
 
   // rather use explicit conversion even if implicit one is private
-  protected def _NumberToDimensionConverter[N: Numeric]: (N) => _DimensionType
+  protected def _NumberToDimensionConverter[N: Numeric]: (N) => T
 
 //  private given [N: Numeric]: Conversion[N, _DimensionType] with
 //    def apply(n: N): _DimensionType = summon[Numeric[N]].toDouble(n)
 
-  private val _GeneratedDimension: Generated[_DimensionType] = summon[Generated[_DimensionType]]
+  // end of Dimension type specific implementation
 
-//  given Precision[_DimensionType] = Precision(1E-12)
-
+  
   // This means that _DimensionType is the same in 3D libraries
-  val Ez3D: Ez3D[_DimensionType] = summon[Ez3D[_DimensionType]]
+  val Ez3D: Ez3D[T] = summon[Ez3D[T]]
   import Ez3D.*
 
-  // end of _DimensionType choice's dependencies
-
-  private val _0: _DimensionType = _DimensionNumeric.zero
-  private val __1: _DimensionType = _DimensionNumeric.one
-  private val __2: _DimensionType = _DimensionNumeric.fromInt(2)
+  private val _DimensionNumeric: Numeric[T] = summon[Numeric[T]]
+  private val _DimensionOrder: Order[T] = summon[Order[T]]
+  private val _GeneratedDimension: Generated[T] = summon[Generated[T]]
+  
+  private val _0: T = _DimensionNumeric.zero
+  private val __1: T = _DimensionNumeric.one
+  private val __2: T = _DimensionNumeric.fromInt(2)
 
   val Zero: DimensionBase = _0
   val One: DimensionBase = __1
@@ -67,8 +61,8 @@ abstract class Dimension[_DimensionType: Precision: Numeric: Trig: Generated: Ez
 
     case Bounded
 
-    private[Dimension] def normalizePosition(value: _DimensionType,
-                                             boundary: SizeValue): _DimensionType =
+    private[Dimension] def normalizePosition(value: T,
+                                             boundary: SizeValue): T =
       this match
         case Flat =>
           _0
@@ -80,13 +74,14 @@ abstract class Dimension[_DimensionType: Precision: Numeric: Trig: Generated: Ez
           boundary.bounce(value)
 
 
-  opaque type SizeValue = _DimensionType
+  // SizeValue
+  opaque type SizeValue = T
 
   object SizeValue:
 
     val Zero: SizeValue = _0
 
-    def apply(size: _DimensionType): SizeValue = size.abs
+    def apply(size: T): SizeValue = size.abs
 
 
   extension (sizeValue: SizeValue)
@@ -125,11 +120,6 @@ abstract class Dimension[_DimensionType: Precision: Numeric: Trig: Generated: Ez
     @targetName("zoom_SizeValue")
     def zoom[N: Numeric](ratio: N): SizeValue =
       sizeValue * _NumberToDimensionConverter.apply(ratio)
-//      sizeValue * ratio
-
-//    @deprecated("use GeneratedPositionValue instead")
-//    def randomPosition(using Geometry): PositionValue =
-//      relativePosition(_Random)
 
     inline def minPosition(using Geometry): PositionValue =
       relativePosition(_0)
@@ -138,7 +128,7 @@ abstract class Dimension[_DimensionType: Precision: Numeric: Trig: Generated: Ez
       geometry match
         case Geometry.Flat => minPosition
         case _ if (sizeValue == SizeValue.Zero) => minPosition
-        case _ => relativePosition(__1 - ε[_DimensionType])
+        case _ => relativePosition(__1 - ε[T])
 
     def isOutOfBounds(position: PositionValue): Boolean =
       (position < PositionValue.Zero) || (position >= sizeValue)
@@ -149,7 +139,7 @@ abstract class Dimension[_DimensionType: Precision: Numeric: Trig: Generated: Ez
     def axisVector(axis: Axis): SpaceVector =
       SpaceVector(sizeValue, axis)
 
-    private[Dimension] final def remainder(dimensionValue: _DimensionType): _DimensionType =
+    private[Dimension] final def remainder(dimensionValue: T): T =
       if (isNull) {
         _0
       }
@@ -161,7 +151,7 @@ abstract class Dimension[_DimensionType: Precision: Numeric: Trig: Generated: Ez
       }
 
     @tailrec
-    private[Dimension] final def bounce(dimensionValue: _DimensionType): _DimensionType =
+    private[Dimension] final def bounce(dimensionValue: T): T =
       if (isNull)
         _0
       else if (dimensionValue < _0)
@@ -169,12 +159,7 @@ abstract class Dimension[_DimensionType: Precision: Numeric: Trig: Generated: Ez
 
       else if (dimensionValue >= sizeValue)
         val remainder = (dimensionValue - sizeValue) fmod sizeValue
-//        println(s"dimensionValue=$dimensionValue")
-//        println(s"sizeValue=$sizeValue")
-//        println(s"(dimensionValue - sizeValue)=${(dimensionValue - sizeValue)}")
-//        println(s"remainder=$remainder")
         if (((dimensionValue - sizeValue) / sizeValue).floor.toInt % 2 == 0)
-//          println(s"sizeValue - remainder=${sizeValue - remainder}")
           sizeValue - remainder
         else
           remainder
@@ -185,16 +170,17 @@ abstract class Dimension[_DimensionType: Precision: Numeric: Trig: Generated: Ez
   val GeneratedSizeValue: Generated[SizeValue] = _GeneratedDimension
 
   val NumericSizeValue: Numeric[SizeValue] = _DimensionNumeric
+  // end SizeValue
 
 
   // Position
-  opaque type PositionValue = _DimensionType
+  opaque type PositionValue = T
 
   object PositionValue:
 
     val Zero: PositionValue = _0
 
-    def apply(position: _DimensionType,
+    def apply(position: T,
               withinBoundary: SizeValue,
               usingGeometry: Geometry): PositionValue =
       usingGeometry.normalizePosition(position, withinBoundary)
@@ -257,7 +243,7 @@ abstract class Dimension[_DimensionType: Precision: Numeric: Trig: Generated: Ez
 
 
   // Speed
-  opaque type SpeedValue = _DimensionType
+  opaque type SpeedValue = T
 
   object SpeedValue:
 
@@ -267,7 +253,7 @@ abstract class Dimension[_DimensionType: Precision: Numeric: Trig: Generated: Ez
                          max: SpeedValue): Generated[SpeedValue] =
       _GeneratedDimension.map(d => min + (d * (max - min)))
 
-    def apply(distance: _DimensionType,
+    def apply(distance: T,
               duration: DurationValue = DurationValue.One): SpeedValue =
       distance / _NumberToDimensionConverter(using Numeric[DurationValue])(duration)
 
@@ -284,12 +270,12 @@ abstract class Dimension[_DimensionType: Precision: Numeric: Trig: Generated: Ez
       to(speed)
 
 
-  given Ordering[SpeedValue] =
+  given Order[SpeedValue] =
     (x: SpeedValue, y: SpeedValue) => x.compare(y)
+  // end SpeedValue
 
-
-  // Acceleration
-  opaque type AccelerationValue = _DimensionType
+  // AccelerationValue
+  opaque type AccelerationValue = T
 
   object AccelerationValue:
 
@@ -299,7 +285,7 @@ abstract class Dimension[_DimensionType: Precision: Numeric: Trig: Generated: Ez
                          max: AccelerationValue): Generated[AccelerationValue] =
       _GeneratedDimension.map(d => min + (d * (max - min)))
 
-    def apply(acceleration: _DimensionType): AccelerationValue =
+    def apply(acceleration: T): AccelerationValue =
       acceleration
 
 
@@ -308,17 +294,52 @@ abstract class Dimension[_DimensionType: Precision: Numeric: Trig: Generated: Ez
       SpeedValue(speed + acceleration)
 
 
-  given Ordering[AccelerationValue] =
+  given Order[AccelerationValue] =
     (x: AccelerationValue, y: AccelerationValue) => x.compare(y)
+  // end AccelerationValue
+
+  // Spin
+  opaque type SpinValue = T
+
+  object SpinValue:
+
+    val Zero: SpinValue = _0
+
+    def generatedBetween(min: SpinValue,
+                         max: SpinValue): Generated[SpinValue] =
+      _GeneratedDimension.map(d => min + (d * (max - min)))
+
+    def apply(distance: T,
+              duration: DurationValue = DurationValue.One): SpinValue =
+      distance / _NumberToDimensionConverter(using Numeric[DurationValue])(duration)
 
 
-  def modulo(a: _DimensionType, b: _DimensionType): _DimensionType
+  extension (spin: SpinValue)
 
-  /** Utilities methods added to [[_DimensionType]] */
-  extension (lhs: _DimensionType)
+    @targetName("spinToBase")
+    def baseValue: DimensionBase =
+      spin
 
-    // % operqtor is not defined for floating numbers in spire
-    infix def fmod(rhs: _DimensionType): _DimensionType =
+  //    def on(position: PositionValue)
+//          (using
+//           boundary: SizeValue,
+//           geometry: Geometry): PositionValue =
+//      PositionValue(position + spin, boundary, geometry)
+//
+//    def accelerate(to: AccelerationValue): SpinValue =
+//      to(spin)
+
+
+  given Order[SpinValue] =
+    (x: SpinValue, y: SpinValue) => x.compare(y)
+  // end SpinValue
+
+
+  /** Utilities methods added to [[T]] */
+  extension (lhs: T)
+
+    // % operator is not defined for floating numbers in spire
+    infix def fmod(rhs: T): T =
       modulo(lhs, rhs)
 
     @targetName("baseToSize")
@@ -334,11 +355,16 @@ abstract class Dimension[_DimensionType: Precision: Numeric: Trig: Generated: Ez
     def acceleration: AccelerationValue =
       AccelerationValue(lhs)
 
+    def spin: SpinValue =
+      SpinValue(lhs)
+
   /** Utilities methods added to [[_StepType]] */
   extension (durationValue: _StepType)
 
     def steps: DurationValue =
       DurationValue(durationValue)
+
+
 
 given Precision[Double] = Precision(1E-10d)
 

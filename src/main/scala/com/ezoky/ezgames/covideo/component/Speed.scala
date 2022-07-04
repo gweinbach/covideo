@@ -7,7 +7,9 @@ package com.ezoky.ezgames.covideo.component
 import com.ezoky.ezgames.covideo.component.Dimension.*
 import com.ezoky.ezgames.covideo.component.Generate.*
 
-import scala.math.Ordering.Implicits.*
+import spire.*
+import spire.math.*
+import spire.implicits.*
 
 /**
  * @author gweinbach on 14/11/2020

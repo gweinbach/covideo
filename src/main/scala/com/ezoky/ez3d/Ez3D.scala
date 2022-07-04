@@ -22,12 +22,12 @@ class Ez3D[T: Numeric : Trig : Precision]
 
   // Vector Transformations
   case class VectorRotation(angle: Radians,
-                            axis: SpaceVector) extends Rotation[SpaceVector] :
+                            axis: NonNullSpaceVector) extends Rotation[SpaceVector] :
 
-    private val quaternion = Quaternion.fromRotationVector(axis, angle)
+    private val quaternion = Quaternion.fromRotationVectorAndAngle(axis, angle)
 
     final override def rotate(v: SpaceVector): Option[SpaceVector] =
-      quaternion.flatMap(_.rotate(v))
+      quaternion.rotate(v)
 
   case class VectorTranslation(translation: SpaceVector)
     extends Translation[SpaceVector] :
@@ -41,15 +41,13 @@ class Ez3D[T: Numeric : Trig : Precision]
   // Point Transformations
   case class PointRotation(center: SpacePoint,
                            angle: Radians,
-                           axis: SpaceVector) extends Rotation[SpacePoint] :
+                           axis: NonNullSpaceVector) extends Rotation[SpacePoint] :
 
-    private val quaternion = Quaternion.fromRotationVector(axis, angle)
+    private val quaternion = Quaternion.fromRotationVectorAndAngle(axis, angle)
 
     final override def rotate(v: SpacePoint): Option[SpacePoint] =
-      for
-        vr <- quaternion.flatMap(_.rotate(SpaceVector(center, v)))
-      yield
-        vr.dest(center)
+      quaternion.rotate(SpaceVector(center, v)).map(_.dest(center))
+
 
   case class PointTranslation(translation: SpaceVector)
     extends Translation[SpacePoint] :
@@ -63,16 +61,16 @@ class Ez3D[T: Numeric : Trig : Precision]
   // Vertex Transformations
   case class VertexRotation(center: SpacePoint,
                             angle: Radians,
-                            axis: SpaceVector) extends Rotation[Vertex] :
+                            axis: NonNullSpaceVector) extends Rotation[Vertex] :
 
-    private val quaternion = Quaternion.fromRotationVector(axis, angle)
+    private val quaternion = Quaternion.fromRotationVectorAndAngle(axis, angle)
 
     final override def rotate(v: Vertex): Option[Vertex] =
       for
-        vs <- quaternion.flatMap(_.rotate(SpaceVector(center, v.s)))
-        vt <- quaternion.flatMap(_.rotate(SpaceVector(center, v.t)))
+        rs <- quaternion.rotate(SpaceVector(center, v.s))
+        rt <- quaternion.rotate(SpaceVector(center, v.t))
       yield
-        Vertex(vs.dest(center), vt.dest(center))
+        Vertex(rs.dest(center), rt.dest(center))
 
 
   case class VertexTranslation(translation: SpaceVector)
