@@ -29,8 +29,8 @@ object Config:
       position = PlanePoint(AreaWidth / 2, AreaHeight / 2),
       near = NearDistance,
       far = NearDistance + AreaDepth,
-      top = AreaHeight,
-      right = AreaWidth
+      top = AreaHeight / 2,
+      right = AreaWidth / 2
     )
   val Scene =
     SceneConfig(

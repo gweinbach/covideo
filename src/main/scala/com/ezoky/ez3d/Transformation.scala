@@ -44,17 +44,10 @@ trait Translation[V]
   def translate(v: V): V
 
 
-class Transformations[V](rotation: Rotation[V],
-                         translation: Translation[V]):
-
-  val identity = Identity[V]()
-
-
-trait Transformable[V <: Transformable[V]]:
-  self: V =>
+extension [V](v: V)
 
   final def rotate(using rotation: Rotation[V]): Option[V] =
-    rotation.rotate(self)
+    rotation.rotate(v)
 
   final def translate(using translation: Translation[V]): V =
-    translation.translate(self)
+    translation.translate(v)

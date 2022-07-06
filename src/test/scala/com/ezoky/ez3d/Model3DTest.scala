@@ -28,10 +28,6 @@ class Model3DTest
 
   "A Point in Space" can "be projected on a scene using a camera" in {
 
-    val aPoint = SpacePoint(0, 0, 0)
-    val aVertex = Vertex(aPoint, SpacePoint(0, 0, -1))
-    val aShape = Shape(aVertex)
-
     val viewFrustum =
       Perspective.ViewFrustum.fromSymetricPlanes(
         nearDistance = 1,
@@ -40,7 +36,7 @@ class Model3DTest
         rightDistance = 1
       ).get
     val camera: Camera = Perspective.LookAtCamera.safe(
-      position = SpacePoint(1,1,2),
+      position = SpacePoint(1,1,1),
       target = SpacePoint(1,1,0),
       upVector = SpaceVector.OneY,
       viewFrustum
@@ -75,6 +71,25 @@ class Model3DTest
 
     val pipeline3D = new Pipeline3D(camera, window)
 
+    val vertexCenter = Vertex(SpacePoint(0, 0, 0), SpacePoint(0, 0, -1))
+    val simpleShape = Shape(vertexCenter)
 
-    assert(pipeline3D.run(aShape) === ScreenShape(ScreenVertex(ScreenPosition(100 px, 50px), ScreenPosition(100 px, 50px))))
+    assert(pipeline3D.run(simpleShape) === ScreenShape(ScreenVertex(ScreenPosition(100 px, 50px), ScreenPosition(100 px, 50px))))
+
+    val diagonalShape =
+      Shape(
+        Vertex(SpacePoint(-1, -1, 0), SpacePoint(0, 0, -1)),
+        Vertex(SpacePoint(-1, 1, 0), SpacePoint(0, 0, -1)),
+        Vertex(SpacePoint(1, -1, 0), SpacePoint(0, 0, -1)),
+        Vertex(SpacePoint(1, 1, 0), SpacePoint(0, 0, -1))
+      )
+    val screenDiagonalShape =
+      ScreenShape(
+        ScreenVertex(ScreenPosition(0px, 0 px), ScreenPosition(100 px, 50px)),
+        ScreenVertex(ScreenPosition(0 px, 100px), ScreenPosition(100 px, 50px)),
+        ScreenVertex(ScreenPosition(200 px, 0 px), ScreenPosition(100 px, 50px)),
+        ScreenVertex(ScreenPosition(200 px, 100 px), ScreenPosition(100 px, 50px))
+      )
+
+    assert(pipeline3D.run(diagonalShape) === screenDiagonalShape)
   }

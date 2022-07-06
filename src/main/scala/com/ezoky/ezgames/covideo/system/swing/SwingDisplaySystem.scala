@@ -43,10 +43,10 @@ object SwingDisplaySystem
   override def displayScene(scene: Scene): IO[Unit] =
     IO {
       // side effects, not pure
-      val mainWindow = SceneWindow(scene.id)
-      mainWindow.updateTitle(scene.name)
-      mainWindow.resize(scene.preferredDimension)
-      mainWindow.draw(scene)
+      val sceneWindow = SceneWindow(scene.id)
+      sceneWindow.updateTitle(scene.name)
+      sceneWindow.resizeScene(scene.preferredDimension)
+      sceneWindow.draw(scene)
     }
 
   override def spriteByHealthCondition(healthCondition: HealthCondition): Sprite =

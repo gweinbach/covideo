@@ -81,6 +81,4 @@ class Transformation3DTest extends AnyFlatSpec :
 
     assert((rotation ×: translation) × SpacePoint.OneX.homogeneous === SpacePoint(0, 2, 1).homogeneous)
     assert((translation.inverse ×: rotation.inverse) × SpacePoint(0, 2, 1).homogeneous === SpacePoint.OneX.homogeneous)
-
-
   }

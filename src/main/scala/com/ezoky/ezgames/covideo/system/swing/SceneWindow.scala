@@ -35,23 +35,29 @@ extension (sceneDimension: ScreenDimension)
   private def awtDimension: AWTDimension =
     AWTDimension(sceneDimension.width, sceneDimension.height)
 
+extension (awtDimension: AWTDimension)
+  private def isNull: Boolean =
+    (awtDimension.height == 0) &&
+    (awtDimension.width == 0)
+
 private class SceneWindow()
   extends JFrame:
 
   println("Creating a SceneWindow")
 
   private val panel: DrawingPanel = new DrawingPanel()
-  private var frameSize: AWTDimension = new AWTDimension()
+  private var panelSize: AWTDimension = new AWTDimension()
 
-  initUI()
+  display()
 
-  def resize(size: ScreenDimension): Unit =
-    if (size.awtDimension != frameSize)
-      setSize(
+  def resizeScene(size: ScreenDimension): Unit =
+    if (size.awtDimension != panelSize)
+      panel.setPreferredSize(
         size.awtDimension
       )
-      frameSize = size.awtDimension
-      repaint()
+      panelSize = size.awtDimension
+      pack()
+//      repaint()
 
   def updateTitle(newTitle: String): Unit =
     if (newTitle != getTitle)
@@ -60,12 +66,15 @@ private class SceneWindow()
   def draw(scene: Scene): Unit =
     panel.updateScene(scene)
 
-  private def initUI(): Unit =
-    getContentPane().add(panel)
-    setSize(frameSize)
+  private def display(): Unit =
+    if !panelSize.isNull then
+      panel.setPreferredSize(panelSize)
+
+    add(panel)
     setLocationRelativeTo(null) // centered on screen
-    setResizable(false)
+//    setResizable(false)
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
+    pack()
     setVisible(true)
 
 
