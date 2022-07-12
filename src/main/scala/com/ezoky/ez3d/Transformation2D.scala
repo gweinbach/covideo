@@ -197,7 +197,21 @@ trait Transformation2D[T: Numeric : Trig : Precision]
     val Identity =
       diagonal(__1, __1, __1)
 
+  extension (matrix: Matrix2D)
 
+    def apply(point: PlanePoint): Option[PlanePoint] =
+      (matrix × point.homogeneous).cartesian
+
+    def apply(vertex: PlaneVertex): Option[PlaneVertex] =
+      for
+        s <- matrix(vertex.s)
+        t <- matrix(vertex.t)
+      yield
+        PlaneVertex(s, t)
+
+  
+  // Some 2D trqnsformations
+  
   trait AffineTransformation2D extends Matrix2D :
     final override val x20: T = _0
     final override val x21: T = _0
@@ -252,28 +266,22 @@ trait Transformation2D[T: Numeric : Trig : Precision]
 
 
 
-//  trait AffineRotation2D
-//    extends AffineTransformation2D:
-//    override val x02 = _0
-//    override val x12 = _0
+  trait AffineRotation2D
+    extends AffineTransformation2D:
+    override val x02 = _0
+    override val x12 = _0
 
-//
-//  case class BasisTransformation(basis: Basis)
-//    extends AffineRotation2D:
-//    override val x00 = basis.i.x
-//    override val x01 = basis.i.y
-//    override val x02 = basis.i.w
-//
-//    override val x10 = basis.j.x
-//    override val x11 = basis.j.y
-//    override val x12 = basis.j.w
-//
-//    override val x20 = basis.k.x
-//    override val x21 = basis.k.y
-//    override val x22 = basis.k.w
-//
-//    def inverse: Matrix2D =
-//      transpose
+
+  case class BasisTransformation2D(basis: Basis2D)
+    extends AffineRotation2D:
+    override val x00 = basis.i.x
+    override val x01 = basis.i.y
+
+    override val x10 = basis.j.x
+    override val x11 = basis.j.y
+
+    def inverse: Matrix2D =
+      transpose
 
 
 //  trait AxisRotation

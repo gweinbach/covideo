@@ -59,8 +59,12 @@ class DimensionCheck extends Properties("Dimensions") {
     forAll { (d: Double, boundary: SizeValue, geometry: Geometry) =>
       val position = PositionValue(d, boundary, geometry)
       given Geometry = geometry
-      (boundary == SizeValue.Zero) || (geometry == Geometry.Flat) ||
-        ((position >= boundary.minPosition) && (position < boundary.maxPosition))
+      ("boundary == 0" |: (boundary == SizeValue.Zero)) ||
+      ("geometry == Geometry.Flat" |: (geometry == Geometry.Flat)) ||
+        (
+          (s"position $position >= #2.minPosition" |: (position >= boundary.minPosition)) &&
+          (s"position $position < #2.maxPosition" |:   (position < boundary.maxPosition))
+          )
     }
 
   property("Position is always within boundary limits") =

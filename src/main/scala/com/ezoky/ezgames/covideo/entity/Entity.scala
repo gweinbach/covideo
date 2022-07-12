@@ -9,6 +9,6 @@ trait Entity[I]:
         (that != null) && (that.id == this.id)
       case default =>
         false
-
+   
   override def hashCode(): Int =
     id.hashCode()

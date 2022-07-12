@@ -145,6 +145,9 @@ trait Model3D[T: Numeric : Precision]
 
     final val shape = component.shape
 
+  object ComponentTransformation:
+    def apply[M: ComponentModel](component: M) =
+      new ComponentTransformation(component) with ModelTransformation(component) {}
 
   extension (point: SpacePoint)
     def toXY: PlanePoint = PlanePoint(point.x, point.y)
@@ -153,29 +156,7 @@ trait Model3D[T: Numeric : Precision]
     def withZ(z: T): SpacePoint =
       SpacePoint(point.x, point.y, z)
 
-  extension (matrix: Matrix)
-    def apply(point: SpacePoint): Option[SpacePoint] =
-      (matrix × point.homogeneous).cartesian
-
-    def apply(vertex: Vertex): Option[Vertex] =
-      for
-        s <- matrix(vertex.s)
-        t <- matrix(vertex.t)
-      yield
-        Vertex(s, t)
-
   extension (matrix: Matrix2D)
-
-    def apply(point: PlanePoint): Option[PlanePoint] =
-      (matrix × point.homogeneous).cartesian
-
-    def apply(vertex: PlaneVertex): Option[PlaneVertex] =
-      for
-        s <- matrix(vertex.s)
-        t <- matrix(vertex.t)
-      yield
-        PlaneVertex(s, t)
-
     def apply(point: SpacePoint): Option[PlanePoint] =
       matrix(point.toXY)
 
@@ -203,31 +184,35 @@ trait Model3D[T: Numeric : Precision]
     val cameraMatrix = projectionMatrix ×: viewMatrix
 
     def run[M: ComponentModel](component: M): ScreenShape =
-      // specific to M
-      val componentTransformation = new ComponentTransformation(component) with ModelTransformation(component) {}
+      // specific to component
+      val componentTransformation = ComponentTransformation(component)
       val modelModelMatrix = componentTransformation.modelMatrix
       val shape = componentTransformation.shape
 
-      val clippingMatrix = (projectionMatrix ×: (viewMatrix ×: modelModelMatrix))
+      println(s"componentPosition=${component.position}")
+      println(s"componentBasis=${component.basis}")
+
+      // val clippingMatrix = (projectionMatrix ×: (viewMatrix ×: modelModelMatrix))
 
       val screenVertices = shape.vertices.map {
         v =>
+           println(s"v=$v")
            for
-//             projectedV <- clippingMatrix(v)
-//             windowV <- windowMatrix(projectedV)
+//             projectionV <- clippingMatrix(v)
+//             windowV <- windowMatrix(projectionV)
 
              worldV <- modelModelMatrix(v)
-//             _ = println(s"worldV=$worldV")
+             _ = println(s"worldV=$worldV")
              cameraV <- viewMatrix(worldV)
-//             _ = println(s"cameraV=$cameraV")
+             _ = println(s"cameraV=$cameraV")
              projectionV <- projectionMatrix(cameraV)
-//             _ = println(s"projectionV=$projectionV")
+             _ = println(s"projectionV=$projectionV")
              flippedV <- windowFlip(projectionV)
-//             _ = println(s"flippedV=$flippedV")
+             _ = println(s"flippedV=$flippedV")
              planeV <- windowTranslation(flippedV)
-//             _ = println(s"planeV=$planeV")
+             _ = println(s"planeV=$planeV")
              windowV <- windowScaling(planeV)
-//             _ = println(s"windowV=$windowV")
+             _ = println(s"windowV=$windowV")
            yield
              windowV.toScreen
       }

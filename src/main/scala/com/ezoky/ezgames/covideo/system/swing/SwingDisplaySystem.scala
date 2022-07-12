@@ -27,7 +27,7 @@ object SwingDisplaySystem
 
   override def controlModel: IO[ControlModel] =
     IO {
-      ControlWindow().getModel()
+      ControlWindow().popModel()
     }
 
   override def updateControlModel(model: ControlModel): IO[Unit] =

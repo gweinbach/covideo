@@ -206,6 +206,8 @@ trait Cameras[T: Numeric : Trig : Precision]
           y33 = _0
         )
 
+      final lazy val focalLength: T = near / top
+
       final lazy val minXn: T = left
       final lazy val minXf: T = left * (far / near)
       final lazy val maxXn: T = right
@@ -221,10 +223,10 @@ trait Cameras[T: Numeric : Trig : Precision]
       final lazy val middleZ: T = -(__2 * far * near) / (far + near)
 
 
-    case class SymetricViewFrustum(near: T,
-                                   far: T,
-                                   top: T,
-                                   right: T)
+    case class SymetricViewFrustum private(near: T,
+                                           far: T,
+                                           top: T,
+                                           right: T)
       extends PerspectiveViewFrustum :
       final override val bottom = -top
       final override val left = -right
@@ -247,15 +249,15 @@ trait Cameras[T: Numeric : Trig : Precision]
           copy(near = near, far = far)
 
 
-    object ViewFrustum:
+    object SymetricViewFrustum:
       def fromSymetricPlanes(nearDistance: T,
                              farDistance: T,
                              topDistance: T,
                              rightDistance: T): Option[SymetricViewFrustum] =
         if (nearDistance <= _0) ||
           (farDistance <= nearDistance) ||
-          (topDistance <= 0) ||
-          (rightDistance <= 0) then
+          (topDistance <= _0) ||
+          (rightDistance <= _0) then
           None
         else
           Some(
@@ -288,40 +290,33 @@ trait Cameras[T: Numeric : Trig : Precision]
               top = topDistance,
               right = rightDistance
             )
-            //            new SymetricViewFrustum :
-            //              final override lazy val near = nearDistance
-            //              final override lazy val far = farDistance
-            //
-            //              final lazy val focalLength = __1 / tan(height / (__2 radians))
-            //
-            //              final override lazy val top = near / focalLength
-            //              final override lazy val right = aspectRatio * top
-
             // used for control
-            //              final lazy val alternateProjectionMatrix =
-            //                Matrix(
-            //                  y00 = focalLength / aspectRatio,
-            //                  y01 = _0,
-            //                  y02 = _0,
-            //                  y03 = _0,
-            //
-            //                  y10 = _0,
-            //                  y11 = focalLength,
-            //                  y12 = _0,
-            //                  y13 = _0,
-            //
-            //                  y20 = _0,
-            //                  y21 = _0,
-            //                  y22 = (far + near) / (near - far),
-            //                  y23 = __2 * far * near / (near - far),
-            //
-            //                  y30 = _0,
-            //                  y31 = _0,
-            //                  y32 = -__1,
-            //                  y33 = _0
-            //                )
-            //              assert(projectionMatrix == alternateProjectionMatrix)
+//              final lazy val alternateProjectionMatrix =
+//                Matrix(
+//                  y00 = focalLength / aspectRatio,
+//                  y01 = _0,
+//                  y02 = _0,
+//                  y03 = _0,
+//
+//                  y10 = _0,
+//                  y11 = focalLength,
+//                  y12 = _0,
+//                  y13 = _0,
+//
+//                  y20 = _0,
+//                  y21 = _0,
+//                  y22 = (far + near) / (near - far),
+//                  y23 = __2 * far * near / (near - far),
+//
+//                  y30 = _0,
+//                  y31 = _0,
+//                  y32 = -__1,
+//                  y33 = _0
+//                )
+//              assert(projectionMatrix == alternateProjectionMatrix)
           )
+
+    val ViewFrustum = SymetricViewFrustum
 
     case class LookAtCamera private(position: SpacePoint,
                                     look: NonNullSpaceVector,
@@ -356,6 +351,29 @@ trait Cameras[T: Numeric : Trig : Precision]
             basis = basis.normalized,
             viewFrustum = viewFrustum
           )
+
+      def viewBoxFromTop(sceneWidth: T,
+                         sceneHeight: T,
+                         sceneDepth: T,
+                         cameraDistance: T): Option[Camera] =
+        for
+          viewFrustum <-
+            Perspective.ViewFrustum.fromSymetricPlanes(
+              nearDistance = cameraDistance,
+              farDistance = cameraDistance + sceneDepth,
+              topDistance = sceneHeight / __2,
+              rightDistance = sceneWidth / __2
+            )
+          cameraPosition = SpacePoint(sceneWidth / __2, sceneHeight / __2, cameraDistance)
+          camera <- Perspective.LookAtCamera.safe(
+              position = cameraPosition,
+              target = cameraPosition.withZ(_0),
+              upVector = SpaceVector.OneY,
+              viewFrustum
+            )
+        yield
+          camera
+
 
 //      for
 //        look <- Vector.nonNull(position, target)

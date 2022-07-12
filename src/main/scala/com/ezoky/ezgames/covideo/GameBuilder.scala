@@ -93,23 +93,29 @@ case class CameraBuilder(cameraConfig: CameraConfig)
 
   override def build: Generated[Camera] =
     Generated.unit(
-      (
-        for
-          viewFrustum <- Perspective.ViewFrustum.fromSymetricPlanes(
-            nearDistance = cameraConfig.near,
-            farDistance = cameraConfig.far,
-            topDistance = cameraConfig.top,
-            rightDistance = cameraConfig.right
-          )
-          camera <- Perspective.LookAtCamera.safe(
-            position = cameraConfig.position.withZ(cameraConfig.near),
-            target = cameraConfig.position.withZ(0), // always looking towards center of near plan
-            upVector = SpaceVector.OneY,
-            viewFrustum = viewFrustum
-          )
-        yield
-          camera
+      Perspective.LookAtCamera.viewBoxFromTop(
+        sceneWidth = cameraConfig.right * 2,
+        sceneHeight = cameraConfig.top * 2,
+        cameraConfig.far - cameraConfig.near,
+        cameraConfig.near
       ).getOrElse(Camera.Default)
+//      (
+//        for
+//          viewFrustum <- Perspective.ViewFrustum.fromSymetricPlanes(
+//            nearDistance = cameraConfig.near,
+//            farDistance = cameraConfig.far,
+//            topDistance = cameraConfig.top,
+//            rightDistance = cameraConfig.right
+//          )
+//          camera <- Perspective.LookAtCamera.safe(
+//            position = cameraConfig.position.withZ(cameraConfig.near),
+//            target = cameraConfig.position.withZ(0), // always looking towards center of near plan
+//            upVector = SpaceVector.OneY,
+//            viewFrustum = viewFrustum
+//          )
+//        yield
+//          camera
+//      ).getOrElse(Camera.Default)
     )
 
 

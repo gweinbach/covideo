@@ -18,11 +18,11 @@ object Config:
   val Area =
     AreaConfig(
       AreaWidth size,
-      xGeometry = Geometry.Bounded,
+      xGeometry = Geometry.Toric,
       AreaHeight size,
-      yGeometry = Geometry.Bounded,
+      yGeometry = Geometry.Toric,
       AreaDepth size,
-      zGeometry = Geometry.Bounded
+      zGeometry = Geometry.Toric
     )
   val Camera =
     CameraConfig(
@@ -60,7 +60,7 @@ object Config:
     )
   val Game =
     GameConfig(
-      populationSize = 10,
+      populationSize = 1,
       Person, World
     )
   val Loop =

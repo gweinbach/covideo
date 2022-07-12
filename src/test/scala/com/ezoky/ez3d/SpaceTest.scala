@@ -18,7 +18,7 @@ import com.ezoky.eznumber.Precision
  */
 class SpaceTest extends AnyFlatSpec:
 
-  given Precision[Double] = Precision(1E-16)
+  given Precision[Double] = Precision(1E-10)
   val space = new Space[Double] {}
   import space.*
 
@@ -31,4 +31,40 @@ class SpaceTest extends AnyFlatSpec:
   "Normal Basis" can "be built from 2 base vectors" in {
     val normalBasis = Basis.orthonormal(Axis.X.base, Axis.Y.base)
     assert(normalBasis === Some(Basis.Normal))
+  }
+
+  "Normal Basis" can "be built from any 2 orthogonal vectors" in {
+
+    val vectorI = NonNullSpaceVector.safe(0.9993743358189562, 0.020876275287366058, -0.028550272092336897).get
+    val vectorJ = NonNullSpaceVector.safe(-0.028550272092343565, 0.952624998820267, -0.3028043817155551).get
+    val vectorK = NonNullSpaceVector.safe(0.020876275287364396, 0.3034300458965983, 0.9526249988202674).get
+
+    val expectedComponentBasis =
+      Basis.safe(vectorI, vectorJ, vectorK).get
+
+    val componentBasisIJ: Basis =
+      Basis.orthonormal(vectorI, vectorJ).get
+
+    assert(componentBasisIJ === expectedComponentBasis)
+    assert(componentBasisIJ.k === vectorK)
+    assert(componentBasisIJ.isNormalized)
+    assert(componentBasisIJ.isOrthogonal)
+
+    val componentBasisJK: Basis =
+      Basis.orthonormal(vectorJ, vectorK).get
+
+    assert(componentBasisJK.k === vectorI)
+
+    val componentBasisKI: Basis =
+      Basis.orthonormal(vectorK, vectorI).get
+
+    assert(componentBasisKI.k === vectorJ)
+
+    val componentBasisJI: Basis =
+      Basis.orthonormal(vectorJ, vectorI).get
+
+    assert(componentBasisJI.k === (-vectorK))
+    assert(componentBasisJI.isNormalized)
+    assert(componentBasisJI.isOrthogonal)
+
   }

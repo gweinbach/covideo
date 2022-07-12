@@ -337,7 +337,22 @@ trait Transformation3D[T: Numeric : Trig : Precision]
 
     val Identity =
       diagonal(__1, __1, __1, __1)
+  
+  
+  extension (matrix: Matrix)
+  
+    def apply(point: SpacePoint): Option[SpacePoint] =
+      (matrix × point.homogeneous).cartesian
 
+    def apply(vertex: Vertex): Option[Vertex] =
+      for
+        s <- matrix(vertex.s)
+        t <- matrix(vertex.t)
+      yield
+        Vertex(s, t)
+
+  
+  // Some 2D trqnsformations
 
   trait AffineTransformation extends Matrix :
     final override val x30: T = _0

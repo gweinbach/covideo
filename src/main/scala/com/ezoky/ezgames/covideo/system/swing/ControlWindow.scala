@@ -25,7 +25,7 @@ private class ControlWindow()
 
   private var model: ControlModel = ControlModel(CameraControl(0, 0, 0))
 
-  def getModel(): ControlModel =
+  def popModel(): ControlModel =
     val currentModel = self.model
     self.model = currentModel.acknowledgeUpdates()
     currentModel
