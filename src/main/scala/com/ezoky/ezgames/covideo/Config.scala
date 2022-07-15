@@ -63,10 +63,10 @@ object Config:
     )
   val Game =
     GameConfig(
-      populationSize = 2000,
+      populationSize = 500,
       Person, World
     )
   val Loop =
     GameLoopConfig(
-      fps = 30
+      fps = 60
     )
