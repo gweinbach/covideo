@@ -134,7 +134,7 @@ trait Transformation3D[T: Numeric : Trig : Precision]
 //        y31 = x03 * m.x10 + x13 * m.x11 + x23 * m.x12 + x33 * m.x13,
 //        y32 = x03 * m.x20 + x13 * m.x21 + x23 * m.x22 + x33 * m.x23,
 //        y33 = x03 * m.x30 + x13 * m.x31 + x23 * m.x32 + x33 * m.x33
-//      )
+//      ).transpose
 
     @targetName("add")
     infix def +(m: Matrix): Matrix =

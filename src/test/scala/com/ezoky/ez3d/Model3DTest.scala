@@ -80,22 +80,27 @@ class Model3DTest
 
     val pipeline3D = new Pipeline3D(camera, window)
 
-    val componentPosition=SpacePoint(1029.3867964965905,646.923968830763,698.354018760909)
-    val componentBasis: Basis = Basis.orthonormal(
-        NonNullSpaceVector.safe(0.4311391013614713,-0.9017784842957555,0.030243024625077768).get,
-        NonNullSpaceVector.safe(0.030243024625067245,0.047942315902163725,0.9983921543198669).get
+    val componentPosition=SpacePoint(835.0271736662914,781.3540128758344,-164.91732501822892)
+    val componentBasis =
+      Basis.orthonormal(
+        NonNullSpaceVector.safe(0.8122271271740444,-0.47947675976152787,0.33224859778663435).get,
+        NonNullSpaceVector.safe(0.33224859778663635,0.8483945455193908,0.4121135333882649).get,
+        NonNullSpaceVector.safe(-0.4794767597615279,-0.22434066056230295,0.848394545519392).get
       ).get
     val v=Vertex(SpacePoint(-20.0,-20.0,-20.0),SpacePoint(20.0,-20.0,-20.0))
     val shape = Shape(v)
     val componentTransformation = ComponentTransformation((componentPosition, componentBasis, shape))
 
-    val worldV=Vertex(SpacePoint(1038.1947236627748,672.5913173122616,676.8224688639667),SpacePoint(1055.4402877172336,636.5201779404314,678.0321898489699))
-    val cameraV=Vertex(SpacePoint(438.1947236627748,172.5913173122616,-823.1775311360333),SpacePoint(455.44028771723356,136.52017794043138,-821.9678101510301))
-    val projectionV=Vertex(SpacePoint(1.3308026127062784,0.628994272015936,-5.727691231558512),SpacePoint(1.3852132714100749,0.49826833698760126,-5.7431116443784145))
+    val worldV=Vertex(SpacePoint(821.7271943623084,778.4624703719232,-196.77245855211476),SpacePoint(854.2162794492701,759.2833999814621,-183.48251464064938))
+    val cameraV=Vertex(SpacePoint(221.7271943623084,278.46247037192325,-1696.7724585521148),SpacePoint(254.21627944927013,259.28339998146214,-1683.4825146406495))
+    val projectionV=Vertex(SpacePoint(0.32668964133162565,0.49233909172984824,-0.33318010262841086),SpacePoint(0.37751547348790593,0.4620482797888897,-0.3733083355433978))
 
-    val flippedV=PlaneVertex(PlanePoint(1.3308026127062784,0.628994272015936),PlanePoint(1.3852132714100749,0.49826833698760126))
-    val planeV=PlaneVertex(PlanePoint(2.3308026127062784,1.628994272015936),PlanePoint(2.385213271410075,1.4982683369876013))
-    val windowV = PlaneVertex(PlanePoint(1398.481567623767,814.497136007968),PlanePoint(1431.127962846045,749.1341684938006))
+    val flippedV=PlaneVertex(PlanePoint(0.32668964133162565,0.49233909172984824),PlanePoint(0.37751547348790593,0.4620482797888897))
+    val planeV=PlaneVertex(PlanePoint(1.3266896413316256,1.4923390917298482),PlanePoint(1.377515473487906,1.4620482797888896))
+    val windowV=PlaneVertex(PlanePoint(796.0137847989754,746.1695458649241),PlanePoint(826.5092840927437,731.0241398944448))
+
+//    println(pipeline3D.viewMatrix(worldV).get)
+//    println(pipeline3D.projectionMatrix(pipeline3D.viewMatrix(worldV).get).get)
 
     assert(componentTransformation.modelMatrix(v).get === worldV)
 
@@ -104,6 +109,20 @@ class Model3DTest
     assert(pipeline3D.windowFlip(projectionV).get === flippedV)
     assert(pipeline3D.windowTranslation(flippedV).get === planeV)
     assert(pipeline3D.windowScaling(planeV).get === windowV)
+
+    val cameraMatrix =
+      (pipeline3D.viewMatrix ×: pipeline3D.projectionMatrix)
+
+    assert(cameraMatrix(worldV).get === projectionV)
+
+    val clipMatrix =
+      componentTransformation.modelMatrix ×: (pipeline3D.viewMatrix ×: pipeline3D.projectionMatrix)
+
+    assert(clipMatrix(v).get === projectionV)
+
+    val windowMatrix = pipeline3D.windowFlip  ×: (pipeline3D.windowTranslation ×: pipeline3D.windowScaling)
+
+    assert(windowMatrix(projectionV).get === windowV)
   }
 
 given Precision[Double] = Precision(1E-10)
@@ -129,17 +148,18 @@ class SimpleModel3D(sceneWidth: Double,
       def windowOrigin: PlanePoint = PlanePoint(-1, -1) // TopLeft = PlanePoint(-1, 1)
       def flipX: Boolean = false
       def flipY: Boolean = false
+      def flipZ: Boolean = true
       def screenDimension: ScreenDimension = window.dimension
 
   // No rotation for a simple Basis
   given ComponentModel[Shape] with
     extension (model: Shape)
       override def position: SpacePoint = SpacePoint(sceneWidth/2, sceneHeight/2, 0)
-      override def basis: Basis = Basis.Normal
+      override def basis: Basis = Basis.NormalDirect
       override def shape: Shape = model
 
-  given ComponentModel[(SpacePoint, Basis, Shape)] with
-    extension (model: (SpacePoint, Basis, Shape))
+  given [B <: Basis]:ComponentModel[(SpacePoint, B, Shape)] with
+    extension (model: (SpacePoint, B, Shape))
       override def position: SpacePoint = model._1
-      override def basis: Basis = model._2
+      override def basis: B = model._2
       override def shape: Shape = model._3

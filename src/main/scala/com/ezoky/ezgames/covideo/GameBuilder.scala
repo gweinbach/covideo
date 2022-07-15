@@ -149,7 +149,7 @@ case class SolidBuilder(area: Box,
     yield
       Solid(
         mobile,
-        Basis.Normal,
+        Basis.NormalDirect,
         spin
       )
 
@@ -162,13 +162,14 @@ case class PersonBuilder(area: Box,
   override def build: Generated[Person] =
     for
       solid <- SolidBuilder(area, personConfig.solidConfig).build
+      shape <- personConfig.shape
     yield
       Person(
         id = PersonId(),
         solid,
         Healthy,
         summon[DisplaySystem].spriteByHealthCondition(Healthy),
-        Cube(40)
+        shape
       )
 
 

@@ -29,7 +29,7 @@ private trait AngleTypes[T: Trig: Numeric]:
   val DegreeIsNumeric: Numeric[Degrees] = _num
 
   sealed trait UniformTrig[A <: Angle]:
-    def pi: A
+    def Pi: A
 
     def sin(a: A): T
     def cos(a: A): T
@@ -44,7 +44,7 @@ private trait AngleTypes[T: Trig: Numeric]:
     def toDegrees(a: A): Degrees
 
   given UniformTrig[Radians] with
-    def pi: Radians = _trig.pi
+    def Pi: Radians = _trig.pi
 
     def sin(a: Radians): T = _trig.sin(a)
     def cos(a: Radians): T = _trig.cos(a)
@@ -60,7 +60,7 @@ private trait AngleTypes[T: Trig: Numeric]:
 
 
   given UniformTrig[Degrees] with
-    def pi: Degrees = _trig.toDegrees(_trig.pi)
+    def Pi: Degrees = _trig.toDegrees(_trig.pi)
 
     def sin(a: Degrees): T = _trig.sin(_trig.toRadians(a))
     def cos(a: Degrees): T = _trig.cos(_trig.toRadians(a))
@@ -84,7 +84,7 @@ trait Angles[T: Trig: Numeric] extends AngleTypes[T]:
   given Numeric[Degrees] = DegreeIsNumeric
 
   def pi[U <: Angle: UniformTrig]: U =
-    summon[UniformTrig[U]].pi
+    summon[UniformTrig[U]].Pi
 
   def sin[U <: Angle: UniformTrig](a: U): T =
     summon[UniformTrig[U]].sin(a)
@@ -130,8 +130,8 @@ trait Angles[T: Trig: Numeric] extends AngleTypes[T]:
       summon[UniformTrig[U]].toDegrees(a)
 
 
-  private val _trig = summon[Trig[T]]
-
+//  private val _trig = summon[Trig[T]]
+//
 //  given UniformTrig[Angle] with
 //    def pi: Angle = _trig.pi radians
 //

@@ -104,9 +104,10 @@ case class CameraConfig(position: PlanePoint,
 given WindowView[Scene] with
   extension (scene: Scene)
     // Scene is projected on a square between -1 & 1
-    def windowOrigin: PlanePoint = PlanePoint(-1, -1) // TopLeft = PlanePoint(-1, -1)
+    def windowOrigin: PlanePoint = PlanePoint(-1, -1) // TopLeft = PlanePoint(-1, 1)
     def flipX: Boolean = false
     def flipY: Boolean = false
+    def flipZ: Boolean = true
     def screenDimension: ScreenDimension = scene.dimension
 
 

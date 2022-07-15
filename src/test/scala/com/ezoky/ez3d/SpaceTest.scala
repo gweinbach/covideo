@@ -23,14 +23,14 @@ class SpaceTest extends AnyFlatSpec:
   import space.*
 
   "Normal Basis" should "be orthogonal and normalized" in {
-    val normalBasis = Basis.Normal
+    val normalBasis = Basis.NormalDirect
     assert(normalBasis.isNormalized)
     assert(normalBasis.isOrthogonal)
   }
 
   "Normal Basis" can "be built from 2 base vectors" in {
-    val normalBasis = Basis.orthonormal(Axis.X.base, Axis.Y.base)
-    assert(normalBasis === Some(Basis.Normal))
+    val normalBasis = Basis.orthonormalDirect(Axis.X.base, Axis.Y.base)
+    assert(normalBasis === Some(Basis.NormalDirect))
   }
 
   "Normal Basis" can "be built from any 2 orthogonal vectors" in {
@@ -43,7 +43,7 @@ class SpaceTest extends AnyFlatSpec:
       Basis.safe(vectorI, vectorJ, vectorK).get
 
     val componentBasisIJ: Basis =
-      Basis.orthonormal(vectorI, vectorJ).get
+      Basis.orthonormalDirect(vectorI, vectorJ).get
 
     assert(componentBasisIJ === expectedComponentBasis)
     assert(componentBasisIJ.k === vectorK)
@@ -51,17 +51,17 @@ class SpaceTest extends AnyFlatSpec:
     assert(componentBasisIJ.isOrthogonal)
 
     val componentBasisJK: Basis =
-      Basis.orthonormal(vectorJ, vectorK).get
+      Basis.orthonormalDirect(vectorJ, vectorK).get
 
     assert(componentBasisJK.k === vectorI)
 
     val componentBasisKI: Basis =
-      Basis.orthonormal(vectorK, vectorI).get
+      Basis.orthonormalDirect(vectorK, vectorI).get
 
     assert(componentBasisKI.k === vectorJ)
 
     val componentBasisJI: Basis =
-      Basis.orthonormal(vectorJ, vectorI).get
+      Basis.orthonormalDirect(vectorJ, vectorI).get
 
     assert(componentBasisJI.k === (-vectorK))
     assert(componentBasisJI.isNormalized)

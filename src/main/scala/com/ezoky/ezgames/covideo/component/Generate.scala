@@ -1,8 +1,8 @@
 package com.ezoky.ezgames.covideo.component
 
 import spire.*
-import spire.math.*
 import spire.implicits.*
+import spire.math.*
 
 object Generate:
 
@@ -36,12 +36,12 @@ object Generate:
   given Generated[Byte] = GeneratedLong.map(_.toByte)
 
 
-  def generatedBetweenFractional[T: Generated: Fractional](min: T,
-                                                 max: T): Generated[T] =
+  def generatedBetweenFractional[T: Generated : Fractional](min: T,
+                                                            max: T): Generated[T] =
     summon[Generated[T]].map(d => min + (d * (max - min)))
 
-  def generatedBetweenIntegral[T: Generated: Integral](min: T,
-                                                 max: T): Generated[T] =
+  def generatedBetweenIntegral[T: Generated : Integral](min: T,
+                                                        max: T): Generated[T] =
     summon[Generated[T]].map(d => min + (d emod (max - min)))
 
 

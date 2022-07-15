@@ -163,7 +163,7 @@ trait Cameras[T: Numeric : Trig : Precision]
                                     look: NonNullSpaceVector = -NonNullSpaceVector.OneZ,
                                     up: NonNullSpaceVector = NonNullSpaceVector.OneY,
                                     right: NonNullSpaceVector = NonNullSpaceVector.OneX,
-                                    basis: OrthonormalBasis = Basis.Normal,
+                                    basis: OrthonormalBasis = Basis.NormalDirect,
                                     viewFrustum: ViewFrustum = ViewFrustum.Default)
       extends Camera :
       final override def withPosition(newPosition: SpacePoint): Camera =
@@ -364,7 +364,7 @@ trait Cameras[T: Numeric : Trig : Precision]
               topDistance = sceneHeight / __2,
               rightDistance = sceneWidth / __2
             )
-          cameraPosition = SpacePoint(sceneWidth / __2, sceneHeight / __2, cameraDistance)
+          cameraPosition = SpacePoint(x = sceneWidth / __2, y = sceneHeight / __2, z = cameraDistance)
           camera <- Perspective.LookAtCamera.safe(
               position = cameraPosition,
               target = cameraPosition.withZ(_0),

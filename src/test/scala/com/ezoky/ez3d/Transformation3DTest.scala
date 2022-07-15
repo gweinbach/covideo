@@ -36,7 +36,7 @@ class Transformation3DTest extends AnyFlatSpec :
   }
 
   "Normal Basis" can "be rotated" in {
-    val rotatedBasis = Basis.orthonormal(Axis.Y.base, Axis.Z.base).get
+    val rotatedBasis = Basis.orthonormalDirect(Axis.Y.base, Axis.Z.base).get
     val rotation = BasisTransformation(rotatedBasis)
 
     assert(rotation × SpacePoint.OneX.homogeneous === SpacePoint.OneY.homogeneous)
@@ -48,7 +48,7 @@ class Transformation3DTest extends AnyFlatSpec :
 
   "Point" can "be translated and rotated or the opposite" in {
 
-    val rotatedBasis = Basis.orthonormal(Axis.Y.base, Axis.Z.base).get
+    val rotatedBasis = Basis.orthonormalDirect(Axis.Y.base, Axis.Z.base).get
     val rotation = BasisTransformation(rotatedBasis)
     val translation = Translation3D(SpaceVector.OneZ + SpaceVector.OneY)
 
@@ -58,7 +58,7 @@ class Transformation3DTest extends AnyFlatSpec :
 
   "Point rotation and translation combination" should "not be commutative" in {
 
-    val rotatedBasis = Basis.orthonormal(Axis.Y.base, Axis.Z.base).get
+    val rotatedBasis = Basis.orthonormalDirect(Axis.Y.base, Axis.Z.base).get
 
     val rotation = BasisTransformation(rotatedBasis)
     val translation = Translation3D(SpaceVector.OneZ + SpaceVector.OneY)
@@ -69,7 +69,7 @@ class Transformation3DTest extends AnyFlatSpec :
 
   "A Coordinate System Transformation" should "be equivalent to the combination of a translation and a rotation" in {
 
-    val rotatedBasis = Basis.orthonormal(Axis.Y.base, Axis.Z.base).get
+    val rotatedBasis = Basis.orthonormalDirect(Axis.Y.base, Axis.Z.base).get
 
     val coordinateSystemTransformation = CoordinateSystemTransformation(SpacePoint(0, 1, 1), rotatedBasis)
 

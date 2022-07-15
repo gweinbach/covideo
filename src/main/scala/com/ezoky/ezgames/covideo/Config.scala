@@ -11,7 +11,7 @@ object Config:
   
   val AreaWidth = 1200
   val AreaHeight = 1000
-  val AreaDepth = 800
+  val AreaDepth = 1200
   
   val NearDistance = 1500
 
@@ -56,11 +56,11 @@ object Config:
     )
   val Person =
     PersonConfig(
-      solidConfig = Solid
+      solidConfig = Solid,
     )
   val Game =
     GameConfig(
-      populationSize = 1,
+      populationSize = 1000,
       Person, World
     )
   val Loop =

@@ -39,7 +39,7 @@ private given Conversion[Position, SpacePoint] with
     SpacePoint(
       position.x.value,
       position.y.value,
-      position.z.value
+      -position.z.value
     )
 
 
@@ -74,7 +74,7 @@ given Viewable3D[World] with
       Population(
         world.id -> Component3D(
           SpacePoint(boundaries.width / Two, boundaries.height / Two, -boundaries.depth / Two),
-          Basis.Normal,
+          Basis.NormalDirect,
           boundaries + origin
         )
       )

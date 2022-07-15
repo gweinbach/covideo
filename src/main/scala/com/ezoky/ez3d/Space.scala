@@ -57,6 +57,9 @@ trait Space[T: Numeric : Precision]:
     def withZ(z: T): SpacePoint =
       copy(z = z)
 
+    lazy val flipZ: SpacePoint =
+      withZ(-z)
+
     override def equals(obj: Any): Boolean =
       obj match
         case that: SpacePoint if (that != null) =>
@@ -431,7 +434,23 @@ trait Space[T: Numeric : Precision]:
           override val k: NonNullSpaceVector = baseK.normalized
 
     def orthonormal(i: SpaceVector,
-                    j: SpaceVector): Option[OrthonormalBasis] =
+                    j: SpaceVector,
+                    k: SpaceVector): Option[OrthonormalBasis] =
+      for
+        baseI <- SpaceVector.nonNull(i)
+        baseJ <- SpaceVector.nonNull(j) if (baseI isOrthogonal baseJ)
+        baseK <- SpaceVector.nonNull(k)
+        if !isCoplanar(baseI, baseJ, baseK) &&
+          (baseI isOrthogonal baseK) &&
+          (baseJ isOrthogonal baseK)
+      yield
+        new OrthonormalBasis :
+          override val i: NonNullSpaceVector = baseI.normalized
+          override val j: NonNullSpaceVector = baseJ.normalized
+          override val k: NonNullSpaceVector = baseK.normalized
+
+    def orthonormalDirect(i: SpaceVector,
+                          j: SpaceVector): Option[OrthonormalBasis] =
       for
         baseI <- SpaceVector.nonNull(i)
         baseJ <- SpaceVector.nonNull(j) if (baseI isOrthogonal baseJ)
@@ -442,11 +461,17 @@ trait Space[T: Numeric : Precision]:
           override val j: NonNullSpaceVector = baseJ.normalized
           override val k: NonNullSpaceVector = baseK.normalized
 
-    val Normal: OrthonormalBasis =
+    val NormalDirect: OrthonormalBasis =
       new OrthonormalBasis :
         override val i: NonNullSpaceVector = Axis.X.base
         override val j: NonNullSpaceVector = Axis.Y.base
         override val k: NonNullSpaceVector = Axis.Z.base
+
+    val NormalIndirect: OrthonormalBasis =
+      new OrthonormalBasis :
+        override val i: NonNullSpaceVector = Axis.X.base
+        override val j: NonNullSpaceVector = Axis.Y.base
+        override val k: NonNullSpaceVector = -Axis.Z.base
 
 
   type Vertices = Iterable[Vertex]
@@ -456,6 +481,9 @@ trait Space[T: Numeric : Precision]:
 
     infix def +(v: SpaceVector): Vertex =
       Vertex(s + v, t + v)
+
+    lazy val flipZ: Vertex =
+      Vertex(s.flipZ, t.flipZ)
 
   object Vertex:
     def apply(s: SpacePoint,

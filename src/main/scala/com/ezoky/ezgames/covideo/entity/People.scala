@@ -7,6 +7,11 @@ package com.ezoky.ezgames.covideo.entity
 import com.ezoky.ezgames.covideo.component.*
 import com.ezoky.ezgames.covideo.component.Dimension.*
 import com.ezoky.ezgames.covideo.component.Dimension.Ez3D.*
+import com.ezoky.ezgames.covideo.component.Generate.{Generated, generatedBetweenFractional}
+
+import spire.*
+import spire.math.*
+import spire.implicits.*
 
 import java.util.UUID
 import scala.annotation.targetName
@@ -44,7 +49,8 @@ object People:
     def rotate: Person =
       copy(solid = solid.rotate)
 
-  case class PersonConfig(solidConfig: SolidConfig)
+  case class PersonConfig(shape: Generated[Shape] = generatedBetweenFractional(5.0,50.0).map(Cube(_)),
+                          solidConfig: SolidConfig)
 
   object PersonId:
     def apply(): PersonId =
