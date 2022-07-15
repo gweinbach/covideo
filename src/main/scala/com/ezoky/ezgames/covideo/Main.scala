@@ -4,7 +4,7 @@ import com.ezoky.ezcategory.{Endomorphism, IO}
 import com.ezoky.ezgames.covideo.component.Generate.*
 import com.ezoky.ezgames.covideo.component.Dimension.{given, *}
 import com.ezoky.ezgames.covideo.entity.*
-import com.ezoky.ezgames.covideo.system.{Accelerate, Display, DisplaySystem, Evolve, Move, Rotate, given}
+import com.ezoky.ezgames.covideo.system.{Accelerate, AngularAccelerate, Display, DisplaySystem, Evolve, Move, Rotate, given}
 import com.ezoky.ezgames.covideo.system.swing.*
 
 import scala.annotation.tailrec
@@ -31,4 +31,4 @@ def step(game: Generated[Game]): Generated[IO[Game]] =
   for
     nextGame <- game.evolve
   yield
-    nextGame.move.accelerate.rotate.display
+    nextGame.move.accelerate.rotate.angularAccelerate.display

@@ -49,7 +49,11 @@ object People:
     def rotate: Person =
       copy(solid = solid.rotate)
 
-  case class PersonConfig(shape: Generated[Shape] = generatedBetweenFractional(5.0,50.0).map(Cube(_)),
+    def angularAccelerate: Person =
+      copy(solid = solid.angularAccelerate)
+
+
+  case class PersonConfig(shape: Generated[Shape],
                           solidConfig: SolidConfig)
 
   object PersonId:

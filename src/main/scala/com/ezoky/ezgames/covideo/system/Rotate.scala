@@ -12,10 +12,10 @@ import com.ezoky.ezgames.covideo.entity.Game
  * @since 0.1.0
  */
 trait Rotate[T]:
-  extension(entity: T) def rotate: T
+  extension (entity: T) def rotate: T
 
 given Rotate[Game] with
-  extension(entity: Game)
+  extension (entity: Game)
     override def rotate: Game =
       entity.copy(
         people = entity.people.map(_.rotate)

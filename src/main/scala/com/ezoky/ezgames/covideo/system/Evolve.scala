@@ -1,6 +1,6 @@
 package com.ezoky.ezgames.covideo.system
 
-import com.ezoky.ezgames.covideo.component.{Acceleration, Mobile, Solid}
+import com.ezoky.ezgames.covideo.component.{Acceleration, AccelerationRange, AngularAcceleration, AngularAccelerationRange, Mobile, Solid}
 import com.ezoky.ezgames.covideo.component.Generate.*
 import com.ezoky.ezgames.covideo.entity.Game
 import com.ezoky.ezgames.covideo.entity.People.{Person, Population}
@@ -26,8 +26,10 @@ given (using Evolve[Mobile]): Evolve[Solid] with
       for
         solid <- entity
         evolvedMobile <- Generated(solid.mobile).evolve
+        within = solid.angularAccelerationRange
+        newAccelerationRange <- AngularAcceleration.generated(within, within, within)
       yield
-        solid.copy(mobile = evolvedMobile)
+        solid.twirl(newAccelerationRange).copy(mobile = evolvedMobile)
 
 
 given (using Evolve[Solid]): Evolve[Person] with

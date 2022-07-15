@@ -267,7 +267,7 @@ abstract class Dimension[T: Precision: Numeric: Trig: Generated: Ez3D: Epsilon]:
       PositionValue(position + speed, boundary, geometry)
 
     def accelerate(to: AccelerationValue): SpeedValue =
-      to(speed)
+      SpeedValue(speed + to)
 
 
   given Order[SpeedValue] =
@@ -288,10 +288,9 @@ abstract class Dimension[T: Precision: Numeric: Trig: Generated: Ez3D: Epsilon]:
     def apply(acceleration: T): AccelerationValue =
       acceleration
 
-
   extension (acceleration: AccelerationValue)
     def apply(speed: SpeedValue): SpeedValue =
-      SpeedValue(speed + acceleration)
+      speed.accelerate(acceleration)
 
 
   given Order[AccelerationValue] =
@@ -325,9 +324,9 @@ abstract class Dimension[T: Precision: Numeric: Trig: Generated: Ez3D: Epsilon]:
 //           boundary: SizeValue,
 //           geometry: Geometry): PositionValue =
 //      PositionValue(position + spin, boundary, geometry)
-//
-//    def accelerate(to: AccelerationValue): SpinValue =
-//      to(spin)
+
+    def angularAccelerate(to: AngularAccelerationValue): SpinValue =
+      SpinValue(spin + to)
 
 
   given Order[SpinValue] =
@@ -335,6 +334,32 @@ abstract class Dimension[T: Precision: Numeric: Trig: Generated: Ez3D: Epsilon]:
   // end SpinValue
 
 
+  // AngularAccelerationValue
+  opaque type AngularAccelerationValue = T
+
+  object AngularAccelerationValue:
+
+    val Zero: AngularAccelerationValue = _0
+
+    def generatedBetween(min: AngularAccelerationValue,
+                         max: AngularAccelerationValue): Generated[AngularAccelerationValue] =
+      _GeneratedDimension.map(d => min + (d * (max - min)))
+
+    def apply(angularAcceleration: T): AngularAccelerationValue =
+      angularAcceleration
+
+
+  extension (angularAcceleration: AngularAccelerationValue)
+    @targetName("angularAccelerateSpin")
+    def apply(spin: SpinValue): SpinValue =
+      spin.angularAccelerate(angularAcceleration)
+
+
+  given Order[AngularAccelerationValue] =
+    (x: AngularAccelerationValue, y: AngularAccelerationValue) => x.compare(y)
+  // end AngularAccelerationValue
+
+  
   /** Utilities methods added to [[T]] */
   extension (lhs: T)
 
@@ -357,6 +382,10 @@ abstract class Dimension[T: Precision: Numeric: Trig: Generated: Ez3D: Epsilon]:
 
     def spin: SpinValue =
       SpinValue(lhs)
+    
+    def angularAcceleration: AngularAccelerationValue =
+      AngularAccelerationValue(lhs)
+
 
   /** Utilities methods added to [[_StepType]] */
   extension (durationValue: _StepType)

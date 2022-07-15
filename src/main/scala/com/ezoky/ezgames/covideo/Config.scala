@@ -4,6 +4,7 @@ import com.ezoky.ezgames.covideo.component.*
 import com.ezoky.ezgames.covideo.component.Dimension.*
 import com.ezoky.ezgames.covideo.component.Dimension.Ez3D.*
 import com.ezoky.ez3d.Screen.*
+import com.ezoky.ezgames.covideo.component.Generate.generatedBetweenFractional
 import com.ezoky.ezgames.covideo.entity.*
 import com.ezoky.ezgames.covideo.entity.People.*
 
@@ -18,11 +19,11 @@ object Config:
   val Area =
     AreaConfig(
       AreaWidth size,
-      xGeometry = Geometry.Toric,
+      xGeometry = Geometry.Bounded,
       AreaHeight size,
-      yGeometry = Geometry.Toric,
+      yGeometry = Geometry.Bounded,
       AreaDepth size,
-      zGeometry = Geometry.Toric
+      zGeometry = Geometry.Bounded
     )
   val Camera =
     CameraConfig(
@@ -52,18 +53,20 @@ object Config:
   val Solid =
     SolidConfig(
       mobileConfig = Mobile,
-      spinRange = SpinRange(-0.1 spin, 0.1 spin)
+      spinRange = SpinRange(-0.1 spin, 0.1 spin),
+      angularAccelerationRange = AngularAccelerationRange(-0.05 angularAcceleration, 0.05 angularAcceleration)
     )
   val Person =
     PersonConfig(
+      shape = generatedBetweenFractional(10.0,50.0).map(Cube(_)),
       solidConfig = Solid,
     )
   val Game =
     GameConfig(
-      populationSize = 1000,
+      populationSize = 2000,
       Person, World
     )
   val Loop =
     GameLoopConfig(
-      fps = 60
+      fps = 30
     )

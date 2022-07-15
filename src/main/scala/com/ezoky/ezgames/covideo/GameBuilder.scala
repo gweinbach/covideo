@@ -146,11 +146,15 @@ case class SolidBuilder(area: Box,
     for
       mobile <- MobileBuilder(area, solidConfig.mobileConfig).build
       spin <- Spin.generated(solidConfig.spinRange, solidConfig.spinRange, solidConfig.spinRange)
+      angularAcceleration <- AngularAcceleration.generated(solidConfig.angularAccelerationRange, solidConfig.angularAccelerationRange, solidConfig.angularAccelerationRange)
     yield
       Solid(
         mobile,
         Basis.NormalDirect,
-        spin
+        spin,
+        solidConfig.spinRange,
+        angularAcceleration,
+        solidConfig.angularAccelerationRange
       )
 
 

@@ -15,7 +15,10 @@ import com.ezoky.ezgames.covideo.component.Dimension.Ez3D.*
  */
 case class Solid(mobile: Mobile,
                  basis: Basis,
-                 spin: Spin):
+                 spin: Spin,
+                 spinRange: SpinRange,
+                 angularAcceleration: AngularAcceleration,
+                 angularAccelerationRange: AngularAccelerationRange):
 
   def move: Solid =
     copy(mobile = mobile.move)
@@ -29,5 +32,12 @@ case class Solid(mobile: Mobile,
   def rotate: Solid =
     copy(basis = spin.rotate(basis))
 
+  def angularAccelerate: Solid =
+    copy(spin = angularAcceleration.accelerate(spin, within = spinRange))
+
+  def twirl(newAngularAcceleration: AngularAcceleration): Solid =
+    copy(angularAcceleration = newAngularAcceleration.truncate(within = angularAccelerationRange))
+
 case class SolidConfig(mobileConfig: MobileConfig,
-                       spinRange: SpinRange)
+                       spinRange: SpinRange,
+                       angularAccelerationRange: AngularAccelerationRange)

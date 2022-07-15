@@ -52,7 +52,7 @@ object Acceleration:
 trait AccelerationCoord[C <: Coord, S <: SpeedCoord[C], A <: AccelerationCoord[C, S, A]](val value: AccelerationValue):
 
   inline protected def newSpeed(speed: SpeedValue): SpeedValue =
-    value(speed)
+    speed.accelerate(value)
 
   def accelerate(speed: S,
                  within: SpeedRange): S
