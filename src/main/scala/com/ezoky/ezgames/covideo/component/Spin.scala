@@ -60,8 +60,8 @@ object Spin:
     )(Spin(_, _, _))
 
   def rotate(quaternion: Quaternion,
-             vector: NonNullSpaceVector): SpaceVector =
-    quaternion.rotate(vector).getOrElse(vector)
+             vector: NonNullSpaceVector): NonNullSpaceVector =
+    quaternion.rotateNonNull(vector)
 
 
 

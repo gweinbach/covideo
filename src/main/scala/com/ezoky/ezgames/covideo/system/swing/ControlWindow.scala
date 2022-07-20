@@ -6,7 +6,7 @@
 package com.ezoky.ezgames.covideo.system.swing
 
 import com.ezoky.ezgames.covideo.component.Dimension.DimensionBase
-import com.ezoky.ezgames.covideo.system.{CameraControl, ControlModel}
+import com.ezoky.ezgames.covideo.system.{CameraControl, ControlModel, ViewFrustumControl, ControlledItem}
 
 import java.awt.{BorderLayout, Graphics2D, GraphicsDevice, GraphicsEnvironment, GridLayout, Color as AWTColor, Dimension as AWTDimension, EventQueue as AWTEventQueue}
 import javax.swing.*
@@ -23,42 +23,26 @@ private class ControlWindow()
 
   println("Creating a ControlWindow")
 
-  private var model: ControlModel = ControlModel(CameraControl(0, 0, 0))
-
-  def popModel(): ControlModel =
-    val currentModel = self.model
-    self.model = currentModel.acknowledgeUpdates()
-    currentModel
-
-  def updateModel(newModel: ControlModel): Unit =
-    if !newModel.equalsState(self.model) then
-      self.model = newModel.acknowledgeUpdates()
-      println(s"modelA: near=${self.model.camera.near}, far=${self.model.camera.far}")
-      _nearSlider.notifyChange()
-      println(s"modelB: near=${self.model.camera.near}, far=${self.model.camera.far}")
-      _farSlider.notifyChange()
-      println(s"modelC: near=${self.model.camera.near}, far=${self.model.camera.far}")
-
 
   def display: Unit =
     initUI()
 
   private lazy val _nearSlider = ControlSlider(
-    () => self.model.camera.near.toInt,
+    () => Control.model.control(ControlledItem.ViewFrustum).near.toInt,
     value =>
-      self.model = self.model.withCamera(self.model.camera.withNear(near = value)), //.notifyChange(),
+      Control.setModel(Control.model.withControl(ControlledItem.ViewFrustum, Control.model.control(ControlledItem.ViewFrustum).withNear(near = value))),
     label = "near",
-    max = self.model.camera.maxNear.toInt,
-    min = self.model.camera.minNear.toInt
+    max = Control.model.control(ControlledItem.ViewFrustum).maxNear.toInt,
+    min = Control.model.control(ControlledItem.ViewFrustum).minNear.toInt
   )
 
   private lazy val _farSlider = ControlSlider(
-    () => self.model.camera.far.toInt,
+    () => Control.model.control(ControlledItem.ViewFrustum).far.toInt,
     value =>
-      self.model = self.model.withCamera(self.model.camera.withFar(far = value)), //.notifyChange(),
+      Control.setModel(Control.model.withControl(ControlledItem.ViewFrustum, Control.model.control(ControlledItem.ViewFrustum).withFar(far = value))),
     label = "far",
-    max = self.model.camera.maxFar.toInt,
-    min = self.model.camera.minFar.toInt
+    max = Control.model.control(ControlledItem.ViewFrustum).maxFar.toInt,
+    min = Control.model.control(ControlledItem.ViewFrustum).minFar.toInt
   )
 
   private lazy val _container =
@@ -85,9 +69,9 @@ private[swing] object ControlWindow:
 
   def apply(): ControlWindow = _ControlWindow
 
-  def apply(controlModel: ControlModel): ControlWindow =
-    _ControlWindow.updateModel(controlModel)
-    _ControlWindow
+//  def apply(controlModel: ControlModel): ControlWindow =
+//    _ControlWindow.updateModel(controlModel)
+//    _ControlWindow
 
 private[swing] class ControlSlider(getter: () => Int,
                                    setter: Int => Unit,
@@ -114,6 +98,7 @@ private[swing] class ControlSlider(getter: () => Int,
   )
   add(jLabel, BorderLayout.NORTH)
   add(jSlider, BorderLayout.SOUTH)
+  Control.subscribe(this.notifyChange)
 
   jSlider.addChangeListener(new ChangeListener() {
     override def stateChanged(e: ChangeEvent): Unit = {

@@ -37,6 +37,9 @@ case class Solid(mobile: Mobile,
 
   def twirl(newAngularAcceleration: AngularAcceleration): Solid =
     copy(angularAcceleration = newAngularAcceleration.truncate(within = angularAccelerationRange))
+    
+  def withMobile(mobile: Mobile): Solid =
+    copy(mobile = mobile)
 
 case class SolidConfig(mobileConfig: MobileConfig,
                        spinRange: SpinRange,

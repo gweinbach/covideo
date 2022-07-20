@@ -15,8 +15,9 @@ import com.ezoky.ezgames.covideo.component.HealthCondition.*
 import com.ezoky.ezgames.covideo.component.swing.SwingSprite
 import com.ezoky.ezgames.covideo.entity.People.{PersonId, Population}
 import com.ezoky.ezgames.covideo.entity.{*, given}
-import com.ezoky.ezgames.covideo.system.DisplaySystem
+import com.ezoky.ezgames.covideo.system.{ControlledItem, DisplaySystem}
 
+import java.awt.event.{KeyEvent, KeyListener}
 import java.awt.image.BufferedImage as AWTImage
 import java.awt.{Graphics2D, GraphicsDevice, GraphicsEnvironment, Color as AWTColor, Dimension as AWTDimension, EventQueue as AWTEventQueue}
 import javax.swing.border.Border
@@ -38,10 +39,10 @@ extension (sceneDimension: ScreenDimension)
 extension (awtDimension: AWTDimension)
   private def isNull: Boolean =
     (awtDimension.height == 0) &&
-    (awtDimension.width == 0)
+      (awtDimension.width == 0)
 
 private class SceneWindow()
-  extends JFrame:
+  extends JFrame :
 
   println("Creating a SceneWindow")
 
@@ -57,7 +58,7 @@ private class SceneWindow()
       )
       panelSize = size.awtDimension
       pack()
-//      repaint()
+  //      repaint()
 
   def updateTitle(newTitle: String): Unit =
     if (newTitle != getTitle)
@@ -70,9 +71,12 @@ private class SceneWindow()
     if !panelSize.isNull then
       panel.setPreferredSize(panelSize)
 
+    panel.setFocusable(true)
+    panel.addKeyListener(new KeyHandler)
     add(panel)
+
     setLocationRelativeTo(null) // centered on screen
-//    setResizable(false)
+    //    setResizable(false)
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
     pack()
     setVisible(true)
@@ -90,12 +94,11 @@ private[swing] object SceneWindow:
       mainWindow
     })
 
-
 /**
  * Drawing Panel
  */
 private class DrawingPanel()
-  extends JPanel:
+  extends JPanel :
 
   println("Creating a DrawingPanel")
   private var optScene: Option[Scene] = None
@@ -169,3 +172,90 @@ private class DrawingPanel()
 
     optScene = Some(scene)
     repaint()
+
+
+class KeyHandler extends KeyListener :
+
+  def keyTyped(e: KeyEvent): Unit = {
+//    displayInfo(e, "KEY TYPED: ")
+  }
+
+  def keyPressed(e: KeyEvent): Unit = {
+//    displayInfo(e, "KEY PRESSED: ")
+    e.getKeyCode() match
+      case KeyEvent.VK_UP =>
+        println("UP")
+        Control.setModel(Control.model.withControl(ControlledItem.Camera, Control.model.control(ControlledItem.Camera).plusDy(100)))
+      case KeyEvent.VK_DOWN =>
+        println("DOWN")
+        Control.setModel(Control.model.withControl(ControlledItem.Camera, Control.model.control(ControlledItem.Camera).plusDy(-100)))
+      case KeyEvent.VK_LEFT =>
+        println("LEFT")
+        Control.setModel(Control.model.withControl(ControlledItem.Camera, Control.model.control(ControlledItem.Camera).plusDx(-100)))
+      case KeyEvent.VK_RIGHT =>
+        println("RIGHT")
+        Control.setModel(Control.model.withControl(ControlledItem.Camera, Control.model.control(ControlledItem.Camera).plusDx(100)))
+      case _ =>
+        ()
+  }
+
+  def keyReleased(e: KeyEvent): Unit = {
+//    displayInfo(e, "KEY RELEASED: ")
+  }
+
+  private def displayInfo(e: KeyEvent,
+                          keyStatus: String): Unit = {
+
+    //You should only rely on the key char if the event
+    //is a key typed event.
+    val id = e.getID()
+    var keyString = ""
+    if (id == KeyEvent.KEY_TYPED) {
+      val c = e.getKeyChar();
+      keyString = "key character = '" + c + "'";
+    } else {
+      val keyCode = e.getKeyCode();
+      keyString = "key code = " + keyCode
+        + " ("
+        + KeyEvent.getKeyText(keyCode)
+        + ")"
+    }
+
+    val modifiersEx = e.getModifiersEx()
+    var modString = "extended modifiers = " + modifiersEx
+    var tmpString = KeyEvent.getKeyModifiersText(modifiersEx)
+
+    if (tmpString.length() > 0) {
+      modString += " (" + tmpString + ")"
+    } else {
+      modString += " (no extended modifiers)"
+    }
+
+    var actionString = "action key? "
+    if (e.isActionKey()) {
+      actionString += "YES"
+    } else {
+      actionString += "NO"
+    }
+
+    var locationString = "key location: "
+    val location = e.getKeyLocation()
+    if (location == KeyEvent.KEY_LOCATION_STANDARD) {
+      locationString += "standard"
+    } else if (location == KeyEvent.KEY_LOCATION_LEFT) {
+      locationString += "left"
+    } else if (location == KeyEvent.KEY_LOCATION_RIGHT) {
+      locationString += "right"
+    } else if (location == KeyEvent.KEY_LOCATION_NUMPAD) {
+      locationString += "numpad"
+    } else { // (location == KeyEvent.KEY_LOCATION_UNKNOWN)
+      locationString += "unknown"
+    }
+
+    //Display information about the KeyEvent...
+    println(s"keyStatus = $keyStatus")
+    println(s"keyString = $keyString")
+    println(s"modString = $modString")
+    println(s"actionString = $actionString")
+    println(s"locationString = $locationString")
+  }

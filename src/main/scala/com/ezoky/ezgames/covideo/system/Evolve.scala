@@ -7,45 +7,45 @@ import com.ezoky.ezgames.covideo.entity.People.{Person, Population}
 
 
 trait Evolve[T]:
-  extension (entity: Generated[T]) def evolve: Generated[T]
+  extension (generatedEntity: Generated[T]) def evolve: Generated[T]
 
 
 given Evolve[Mobile] with
-  extension (entity: Generated[Mobile])
+  extension (generatedMobile: Generated[Mobile])
     override def evolve: Generated[Mobile] =
       for
-        mobile <- entity
+        mobile <- generatedMobile
         within = mobile.accelerationRange
         newAcceleration <- Acceleration.generated(within, within, within)
       yield
         mobile.turn(newAcceleration)
 
 given (using Evolve[Mobile]): Evolve[Solid] with
-  extension (entity: Generated[Solid])
+  extension (generatedSolid: Generated[Solid])
     override def evolve: Generated[Solid] =
       for
-        solid <- entity
+        solid <- generatedSolid
         evolvedMobile <- Generated(solid.mobile).evolve
         within = solid.angularAccelerationRange
         newAccelerationRange <- AngularAcceleration.generated(within, within, within)
       yield
-        solid.twirl(newAccelerationRange).copy(mobile = evolvedMobile)
+        solid.twirl(newAccelerationRange).withMobile(evolvedMobile)
 
 
 given (using Evolve[Solid]): Evolve[Person] with
-  extension (entity: Generated[Person])
+  extension (generatedPerson: Generated[Person])
     override def evolve: Generated[Person] =
       for
-        person <- entity
+        person <- generatedPerson
         evolvedSolid <- Generated(person.solid).evolve
       yield
-        person.copy(solid = evolvedSolid)
+        person.withSolid(solid = evolvedSolid)
 
 given (using Evolve[Person]): Evolve[Game] with
-  extension (entity: Generated[Game])
+  extension (generatedGame: Generated[Game])
     override def evolve: Generated[Game] =
       for
-        game <- entity
+        game <- generatedGame
         evolvedPeople <- Generated.flatMapSet(game.people.values.toSet, _.evolve)
       yield
-        game.copy(people = Population(evolvedPeople))
+        game.withPeople(people = Population(evolvedPeople))

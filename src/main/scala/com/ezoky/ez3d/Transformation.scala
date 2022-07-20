@@ -11,42 +11,42 @@ package com.ezoky.ez3d
  * @author gweinbach on 11/06/2022
  */
 trait Transformation[V]
-  extends (V => Option[V]) :
+  extends (V => V) :
 
-  def transform(v: V): Option[V]
+  def transform(v: V): V
 
-  final override def apply(v: V): Option[V] =
+  final override def apply(v: V): V =
     transform(v)
 
   infix def o(t2: Transformation[V]): Transformation[V] =
-    (v: V) => t2.transform(v).flatMap(transform)
+    (v: V) => transform(t2.transform(v))
 
 
 class Identity[V]
   extends Transformation[V] :
 
-  final override def transform(v: V): Option[V] = Some(v)
+  final override def transform(v: V): V = v
 
 
 trait Rotation[V]
   extends Transformation[V] :
 
-  final override def transform(v: V): Option[V] = rotate(v)
+  final override def transform(v: V): V = rotate(v)
 
-  def rotate(v: V): Option[V]
+  def rotate(v: V): V
 
 
 trait Translation[V]
   extends Transformation[V] :
 
-  final override def transform(v: V): Option[V] = Some(translate(v))
+  final override def transform(v: V): V = translate(v)
 
   def translate(v: V): V
 
 
 extension [V](v: V)
 
-  final def rotate(using rotation: Rotation[V]): Option[V] =
+  final def rotate(using rotation: Rotation[V]): V =
     rotation.rotate(v)
 
   final def translate(using translation: Translation[V]): V =

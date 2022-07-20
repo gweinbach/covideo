@@ -34,6 +34,9 @@ private given Conversion[PositionValue, DimensionBase] with
   def apply(positionValue: PositionValue): DimensionBase =
     positionValue.baseValue
 
+/**
+ * Very important point: coordinate base in World area is indirect, therefore z value is negated
+ */
 private given Conversion[Position, SpacePoint] with
   def apply(position: Position): SpacePoint =
     SpacePoint(

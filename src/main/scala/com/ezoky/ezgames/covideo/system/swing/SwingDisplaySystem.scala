@@ -6,7 +6,7 @@ import com.ezoky.ezgames.covideo.component.swing.SwingSprite
 import com.ezoky.ezgames.covideo.component.{HealthCondition, Sprite}
 import com.ezoky.ezgames.covideo.entity.People.{PersonId, Population}
 import com.ezoky.ezgames.covideo.entity.{Scene, given}
-import com.ezoky.ezgames.covideo.system.{ControlModel, DisplaySystem}
+import com.ezoky.ezgames.covideo.system.{ControlModel, ControlledItem, DisplaySystem}
 
 /**
  * @author gweinbach on 14/05/2022 12:29
@@ -25,14 +25,14 @@ object SwingDisplaySystem
     ScreenDimension(screenWidth, screenHeight)
 
 
-  override def controlModel: IO[ControlModel] =
+  override def popControlModel(item: ControlledItem): IO[ControlModel] =
     IO {
-      ControlWindow().popModel()
+      Control.popModel(item)
     }
 
   override def updateControlModel(model: ControlModel): IO[Unit] =
     IO {
-      ControlWindow().updateModel(model)
+      Control.updateModel(model)
     }
 
   override def displayControl(): IO[Unit] =

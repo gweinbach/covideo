@@ -185,6 +185,11 @@ abstract class Dimension[T: Precision: Numeric: Trig: Generated: Ez3D: Epsilon]:
               usingGeometry: Geometry): PositionValue =
       usingGeometry.normalizePosition(position, withinBoundary)
 
+    def middle(p1: PositionValue,
+               p2: PositionValue): PositionValue =
+      (p1 + p2) / __2
+
+
   extension (position: PositionValue)
 
     @targetName("positionToInt")

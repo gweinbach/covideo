@@ -15,6 +15,9 @@ case class Game(world: World,
   
   def withWorld(world: World): Game =
     copy(world = world)
+    
+  def withPeople(people: Population[Person]): Game =
+    copy(people = people)
 
 case class GameConfig(populationSize: Int,
                       personConfig: PersonConfig,

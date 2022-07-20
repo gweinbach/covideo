@@ -126,20 +126,27 @@ trait Cameras[T: Numeric : Trig : Precision]
     )
 
   sealed trait Camera:
+    // World coordinates
     val position: SpacePoint
-    val look: NonNullSpaceVector
-    val up: NonNullSpaceVector
-    val right: NonNullSpaceVector
+    val target: SpacePoint
     val basis: OrthonormalBasis
+    final lazy val eye: SpaceVector = SpaceVector(position)
+    final lazy val look = SpaceVector(position, target)
+    final lazy val right = basis.i
+    final lazy val up = basis.j
 
     val viewFrustum: ViewFrustum
 
     def withPosition(newPosition: SpacePoint): Camera
 
+    def withTarget(newTarget: SpacePoint): Camera
+
+    def withBasis(newBasis: OrthonormalBasis): Camera
+
     def withViewFrustum(newViewFrustum: ViewFrustum): Camera
 
-    final lazy val eye: SpaceVector = SpaceVector(position)
-    final lazy val target: SpacePoint = look.dest(position)
+    def move(dx: T,
+             dy: T): Camera
 
   //  object Parallel:
 
@@ -160,16 +167,20 @@ trait Cameras[T: Numeric : Trig : Precision]
   object Camera:
 
     private case class SimpleCamera(position: SpacePoint = SpacePoint.Origin,
-                                    look: NonNullSpaceVector = -NonNullSpaceVector.OneZ,
-                                    up: NonNullSpaceVector = NonNullSpaceVector.OneY,
-                                    right: NonNullSpaceVector = NonNullSpaceVector.OneX,
+                                    target: SpacePoint = SpacePoint(_0, _0, -__1),
                                     basis: OrthonormalBasis = Basis.NormalDirect,
                                     viewFrustum: ViewFrustum = ViewFrustum.Default)
       extends Camera :
       final override def withPosition(newPosition: SpacePoint): Camera =
         copy(position = newPosition)
+      final override def withTarget(newTarget: SpacePoint): Camera =
+        copy(target = newTarget)
+      final override def withBasis(newBasis: OrthonormalBasis): Camera =
+        copy(basis = newBasis)
       final override def withViewFrustum(newViewFrustum: ViewFrustum): Camera =
         copy(viewFrustum = newViewFrustum)
+      final override def move(dx: T, dy: T): Camera =
+        copy(position = position.withX(position.x + dx).withY(position.y + dy))
 
     val Default: Camera = SimpleCamera()
 
@@ -319,17 +330,45 @@ trait Cameras[T: Numeric : Trig : Precision]
     val ViewFrustum = SymetricViewFrustum
 
     case class LookAtCamera private(position: SpacePoint,
-                                    look: NonNullSpaceVector,
-                                    up: NonNullSpaceVector,
-                                    right: NonNullSpaceVector,
+                                    target: SpacePoint,
                                     basis: OrthonormalBasis,
                                     viewFrustum: ViewFrustum)
       extends Camera :
       final override def withPosition(newPosition: SpacePoint): Camera =
         copy(position = newPosition)
 
+      final override def withTarget(newTarget: SpacePoint): Camera =
+        copy(target = newTarget)
+
+      final override def withBasis(newBasis: OrthonormalBasis): Camera =
+        copy(basis = newBasis)
+
       final override def withViewFrustum(newViewFrustum: ViewFrustum): Camera =
         copy(viewFrustum = newViewFrustum)
+
+      final override def move(dx: T,
+                              dy: T): Camera =
+        if dx == _0 && dy == _0 then
+          this
+        else
+          val targetDistance = look.magnitude
+          val horizontalAngle: Radians = atan(dx / targetDistance)
+          val verticalAngle: Radians = atan(dy / targetDistance)
+          val qh = Quaternion.fromRotationVectorAndAngle(up, horizontalAngle)
+          val qv = Quaternion.fromRotationVectorAndAngle(right, verticalAngle)
+          val newPositionBasis =
+            for
+              vector <- SpaceVector.nonNull(target, position)
+              rotation = qh × qv
+              rotated = rotation.rotate(vector)
+              rotatedBasis <- rotation.rotate(basis).asInstanceOf[Option[OrthonormalBasis]]
+            yield
+//              (rotated.dest(target), basis)
+              (rotated.dest(target), rotatedBasis)
+          copy(
+            position = newPositionBasis.map(_._1).getOrElse(position),
+            basis = newPositionBasis.map(_._2).getOrElse(basis)
+          ) // TODO handle error
 
     object LookAtCamera:
 
@@ -345,9 +384,7 @@ trait Cameras[T: Numeric : Trig : Precision]
         yield
           LookAtCamera(
             position = position,
-            look = look.normalized,
-            up = up.normalized,
-            right = right.normalized,
+            target = target,
             basis = basis.normalized,
             viewFrustum = viewFrustum
           )
@@ -365,9 +402,10 @@ trait Cameras[T: Numeric : Trig : Precision]
               rightDistance = sceneWidth / __2
             )
           cameraPosition = SpacePoint(x = sceneWidth / __2, y = sceneHeight / __2, z = cameraDistance)
+          targetPosition = cameraPosition.withZ(-sceneDepth / __2) // Center of the box
           camera <- Perspective.LookAtCamera.safe(
               position = cameraPosition,
-              target = cameraPosition.withZ(_0),
+              target = targetPosition,
               upVector = SpaceVector.OneY,
               viewFrustum
             )

@@ -52,6 +52,8 @@ object People:
     def angularAccelerate: Person =
       copy(solid = solid.angularAccelerate)
 
+    def withSolid(solid: Solid): Person =
+      copy(solid = solid)
 
   case class PersonConfig(shape: Generated[Shape],
                           solidConfig: SolidConfig)

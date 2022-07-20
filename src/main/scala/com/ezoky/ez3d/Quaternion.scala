@@ -42,7 +42,7 @@ trait H[T: Numeric : Precision]
         Some(divideBy(y))
 
     @targetName("times")
-    infix def ×(q2: Quaternion): Option[Quaternion] =
+    infix def ×(q2: Quaternion): Quaternion =
       val v1 = SpaceVector(b, c, d)
       val w1 = a
       val v2 = SpaceVector(q2.b, q2.c, q2.d)
@@ -50,7 +50,7 @@ trait H[T: Numeric : Precision]
       Quaternion(
         (w1 * w2) - (v1 ⋅ v2),
         (v2 * w1) + (v1 * w2) + (v1 ∧ v2)
-      ).normalized
+      )
 
     lazy val real: T = a
     lazy val imaginary: SpaceVector = SpaceVector(b, c, d)
@@ -67,11 +67,27 @@ trait H[T: Numeric : Precision]
     def rotationAxis: Option[NonNullSpaceVector] =
       SpaceVector.nonNull(b, c, d).map(_.normalized)
 
-    def rotate(vector: SpaceVector): Option[SpaceVector] =
+    def rotateNull(vector: NullSpaceVector.type ): NullSpaceVector.type =
+      NullSpaceVector
+
+    def rotateNonNull(vector: NonNullSpaceVector): NonNullSpaceVector =
+      (this × Quaternion(_0, vector) × conjugate).imaginary.asInstanceOf[NonNullSpaceVector] // TODO: don't cast
+
+    def rotate(vector: SpaceVector): SpaceVector =
+      vector match
+        case nonNullSpaceVector: NonNullSpaceVector =>
+          rotateNonNull(nonNullSpaceVector)
+        case nullSpaceVector: NullSpaceVector.type =>
+          rotateNull(nullSpaceVector)
+
+    def rotate(basis: Basis): Option[Basis] =
       for
-        q1 <- this × Quaternion(_0, vector)
-        q2 <- q1 × conjugate
-      yield q2.imaginary
+        rotatedBasis <- basis.same(
+          rotateNonNull(basis.i),
+          rotateNonNull(basis.j),
+          rotateNonNull(basis.k)
+        )
+      yield rotatedBasis
 
     override def equals(obj: Any): Boolean =
       obj match

@@ -16,11 +16,14 @@ case class Box(width: Width,
                height: Height,
                depth: Depth):
 
-  def minPosition: Position =
+  lazy val minPosition: Position =
     Position(width.minCoord, height.minCoord, depth.minCoord)
-    
-  def maxPosition: Position =
+
+  lazy val maxPosition: Position =
     Position(width.maxCoord, height.maxCoord, depth.maxCoord)
 
+  lazy val center: Position =
+    Position.middle(minPosition, maxPosition)
+    
   def generatedPosition: Generated[Position] =
     Position.generatedWithin(this)
