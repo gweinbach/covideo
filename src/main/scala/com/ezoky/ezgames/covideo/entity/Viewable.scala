@@ -7,24 +7,50 @@ package com.ezoky.ezgames.covideo.entity
 
 import com.ezoky.ezgames.covideo.component.Dimension.*
 import com.ezoky.ezgames.covideo.component.Dimension.Ez3D.*
-import com.ezoky.ezgames.covideo.component.Position
+import com.ezoky.ezgames.covideo.component.{Position, Sprite}
 import com.ezoky.ezgames.covideo.entity.People.*
 
 /**
  * @since 0.2.0
  * @author gweinbach on 02/07/2022
  */
-trait Viewable3D[T]:
+trait Viewable[T, V]:
   extension (viewable: T)
-    def all3DComponents: Population[Component3D]
+    def allViewables: Population[V]
 
-given [T: Viewable3D]: Viewable3D[Population[T]] with
+given [V, T](using Viewable[T, V]): Viewable[Population[T], V] with
   extension (population: Population[T])
-    def all3DComponents: Population[Component3D] =
-      population.foldLeft(Population.empty[Component3D]){
+    def allViewables: Population[V] =
+      population.foldLeft(Population.empty[V]){
         case (pop, (_, t)) =>
-          pop ++ t.all3DComponents
+          pop ++ t.allViewables
       }
+
+given [V](using Viewable[World, V])(using Viewable[Person, V]): Viewable[Game, V] with
+  extension (game: Game)
+    override def allViewables: Population[V] =
+      game.world.allViewables ++ game.people.allViewables
+
+
+trait ViewableSprite[T]
+  extends Viewable[T, Sprite]
+
+given ViewableSprite[World] with
+  extension (world: World)
+    override def allViewables: Population[Sprite] =
+      Population.empty
+
+given ViewableSprite[Person] with
+  extension (person: Person)
+    override def allViewables: Population[Sprite] =
+      Population(
+        person.id ->
+          person.sprite
+      )
+
+
+trait Viewable3D[T]
+  extends Viewable[T, Component3D]
 
 private given Conversion[SizeValue, DimensionBase] with
   def apply(sizeValue: SizeValue): DimensionBase =
@@ -48,7 +74,7 @@ private given Conversion[Position, SpacePoint] with
 
 given Viewable3D[Person] with
   extension (person: Person)
-    override def all3DComponents: Population[Component3D] =
+    override def allViewables: Population[Component3D] =
       Population(
         person.id ->
           Component3D(
@@ -58,14 +84,9 @@ given Viewable3D[Person] with
           )
       )
 
-given (using Viewable3D[Person]): Viewable3D[Game] with
-  extension (game: Game)
-    override def all3DComponents: Population[Component3D] =
-      game.world.all3DComponents ++ game.people.all3DComponents
-
 given Viewable3D[World] with
   extension (world: World)
-    override def all3DComponents: Population[Component3D] =
+    override def allViewables: Population[Component3D] =
       val boundaries =
         Parallelepiped(
           width = world.area.width.value,

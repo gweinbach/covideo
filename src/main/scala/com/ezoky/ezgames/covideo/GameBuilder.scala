@@ -99,23 +99,6 @@ case class CameraBuilder(cameraConfig: CameraConfig)
         cameraConfig.far - cameraConfig.near,
         cameraConfig.near
       ).getOrElse(Camera.Default)
-//      (
-//        for
-//          viewFrustum <- Perspective.ViewFrustum.fromSymetricPlanes(
-//            nearDistance = cameraConfig.near,
-//            farDistance = cameraConfig.far,
-//            topDistance = cameraConfig.top,
-//            rightDistance = cameraConfig.right
-//          )
-//          camera <- Perspective.LookAtCamera.safe(
-//            position = cameraConfig.position.withZ(cameraConfig.near),
-//            target = cameraConfig.position.withZ(0), // always looking towards center of near plan
-//            upVector = SpaceVector.OneY,
-//            viewFrustum = viewFrustum
-//          )
-//        yield
-//          camera
-//      ).getOrElse(Camera.Default)
     )
 
 

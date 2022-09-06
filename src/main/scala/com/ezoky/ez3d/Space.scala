@@ -25,7 +25,7 @@ trait Space[T: Numeric : Precision]:
   private val _0: T = _SpatialNumeric.zero
   private val __1: T = _SpatialNumeric.one // double '_' to avoid conflict with Product<X>._1
 
-  type Object3D = SpacePoint|SpaceVector
+  type Object3D = SpacePoint | SpaceVector
 
   sealed trait Axis:
     def base: NonNullSpaceVector
@@ -190,7 +190,7 @@ trait Space[T: Numeric : Precision]:
   case class NonNullSpaceVector private(x: T,
                                         y: T,
                                         z: T)
-    extends SpaceVector:
+    extends SpaceVector :
 
     lazy val normalized: NonNullSpaceVector =
       divideBy(magnitude)
@@ -244,8 +244,8 @@ trait Space[T: Numeric : Precision]:
       (x ~= _0) && (y ~= _0) && (z ~= _0)
 
     def safe(x: T,
-                    y: T,
-                    z: T): Option[NonNullSpaceVector] =
+             y: T,
+             z: T): Option[NonNullSpaceVector] =
       if isNullTuple(x, y, z) then
         None
       else
@@ -330,7 +330,7 @@ trait Space[T: Numeric : Precision]:
     val k: NonNullSpaceVector
 
     lazy val normalized: NormalizedBasis =
-      new NormalizedBasis:
+      new NormalizedBasis :
         override val i: NonNullSpaceVector = self.i.normalized
         override val j: NonNullSpaceVector = self.j.normalized
         override val k: NonNullSpaceVector = self.k.normalized
@@ -341,11 +341,6 @@ trait Space[T: Numeric : Precision]:
     lazy val isOrthogonal: Boolean =
       Basis.isOrthogonal(i, j, k)
 
-    def same(i: NonNullSpaceVector,
-             j: NonNullSpaceVector,
-             k: NonNullSpaceVector): Option[Basis] =
-      Basis.safe(i, j, k)
-    
     override def equals(obj: Any): Boolean =
       obj match
         case that: Basis if (that != null) =>
@@ -359,44 +354,32 @@ trait Space[T: Numeric : Precision]:
       31 * (
         31 * (
           i.##
-        ) + j.##
-      ) + k.##
+          ) + j.##
+        ) + k.##
 
     override def toString: String =
       s"Basis($i, $j, $k)"
 
   trait NormalizedBasis extends Basis :
+
     override lazy val normalized: NormalizedBasis =
       this
-
-    override def same(i: NonNullSpaceVector,
-                      j: NonNullSpaceVector,
-                      k: NonNullSpaceVector): Option[NormalizedBasis] =
-      Basis.normalized(i, j, k)
 
 
   trait OrthogonalBasis extends Basis :
     self =>
+
     override lazy val normalized: OrthonormalBasis =
       new OrthonormalBasis :
         override val i: NonNullSpaceVector = self.i.normalized
         override val j: NonNullSpaceVector = self.j.normalized
         override val k: NonNullSpaceVector = self.k.normalized
 
-    override def same(i: NonNullSpaceVector,
-                      j: NonNullSpaceVector,
-                      k: NonNullSpaceVector): Option[OrthogonalBasis] =
-      Basis.orthogonal(i, j, k)
-
-
   trait OrthonormalBasis extends OrthogonalBasis with NormalizedBasis :
+
     override lazy val normalized: OrthonormalBasis =
       this
 
-    override def same(i: NonNullSpaceVector,
-                      j: NonNullSpaceVector,
-                      k: NonNullSpaceVector): Option[OrthonormalBasis] =
-      Basis.orthonormal(i, j, k)
 
   object Basis:
 
@@ -455,7 +438,6 @@ trait Space[T: Numeric : Precision]:
           override val j: NonNullSpaceVector = baseJ.normalized
           override val k: NonNullSpaceVector = baseK.normalized
 
-
     def orthonormal(i: SpaceVector,
                     j: SpaceVector,
                     k: SpaceVector): Option[OrthonormalBasis] =
@@ -467,7 +449,7 @@ trait Space[T: Numeric : Precision]:
           (baseI isOrthogonal baseK) &&
           (baseJ isOrthogonal baseK)
       yield
-        new OrthonormalBasis:
+        new OrthonormalBasis :
           override val i: NonNullSpaceVector = baseI.normalized
           override val j: NonNullSpaceVector = baseJ.normalized
           override val k: NonNullSpaceVector = baseK.normalized
@@ -491,7 +473,7 @@ trait Space[T: Numeric : Precision]:
         baseJ <- SpaceVector.nonNull(j) if (baseI isOrthogonal baseJ)
         baseK <- SpaceVector.nonNullCrossProduct(baseI, baseJ)
       yield
-        new OrthonormalBasis:
+        new OrthonormalBasis :
           override val i: NonNullSpaceVector = baseI.normalized
           override val j: NonNullSpaceVector = baseJ.normalized
           override val k: NonNullSpaceVector = -baseK.normalized
@@ -510,59 +492,59 @@ trait Space[T: Numeric : Precision]:
         override val k: NonNullSpaceVector = -Axis.Z.base
 
 
-  type Vertices = Iterable[Vertex]
+  type Segments = Iterable[Segment]
 
-  case class Vertex(s: SpacePoint,
-                    t: SpacePoint):
+  case class Segment(s: SpacePoint,
+                     t: SpacePoint):
 
-    infix def +(v: SpaceVector): Vertex =
-      Vertex(s + v, t + v)
+    infix def +(v: SpaceVector): Segment =
+      Segment(s + v, t + v)
 
-    lazy val flipZ: Vertex =
-      Vertex(s.flipZ, t.flipZ)
+    lazy val flipZ: Segment =
+      Segment(s.flipZ, t.flipZ)
 
-  object Vertex:
+  object Segment:
     def apply(s: SpacePoint,
-              v: SpaceVector): Vertex =
-      Vertex(s, v.dest(s))
+              v: SpaceVector): Segment =
+      Segment(s, v.dest(s))
 
-  object Vertices:
-    val Empty: Vertices = Iterable()
+  object Segments:
+    val Empty: Segments = Iterable()
 
   trait Shape:
-    val vertices: Vertices
+    val segments: Segments
 
     inline def +(s2: Shape): Shape =
       Shape.merge(this, s2)
 
     override def toString: String =
-      s"Shape(${vertices.mkString(",")})"
+      s"Shape(${segments.mkString(",")})"
 
     override def equals(obj: Any): Boolean =
       obj match
         case that: Shape if that != null =>
-          that.vertices == this.vertices
+          that.segments == this.segments
         case _ =>
           false
 
     override def hashCode(): Int =
-      43 * vertices.hashCode()
+      43 * segments.hashCode()
 
   object Shape:
-    def apply(vertices: Vertices): Shape =
-      SimpleShape(vertices)
+    def apply(segments: Segments): Shape =
+      SimpleShape(segments)
 
-    def apply(vertices: Vertex*): Shape =
-      Shape(vertices)
+    def apply(segments: Segment*): Shape =
+      Shape(segments)
 
     lazy val Empty: Shape =
-      Shape(Vertices.Empty)
+      Shape(Segments.Empty)
 
     def merge(s1: Shape,
               s2: Shape): Shape =
       Shape(
-        s1.vertices ++ s2.vertices
+        s1.segments ++ s2.segments
       )
 
-  private case class SimpleShape(vertices: Vertices)
+  private case class SimpleShape(segments: Segments)
     extends Shape

@@ -344,12 +344,12 @@ trait Transformation3D[T: Numeric : Trig : Precision]
     def apply(point: SpacePoint): Option[SpacePoint] =
       (matrix × point.homogeneous).cartesian
 
-    def apply(vertex: Vertex): Option[Vertex] =
+    def apply(segment: Segment): Option[Segment] =
       for
-        s <- matrix(vertex.s)
-        t <- matrix(vertex.t)
+        s <- matrix(segment.s)
+        t <- matrix(segment.t)
       yield
-        Vertex(s, t)
+        Segment(s, t)
 
   
   // Some 2D trqnsformations

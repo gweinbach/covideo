@@ -61,12 +61,12 @@ object Screen:
                     right: Pixel = 0 px)
 
   
-  type ScreenVertices = Iterable[ScreenVertex]
+  type ScreenSegments = Iterable[ScreenSegment]
 
-  case class ScreenVertex(s: ScreenPosition,
+  case class ScreenSegment(s: ScreenPosition,
                           t: ScreenPosition)
   
-  case class ScreenShape(vertices: ScreenVertices)
+  case class ScreenShape(segments: ScreenSegments)
   
   object ScreenShape:
-    def apply(vertices: ScreenVertex*): ScreenShape = ScreenShape(vertices)
+    def apply(segments: ScreenSegment*): ScreenShape = ScreenShape(segments)

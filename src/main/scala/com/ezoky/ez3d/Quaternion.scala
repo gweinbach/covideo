@@ -82,7 +82,7 @@ trait H[T: Numeric : Precision]
 
     def rotate(basis: Basis): Option[Basis] =
       for
-        rotatedBasis <- basis.same(
+        rotatedBasis <- Basis.safe(
           rotateNonNull(basis.i),
           rotateNonNull(basis.j),
           rotateNonNull(basis.k)

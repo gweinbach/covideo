@@ -202,12 +202,12 @@ trait Transformation2D[T: Numeric : Trig : Precision]
     def apply(point: PlanePoint): Option[PlanePoint] =
       (matrix × point.homogeneous).cartesian
 
-    def apply(vertex: PlaneVertex): Option[PlaneVertex] =
+    def apply(segment: PlaneSegment): Option[PlaneSegment] =
       for
-        s <- matrix(vertex.s)
-        t <- matrix(vertex.t)
+        s <- matrix(segment.s)
+        t <- matrix(segment.t)
       yield
-        PlaneVertex(s, t)
+        PlaneSegment(s, t)
 
   
   // Some 2D trqnsformations

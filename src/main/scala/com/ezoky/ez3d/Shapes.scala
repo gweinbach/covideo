@@ -28,12 +28,12 @@ trait Shapes[T: Numeric: Precision]
 
     val halfSize = size / __2
 
-    override val vertices: Vertices =
+    override val segments: Segments =
       scala.Vector(
-        Vertex(SpacePoint(-halfSize, -halfSize, _0), SpacePoint(halfSize, -halfSize, _0)),
-        Vertex(SpacePoint(halfSize, -halfSize, _0), SpacePoint(halfSize, halfSize, _0)),
-        Vertex(SpacePoint(halfSize, halfSize, _0), SpacePoint(-halfSize, halfSize, _0)),
-        Vertex(SpacePoint(-halfSize, halfSize, _0), SpacePoint(-halfSize, -halfSize, _0))
+        Segment(SpacePoint(-halfSize, -halfSize, _0), SpacePoint(halfSize, -halfSize, _0)),
+        Segment(SpacePoint(halfSize, -halfSize, _0), SpacePoint(halfSize, halfSize, _0)),
+        Segment(SpacePoint(halfSize, halfSize, _0), SpacePoint(-halfSize, halfSize, _0)),
+        Segment(SpacePoint(-halfSize, halfSize, _0), SpacePoint(-halfSize, -halfSize, _0))
       )
 
   case class Cube(size: T)
@@ -41,22 +41,22 @@ trait Shapes[T: Numeric: Precision]
 
     val halfSize = size / __2
 
-    override val vertices: Vertices =
+    override val segments: Segments =
       scala.Vector(
-        Vertex(SpacePoint(-halfSize, -halfSize, -halfSize), SpacePoint(halfSize, -halfSize, -halfSize)),
-        Vertex(SpacePoint(halfSize, -halfSize, -halfSize), SpacePoint(halfSize, halfSize, -halfSize)),
-        Vertex(SpacePoint(halfSize, halfSize, -halfSize), SpacePoint(-halfSize, halfSize, -halfSize)),
-        Vertex(SpacePoint(-halfSize, halfSize, -halfSize), SpacePoint(-halfSize, -halfSize, -halfSize)),
+        Segment(SpacePoint(-halfSize, -halfSize, -halfSize), SpacePoint(halfSize, -halfSize, -halfSize)),
+        Segment(SpacePoint(halfSize, -halfSize, -halfSize), SpacePoint(halfSize, halfSize, -halfSize)),
+        Segment(SpacePoint(halfSize, halfSize, -halfSize), SpacePoint(-halfSize, halfSize, -halfSize)),
+        Segment(SpacePoint(-halfSize, halfSize, -halfSize), SpacePoint(-halfSize, -halfSize, -halfSize)),
 
-        Vertex(SpacePoint(-halfSize, -halfSize, halfSize), SpacePoint(halfSize, -halfSize, halfSize)),
-        Vertex(SpacePoint(halfSize, -halfSize, halfSize), SpacePoint(halfSize, halfSize, halfSize)),
-        Vertex(SpacePoint(halfSize, halfSize, halfSize), SpacePoint(-halfSize, halfSize, halfSize)),
-        Vertex(SpacePoint(-halfSize, halfSize, halfSize), SpacePoint(-halfSize, -halfSize, halfSize)),
+        Segment(SpacePoint(-halfSize, -halfSize, halfSize), SpacePoint(halfSize, -halfSize, halfSize)),
+        Segment(SpacePoint(halfSize, -halfSize, halfSize), SpacePoint(halfSize, halfSize, halfSize)),
+        Segment(SpacePoint(halfSize, halfSize, halfSize), SpacePoint(-halfSize, halfSize, halfSize)),
+        Segment(SpacePoint(-halfSize, halfSize, halfSize), SpacePoint(-halfSize, -halfSize, halfSize)),
 
-        Vertex(SpacePoint(-halfSize, -halfSize, -halfSize), SpacePoint(-halfSize, -halfSize, halfSize)),
-        Vertex(SpacePoint(-halfSize, halfSize, -halfSize), SpacePoint(-halfSize, halfSize, halfSize)),
-        Vertex(SpacePoint(halfSize, -halfSize, -halfSize), SpacePoint(halfSize, -halfSize, halfSize)),
-        Vertex(SpacePoint(halfSize, halfSize, -halfSize), SpacePoint(halfSize, halfSize, halfSize)),
+        Segment(SpacePoint(-halfSize, -halfSize, -halfSize), SpacePoint(-halfSize, -halfSize, halfSize)),
+        Segment(SpacePoint(-halfSize, halfSize, -halfSize), SpacePoint(-halfSize, halfSize, halfSize)),
+        Segment(SpacePoint(halfSize, -halfSize, -halfSize), SpacePoint(halfSize, -halfSize, halfSize)),
+        Segment(SpacePoint(halfSize, halfSize, -halfSize), SpacePoint(halfSize, halfSize, halfSize)),
       )  
       
   case class Parallelepiped(width: T,
@@ -68,22 +68,22 @@ trait Shapes[T: Numeric: Precision]
     val halfHeight = height / __2
     val halfDepth = depth / __2
 
-    override val vertices: Vertices =
+    override val segments: Segments =
       scala.Vector(
-        Vertex(SpacePoint(-halfWidth, -halfHeight, -halfDepth), SpacePoint(halfWidth, -halfHeight, -halfDepth)),
-        Vertex(SpacePoint(halfWidth, -halfHeight, -halfDepth), SpacePoint(halfWidth, halfHeight, -halfDepth)),
-        Vertex(SpacePoint(halfWidth, halfHeight, -halfDepth), SpacePoint(-halfWidth, halfHeight, -halfDepth)),
-        Vertex(SpacePoint(-halfWidth, halfHeight, -halfDepth), SpacePoint(-halfWidth, -halfHeight, -halfDepth)),
+        Segment(SpacePoint(-halfWidth, -halfHeight, -halfDepth), SpacePoint(halfWidth, -halfHeight, -halfDepth)),
+        Segment(SpacePoint(halfWidth, -halfHeight, -halfDepth), SpacePoint(halfWidth, halfHeight, -halfDepth)),
+        Segment(SpacePoint(halfWidth, halfHeight, -halfDepth), SpacePoint(-halfWidth, halfHeight, -halfDepth)),
+        Segment(SpacePoint(-halfWidth, halfHeight, -halfDepth), SpacePoint(-halfWidth, -halfHeight, -halfDepth)),
 
-        Vertex(SpacePoint(-halfWidth, -halfHeight, halfDepth), SpacePoint(halfWidth, -halfHeight, halfDepth)),
-        Vertex(SpacePoint(halfWidth, -halfHeight, halfDepth), SpacePoint(halfWidth, halfHeight, halfDepth)),
-        Vertex(SpacePoint(halfWidth, halfHeight, halfDepth), SpacePoint(-halfWidth, halfHeight, halfDepth)),
-        Vertex(SpacePoint(-halfWidth, halfHeight, halfDepth), SpacePoint(-halfWidth, -halfHeight, halfDepth)),
+        Segment(SpacePoint(-halfWidth, -halfHeight, halfDepth), SpacePoint(halfWidth, -halfHeight, halfDepth)),
+        Segment(SpacePoint(halfWidth, -halfHeight, halfDepth), SpacePoint(halfWidth, halfHeight, halfDepth)),
+        Segment(SpacePoint(halfWidth, halfHeight, halfDepth), SpacePoint(-halfWidth, halfHeight, halfDepth)),
+        Segment(SpacePoint(-halfWidth, halfHeight, halfDepth), SpacePoint(-halfWidth, -halfHeight, halfDepth)),
 
-        Vertex(SpacePoint(-halfWidth, -halfHeight, -halfDepth), SpacePoint(-halfWidth, -halfHeight, halfDepth)),
-        Vertex(SpacePoint(-halfWidth, halfHeight, -halfDepth), SpacePoint(-halfWidth, halfHeight, halfDepth)),
-        Vertex(SpacePoint(halfWidth, -halfHeight, -halfDepth), SpacePoint(halfWidth, -halfHeight, halfDepth)),
-        Vertex(SpacePoint(halfWidth, halfHeight, -halfDepth), SpacePoint(halfWidth, halfHeight, halfDepth)),
+        Segment(SpacePoint(-halfWidth, -halfHeight, -halfDepth), SpacePoint(-halfWidth, -halfHeight, halfDepth)),
+        Segment(SpacePoint(-halfWidth, halfHeight, -halfDepth), SpacePoint(-halfWidth, halfHeight, halfDepth)),
+        Segment(SpacePoint(halfWidth, -halfHeight, -halfDepth), SpacePoint(halfWidth, -halfHeight, halfDepth)),
+        Segment(SpacePoint(halfWidth, halfHeight, -halfDepth), SpacePoint(halfWidth, halfHeight, halfDepth)),
       )
       
   case class Cross(width: T,
@@ -95,11 +95,11 @@ trait Shapes[T: Numeric: Precision]
     val halfHeight = height / __2
     val halfDepth = depth / __2
 
-    override val vertices: Vertices =
+    override val segments: Segments =
       scala.Vector(
-        Vertex(SpacePoint(-halfWidth, _0, _0), SpacePoint(halfWidth, _0, _0)),
-        Vertex(SpacePoint(_0, -halfHeight, _0), SpacePoint(_0, halfHeight, _0)),
-        Vertex(SpacePoint(_0, _0, -halfDepth), SpacePoint(_0, _0, halfDepth))
+        Segment(SpacePoint(-halfWidth, _0, _0), SpacePoint(halfWidth, _0, _0)),
+        Segment(SpacePoint(_0, -halfHeight, _0), SpacePoint(_0, halfHeight, _0)),
+        Segment(SpacePoint(_0, _0, -halfDepth), SpacePoint(_0, _0, halfDepth))
       )
       
   object Cross:

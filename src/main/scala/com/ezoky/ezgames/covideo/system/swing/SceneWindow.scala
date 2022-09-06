@@ -125,14 +125,14 @@ private class DrawingPanel()
       yield
         val screenShape = pipeline3D.run(component)
         for
-          vertex <- screenShape.vertices
+          segment <- screenShape.segments
         yield
-          //          println(s"vertex=$vertex")
+          //          println(s"segment=$segment")
           g2d.drawLine(
-            vertex.s.x,
-            vertex.s.y,
-            vertex.t.x,
-            vertex.t.y,
+            segment.s.x,
+            segment.s.y,
+            segment.t.x,
+            segment.t.y,
           )
 
     //      for

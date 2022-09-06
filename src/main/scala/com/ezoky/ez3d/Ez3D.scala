@@ -59,27 +59,27 @@ class Ez3D[T: Numeric : Trig : Precision]
   // end Point Transformations
 
 
-  // Vertex Transformations
-  case class VertexRotation(center: SpacePoint,
+  // Segment Transformations
+  case class SegmentRotation(center: SpacePoint,
                             angle: Radians,
-                            axis: NonNullSpaceVector) extends Rotation[Vertex] :
+                            axis: NonNullSpaceVector) extends Rotation[Segment] :
 
     private val quaternion = Quaternion.fromRotationVectorAndAngle(axis, angle)
 
-    final override def rotate(v: Vertex): Vertex =
-      Vertex(
+    final override def rotate(v: Segment): Segment =
+      Segment(
         quaternion.rotate(SpaceVector(center, v.s)).dest(center),
         quaternion.rotate(SpaceVector(center, v.t)).dest(center)
       )
 
 
-  case class VertexTranslation(translation: SpaceVector)
-    extends Translation[Vertex] :
+  case class SegmentTranslation(translation: SpaceVector)
+    extends Translation[Segment] :
 
-    final override def translate(v: Vertex): Vertex =
+    final override def translate(v: Segment): Segment =
       v + translation
 
-  // end Vertex Transformations
+  // end Segment Transformations
 
 
   import Perspective.*

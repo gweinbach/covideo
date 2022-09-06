@@ -305,7 +305,7 @@ trait Plane[T: Numeric : Precision]:
 //      PlaneVector(t, t)
 
 
-  case class PlaneVertex(s: PlanePoint,
+  case class PlaneSegment(s: PlanePoint,
                          t: PlanePoint)
 
   case class ClippingWindow(width: T,

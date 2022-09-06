@@ -70,20 +70,20 @@ trait Cameras[T: Numeric : Trig : Precision]
     final lazy val shape: Shape =
       Shape(
         Vector(
-          Vertex(nearBottomLeft, nearTopLeft),
-          Vertex(nearTopLeft, nearTopRight),
-          Vertex(nearTopRight, nearBottomRight),
-          Vertex(nearBottomRight, nearBottomLeft),
+          Segment(nearBottomLeft, nearTopLeft),
+          Segment(nearTopLeft, nearTopRight),
+          Segment(nearTopRight, nearBottomRight),
+          Segment(nearBottomRight, nearBottomLeft),
 
-          Vertex(farBottomLeft, farTopLeft),
-          Vertex(farTopLeft, farTopRight),
-          Vertex(farTopRight, farBottomRight),
-          Vertex(farBottomRight, farBottomLeft),
+          Segment(farBottomLeft, farTopLeft),
+          Segment(farTopLeft, farTopRight),
+          Segment(farTopRight, farBottomRight),
+          Segment(farBottomRight, farBottomLeft),
 
-          Vertex(nearBottomLeft, farBottomLeft),
-          Vertex(nearTopLeft, farTopLeft),
-          Vertex(nearTopRight, farTopRight),
-          Vertex(nearBottomRight, farBottomRight)
+          Segment(nearBottomLeft, farBottomLeft),
+          Segment(nearTopLeft, farTopLeft),
+          Segment(nearTopRight, farTopRight),
+          Segment(nearBottomRight, farBottomRight)
         )
       )
 
@@ -129,7 +129,7 @@ trait Cameras[T: Numeric : Trig : Precision]
     // World coordinates
     val position: SpacePoint
     val target: SpacePoint
-    val basis: OrthonormalBasis
+    val basis: Basis
     final lazy val eye: SpaceVector = SpaceVector(position)
     final lazy val look = SpaceVector(position, target)
     final lazy val right = basis.i
@@ -141,7 +141,7 @@ trait Cameras[T: Numeric : Trig : Precision]
 
     def withTarget(newTarget: SpacePoint): Camera
 
-    def withBasis(newBasis: OrthonormalBasis): Camera
+    def withBasis(newBasis: Basis): Camera
 
     def withViewFrustum(newViewFrustum: ViewFrustum): Camera
 
@@ -168,14 +168,14 @@ trait Cameras[T: Numeric : Trig : Precision]
 
     private case class SimpleCamera(position: SpacePoint = SpacePoint.Origin,
                                     target: SpacePoint = SpacePoint(_0, _0, -__1),
-                                    basis: OrthonormalBasis = Basis.NormalDirect,
+                                    basis: Basis = Basis.NormalDirect,
                                     viewFrustum: ViewFrustum = ViewFrustum.Default)
       extends Camera :
       final override def withPosition(newPosition: SpacePoint): Camera =
         copy(position = newPosition)
       final override def withTarget(newTarget: SpacePoint): Camera =
         copy(target = newTarget)
-      final override def withBasis(newBasis: OrthonormalBasis): Camera =
+      final override def withBasis(newBasis: Basis): Camera =
         copy(basis = newBasis)
       final override def withViewFrustum(newViewFrustum: ViewFrustum): Camera =
         copy(viewFrustum = newViewFrustum)
@@ -331,16 +331,17 @@ trait Cameras[T: Numeric : Trig : Precision]
 
     case class LookAtCamera private(position: SpacePoint,
                                     target: SpacePoint,
-                                    basis: OrthonormalBasis,
+                                    basis: Basis,
                                     viewFrustum: ViewFrustum)
       extends Camera :
+
       final override def withPosition(newPosition: SpacePoint): Camera =
         copy(position = newPosition)
 
       final override def withTarget(newTarget: SpacePoint): Camera =
         copy(target = newTarget)
 
-      final override def withBasis(newBasis: OrthonormalBasis): Camera =
+      final override def withBasis(newBasis: Basis): Camera =
         copy(basis = newBasis)
 
       final override def withViewFrustum(newViewFrustum: ViewFrustum): Camera =
@@ -356,19 +357,16 @@ trait Cameras[T: Numeric : Trig : Precision]
           val verticalAngle: Radians = atan(dy / targetDistance)
           val qh = Quaternion.fromRotationVectorAndAngle(up, horizontalAngle)
           val qv = Quaternion.fromRotationVectorAndAngle(right, verticalAngle)
-          val newPositionBasis =
-            for
+          (for
               vector <- SpaceVector.nonNull(target, position)
               rotation = qh × qv
               rotated = rotation.rotate(vector)
-              rotatedBasis <- rotation.rotate(basis).asInstanceOf[Option[OrthonormalBasis]]
+              rotatedBasis <- rotation.rotate(basis)
             yield
-//              (rotated.dest(target), basis)
-              (rotated.dest(target), rotatedBasis)
-          copy(
-            position = newPositionBasis.map(_._1).getOrElse(position),
-            basis = newPositionBasis.map(_._2).getOrElse(basis)
-          ) // TODO handle error
+              copy(
+                position = rotated.dest(target),
+                basis = rotatedBasis
+              )).getOrElse(this) // TODO handle error
 
     object LookAtCamera:
 
@@ -389,6 +387,9 @@ trait Cameras[T: Numeric : Trig : Precision]
             viewFrustum = viewFrustum
           )
 
+      /**
+       * The projection screen is located on top side of the box.
+       */
       def viewBoxFromTop(sceneWidth: T,
                          sceneHeight: T,
                          sceneDepth: T,

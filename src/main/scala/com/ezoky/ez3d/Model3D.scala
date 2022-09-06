@@ -30,12 +30,12 @@ trait Model3D[T: Numeric : Precision]
   private def shapeToX(pointToPoint: SpacePoint => Option[SpacePoint]): Shape => Shape =
     shape =>
       Shape(
-        shape.vertices.flatMap(vertex =>
+        shape.segments.flatMap(segment =>
           for
-            s <- pointToPoint(vertex.s)
-            t <- pointToPoint(vertex.t)
+            s <- pointToPoint(segment.s)
+            t <- pointToPoint(segment.t)
           yield
-            Vertex(s, t))
+            Segment(s, t))
       )
 
   trait Model[M]:
@@ -120,12 +120,12 @@ trait Model3D[T: Numeric : Precision]
      */
     final def shapeToWindow(shape: Shape): ScreenShape =
       ScreenShape(
-        shape.vertices.flatMap(vertex =>
+        shape.segments.flatMap(segment =>
           for
-            s <- clipToWindow(vertex.s)
-            t <- clipToWindow(vertex.t)
+            s <- clipToWindow(segment.s)
+            t <- clipToWindow(segment.t)
           yield
-            ScreenVertex(s, t))
+            ScreenSegment(s, t))
       )
 
 
@@ -155,20 +155,20 @@ trait Model3D[T: Numeric : Precision]
     def apply(point: SpacePoint): Option[PlanePoint] =
       matrix(point.withoutZ)
 
-    def apply(vertex: Vertex): Option[PlaneVertex] =
+    def apply(segment: Segment): Option[PlaneSegment] =
       for
-        s <- matrix(vertex.s)
-        t <- matrix(vertex.t)
+        s <- matrix(segment.s)
+        t <- matrix(segment.t)
       yield
-        PlaneVertex(s, t)
+        PlaneSegment(s, t)
 
   extension (planePoint: PlanePoint)
     def toScreen: ScreenPosition =
       ScreenPosition(planePoint.x px, planePoint.y px)
 
-  extension (planeVertex: PlaneVertex)
-    def toScreen: ScreenVertex =
-      ScreenVertex(planeVertex.s.toScreen, planeVertex.t.toScreen)
+  extension (planeSegment: PlaneSegment)
+    def toScreen: ScreenSegment =
+      ScreenSegment(planeSegment.s.toScreen, planeSegment.t.toScreen)
   // end Conversion tools
 
 
@@ -191,7 +191,7 @@ trait Model3D[T: Numeric : Precision]
 
       val clippingMatrix = modelModelMatrix ×: cameraMatrix
 
-      val screenVertices = shape.vertices.map {
+      val screenSegments = shape.segments.map {
         v =>
 //           println(s"v=$v")
            for
@@ -215,6 +215,6 @@ trait Model3D[T: Numeric : Precision]
       }
 
       ScreenShape(
-        // TODO: take care of potential tansformation problems resulting in None vertices
-        screenVertices.flatten
+        // TODO: take care of potential tansformation problems resulting in None segments
+        screenSegments.flatten
       )

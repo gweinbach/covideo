@@ -63,7 +63,7 @@ object Config:
     )
   val Game =
     GameConfig(
-      populationSize = 500,
+      populationSize = 10,
       Person, World
     )
   val Loop =

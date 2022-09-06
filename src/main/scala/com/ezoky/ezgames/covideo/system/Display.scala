@@ -5,6 +5,7 @@ import com.ezoky.ezcategory.IO
 import com.ezoky.ezgames.covideo.component.Dimension.DimensionBase
 import com.ezoky.ezgames.covideo.component.Dimension.Ez3D.*
 import com.ezoky.ezgames.covideo.component.{HealthCondition, Position, Sprite}
+import com.ezoky.ezgames.covideo.entity.People.Population
 import com.ezoky.ezgames.covideo.entity.{*, given}
 
 /**
@@ -79,10 +80,12 @@ given (using DisplaySystem, Display[World]): Display[Game] with
         displayedWorld <- game.world.display
 
         scene = displayedWorld.scene
+
         // We get all sprites
-        sprites = game.people.map(_.sprite)
+        sprites: Population[Sprite] = game.allViewables
+
         // We get all 3D components
-        components = game.all3DComponents
+        components: Population[Component3D] = game.allViewables
 
         displayedScene = scene.withSprites(sprites).withComponents(components)
 
