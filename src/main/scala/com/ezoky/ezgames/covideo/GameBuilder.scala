@@ -93,12 +93,18 @@ case class CameraBuilder(cameraConfig: CameraConfig)
 
   override def build: Generated[Camera] =
     Generated.unit(
-      Perspective.LookAtCamera.viewBoxFromTop(
-        sceneWidth = cameraConfig.right * 2,
+      Orthographic.viewBoxFromLeft(
+        sceneDepth = cameraConfig.right * 2,
         sceneHeight = cameraConfig.top * 2,
-        cameraConfig.far - cameraConfig.near,
-        cameraConfig.near
+        sceneWidth = cameraConfig.far - cameraConfig.near,
+        cameraDistance = cameraConfig.near
       ).getOrElse(Camera.Default)
+//        Orthographic.viewBoxFromTop(
+//      sceneWidth = cameraConfig.right * 10,
+//      sceneHeight = cameraConfig.top * 10,
+//      sceneDepth = cameraConfig.far - cameraConfig.near,
+//      cameraDistance = cameraConfig.near
+//    ).getOrElse(Camera.Default)
     )
 
 

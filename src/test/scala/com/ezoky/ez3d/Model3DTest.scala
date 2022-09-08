@@ -32,7 +32,7 @@ class Model3DTest
     import model3D.{*, given}
 
     val camera: Camera =
-      Perspective.LookAtCamera.viewBoxFromTop(sceneWidth, sceneHeight, sceneDepth, cameraDistance).get
+      Perspective.viewBoxFromTop(sceneWidth, sceneHeight, sceneDepth, cameraDistance).get
 
     val window = Window(ScreenDimension(200 px, 100 px))
 
@@ -74,7 +74,7 @@ class Model3DTest
     import model3D.{*, given}
 
     val camera: Camera =
-      Perspective.LookAtCamera.viewBoxFromTop(sceneWidth, sceneHeight, sceneDepth, cameraDistance).get
+      Perspective.viewBoxFromTop(sceneWidth, sceneHeight, sceneDepth, cameraDistance).get
 
     val window = Window(ScreenDimension(1200 px, 1000 px))
 

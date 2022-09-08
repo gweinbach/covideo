@@ -82,7 +82,7 @@ class Ez3D[T: Numeric : Trig : Precision]
   // end Segment Transformations
 
 
-  import Perspective.*
+//  import Perspective.*
 
   given Model[Camera] with
     extension (camera: Camera)

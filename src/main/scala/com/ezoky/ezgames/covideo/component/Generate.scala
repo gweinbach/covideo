@@ -57,7 +57,8 @@ object Generate:
         val (a, nextGen) = generated(seed)
         (f(a), nextGen)
 
-    def map2[A1, A2, B](generatedA1: Generated[A1], generatedA2: Generated[A2])(f: (A1, A2) => B): Generated[B] =
+    def map2[A1, A2, B](generatedA1: Generated[A1], 
+                        generatedA2: Generated[A2])(f: (A1, A2) => B): Generated[B] =
       (genA1: Generator) =>
         val (a1, genA2) = generatedA1(genA1)
         val (a2, nextGen) = generatedA2(genA2)

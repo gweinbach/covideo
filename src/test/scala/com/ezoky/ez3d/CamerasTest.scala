@@ -28,7 +28,7 @@ class CamerasTest extends AnyFlatSpec :
     //    val perspectiveViewFrustum =
     //      Perspective.ViewFrustum.fromFieldOfView(10.0, 50.0, 1.0, 90.0 degrees).get
     val perspectiveViewFrustum =
-      Perspective.ViewFrustum.fromSymetricPlanes(20, 220, 300, 400).get
+      Perspective.viewFrustumFromSymetricPlanes(20, 220, 300, 400).get
     val projection = perspectiveViewFrustum.projectionMatrix
 
     // assert(perspectiveViewFrustum.alternateProjectionMatrix === projection)
