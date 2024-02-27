@@ -4,7 +4,7 @@
 
 package com.ezoky.ezgames.covideo.component
 
-import com.ezoky.ezgames.covideo.component.Dimension.*
+import com.ezoky.ezgames.covideo.component.DimensionDouble.*
 import com.ezoky.ezgames.covideo.component.Generate.Generated
 import com.ezoky.ezgames.covideo.component.{Depth, Height, Width}
 
@@ -12,6 +12,9 @@ import com.ezoky.ezgames.covideo.component.{Depth, Height, Width}
  * @author gweinbach on 14/11/2020
  * @since 0.1.0
  */
+
+trait Boxes[T: Dimension]
+  extends Positions[T]
 case class Box(width: Width,
                height: Height,
                depth: Depth):

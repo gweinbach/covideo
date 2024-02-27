@@ -45,11 +45,11 @@ abstract class Dimension[T: Precision: Numeric: Trig: Generated: Ez3D: Epsilon]:
   private val _DimensionOrder: Order[T] = summon[Order[T]]
   private val _GeneratedDimension: Generated[T] = summon[Generated[T]]
   
-  private val _0: T = _DimensionNumeric.zero
+  private val __0: T = _DimensionNumeric.zero
   private val __1: T = _DimensionNumeric.one
   private val __2: T = _DimensionNumeric.fromInt(2)
 
-  val Zero: DimensionBase = _0
+  val Zero: DimensionBase = __0
   val One: DimensionBase = __1
   val Two: DimensionBase = __2
 
@@ -65,7 +65,7 @@ abstract class Dimension[T: Precision: Numeric: Trig: Generated: Ez3D: Epsilon]:
                                              boundary: SizeValue): T =
       this match
         case Flat =>
-          _0
+          __0
 
         case Toric =>
           boundary.remainder(value)
@@ -79,7 +79,7 @@ abstract class Dimension[T: Precision: Numeric: Trig: Generated: Ez3D: Epsilon]:
 
   object SizeValue:
 
-    val Zero: SizeValue = _0
+    val Zero: SizeValue = __0
 
     def apply(size: T): SizeValue = size.abs
 
@@ -122,7 +122,7 @@ abstract class Dimension[T: Precision: Numeric: Trig: Generated: Ez3D: Epsilon]:
       sizeValue * _NumberToDimensionConverter.apply(ratio)
 
     inline def minPosition(using Geometry): PositionValue =
-      relativePosition(_0)
+      relativePosition(__0)
 
     inline def maxPosition(using geometry:  Geometry): PositionValue =
       geometry match
@@ -141,9 +141,9 @@ abstract class Dimension[T: Precision: Numeric: Trig: Generated: Ez3D: Epsilon]:
 
     private[Dimension] final def remainder(dimensionValue: T): T =
       if (isNull) {
-        _0
+        __0
       }
-      else if (dimensionValue < _0) {
+      else if (dimensionValue < __0) {
         (sizeValue + (dimensionValue fmod sizeValue)) fmod sizeValue
       }
       else {
@@ -153,8 +153,8 @@ abstract class Dimension[T: Precision: Numeric: Trig: Generated: Ez3D: Epsilon]:
     @tailrec
     private[Dimension] final def bounce(dimensionValue: T): T =
       if (isNull)
-        _0
-      else if (dimensionValue < _0)
+        __0
+      else if (dimensionValue < __0)
         bounce(-dimensionValue)
 
       else if (dimensionValue >= sizeValue)
@@ -178,7 +178,7 @@ abstract class Dimension[T: Precision: Numeric: Trig: Generated: Ez3D: Epsilon]:
 
   object PositionValue:
 
-    val Zero: PositionValue = _0
+    val Zero: PositionValue = __0
 
     def apply(position: T,
               withinBoundary: SizeValue,
@@ -252,7 +252,7 @@ abstract class Dimension[T: Precision: Numeric: Trig: Generated: Ez3D: Epsilon]:
 
   object SpeedValue:
 
-    val Zero: SpeedValue = _0
+    val Zero: SpeedValue = __0
 
     def generatedBetween(min: SpeedValue,
                          max: SpeedValue): Generated[SpeedValue] =
@@ -284,7 +284,7 @@ abstract class Dimension[T: Precision: Numeric: Trig: Generated: Ez3D: Epsilon]:
 
   object AccelerationValue:
 
-    val Zero: AccelerationValue = _0
+    val Zero: AccelerationValue = __0
 
     def generatedBetween(min: AccelerationValue,
                          max: AccelerationValue): Generated[AccelerationValue] =
@@ -307,7 +307,7 @@ abstract class Dimension[T: Precision: Numeric: Trig: Generated: Ez3D: Epsilon]:
 
   object SpinValue:
 
-    val Zero: SpinValue = _0
+    val Zero: SpinValue = __0
 
     def generatedBetween(min: SpinValue,
                          max: SpinValue): Generated[SpinValue] =
@@ -344,7 +344,7 @@ abstract class Dimension[T: Precision: Numeric: Trig: Generated: Ez3D: Epsilon]:
 
   object AngularAccelerationValue:
 
-    val Zero: AngularAccelerationValue = _0
+    val Zero: AngularAccelerationValue = __0
 
     def generatedBetween(min: AngularAccelerationValue,
                          max: AngularAccelerationValue): Generated[AngularAccelerationValue] =
@@ -402,7 +402,7 @@ abstract class Dimension[T: Precision: Numeric: Trig: Generated: Ez3D: Epsilon]:
 
 given Precision[Double] = Precision(1E-10d)
 
-object Dimension extends Dimension[Double]:
+object DimensionDouble extends Dimension[Double]:
 
   override def modulo(a: Double, b: Double): Double = a % b
 
