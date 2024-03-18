@@ -5,16 +5,18 @@
 
 package com.ezoky.ezgames.covideo.component
 
-import com.ezoky.ez3d.Transformation3D
-import com.ezoky.ezgames.covideo.component.DimensionDouble.*
-import com.ezoky.ezgames.covideo.component.DimensionDouble.Ez3D.*
+import spire.algebra.Trig
 
 /**
  * @since 0.2.0
  * @author gweinbach on 19/06/2022
  */
-trait Solids[T: Dimension]
-  extends Spins[T]:
+trait Solids[D: Dimension: Trig]
+  extends Mobiles[D]
+  with AngularAccelerations[D]:
+
+  import CoordsDimension.*
+  import CoordsDimension.Ez3D.*
   
   case class Solid(mobile: Mobile,
                    basis: Basis,

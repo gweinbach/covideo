@@ -11,10 +11,10 @@ object Dependencies {
 
     //    val scala211 = "2.11.12"
 //    val scala212 = "2.12.15"
-    val scala213 = "2.13.7"
+    val scala213 = "2.13.12"
 
     val scala2 = scala213
-    val scala3 = "3.1.2"
+    val scala3 = "3.4.0"
 
     // Scala standard modules
     val ScalaParallelCollections = "1.0.4"

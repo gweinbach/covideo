@@ -1,16 +1,16 @@
 package com.ezoky.ezgames.covideo.component
 
-import Generate.*
+import com.ezoky.ezgames.covideo.component.Generate.*
+
 import spire.*
-import spire.math.*
 import spire.implicits.*
+import spire.math.*
 
-trait Accelerations[T: Dimension]:
+trait Accelerations[T: Dimension]
+  extends Speeds[T]:
 
-  val _Dimension = summon[Dimension[T]]
+  import CoordsDimension.*
   
-  import _Dimension.*
-
   case class Acceleration(xAcceleration: XAcceleration,
                           yAcceleration: YAcceleration,
                           zAcceleration: ZAcceleration):
@@ -97,7 +97,7 @@ trait Accelerations[T: Dimension]:
 
 
   case class XAcceleration(override val value: AccelerationValue)
-    extends AccelerationCoord[XCoord, XSpeed, XAcceleration] :
+    extends AccelerationCoord[XCoord, XSpeed, XAcceleration]:
 
     override def accelerate(speed: XSpeed,
                             within: SpeedRange): XSpeed =
@@ -115,7 +115,7 @@ trait Accelerations[T: Dimension]:
       range.generatedAccelerationValue.map(XAcceleration(_))
 
   case class YAcceleration(override val value: AccelerationValue)
-    extends AccelerationCoord[YCoord, YSpeed, YAcceleration] :
+    extends AccelerationCoord[YCoord, YSpeed, YAcceleration]:
 
     override def accelerate(speed: YSpeed,
                             within: SpeedRange): YSpeed =

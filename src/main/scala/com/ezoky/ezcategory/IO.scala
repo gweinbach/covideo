@@ -13,12 +13,10 @@ import scala.util.Try
  * @since 0.2.0
  * @author gweinbach on 27/05/2022
  */
-import scala.util.Try
-import scala.concurrent.{ExecutionContext, Future}
 
 sealed trait IO[+A] extends Product with Serializable {
 
-  import IO._
+  import IO.*
 
   def unsafeRun(): A
 
@@ -34,7 +32,9 @@ sealed trait IO[+A] extends Product with Serializable {
   // ----- impure sync unsafeRun* methods
 
   // runs on the current Thread returning Try[A]
-  def unsafeRunToTry: Try[A] = Try { unsafeRun() }
+  def unsafeRunToTry: Try[A] = Try {
+    unsafeRun()
+  }
 
   // runs on the current Thread returning Either[Throwable, A]
   def unsafeRunToEither: Either[Throwable, A] = unsafeRunToTry.toEither
@@ -42,7 +42,9 @@ sealed trait IO[+A] extends Product with Serializable {
   // ----- impure async unsafeRun* methods
 
   // returns a Future that runs the task eagerly on another thread
-  def unsafeRunToFuture(implicit ec: ExecutionContext): Future[A] = Future { unsafeRun() }
+  def unsafeRunToFuture(implicit ec: ExecutionContext): Future[A] = Future {
+    unsafeRun()
+  }
 
   // runs the IO in a Runnable on the given ExecutionContext
   // and then executes the specified Try based callback
@@ -60,7 +62,7 @@ sealed trait IO[+A] extends Product with Serializable {
   // any non-fatal exceptions thrown will be reported to the ExecutionContext.
   def foreach(f: A => Unit)(implicit ec: ExecutionContext): Unit =
     unsafeRunAsync {
-      case Left(ex)     => ec.reportFailure(ex)
+      case Left(ex) => ec.reportFailure(ex)
       case Right(value) => f(value)
     }
 
@@ -71,7 +73,7 @@ sealed trait IO[+A] extends Product with Serializable {
   def failed: IO[Throwable] =
     this.flatMap {
       case Error(t) => IO.pure(t)
-      case _        => IO.raiseError(new NoSuchElementException("failed"))
+      case _ => IO.raiseError(new NoSuchElementException("failed"))
     }
 }
 
@@ -94,12 +96,16 @@ object IO {
   }
 
   def pure[A](a: A): IO[A] = Pure(a)
-  def now[A](a: A): IO[A]  = pure(a)
+
+  def now[A](a: A): IO[A] = pure(a)
 
   def raiseError[A](t: Throwable): IO[A] = Error[A](t)
-  def fail[A](t: Throwable): IO[A]       = raiseError(t)
 
-  def eval[A](a: => A): IO[A]  = Eval(() => a)
+  def fail[A](t: Throwable): IO[A] = raiseError(t)
+
+  def eval[A](a: => A): IO[A] = Eval(() => a)
+
   def delay[A](a: => A): IO[A] = eval(a)
+
   def apply[A](a: => A): IO[A] = eval(a)
 }

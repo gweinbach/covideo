@@ -16,7 +16,7 @@ import spire.math.*
  */
 trait Coords[T: Dimension]:
 
-  val CoordsDimension = summon[Dimension[T]]
+  val CoordsDimension: Dimension[T] = summon[Dimension[T]]
 
   import CoordsDimension.*
 
@@ -41,8 +41,8 @@ trait Coords[T: Dimension]:
                x2: XCoord): XCoord =
       XCoord(PositionValue.middle(x1.value, x2.value))
 
-    def generatedWithin(width: Width): Generated[XCoord] =
-      width.generatedCoord
+//    def generatedWithin(width: Width): Generated[XCoord] =
+//      width.generatedCoord
 
 
   object YCoord:
@@ -54,8 +54,8 @@ trait Coords[T: Dimension]:
                y2: YCoord): YCoord =
       YCoord(PositionValue.middle(y1.value, y2.value))
 
-    def generatedWithin(height: Height): Generated[YCoord] =
-      height.generatedCoord
+//    def generatedWithin(height: Height): Generated[YCoord] =
+//      height.generatedCoord
 
 
   object ZCoord:
@@ -67,7 +67,7 @@ trait Coords[T: Dimension]:
                z2: ZCoord): ZCoord =
       ZCoord(PositionValue.middle(z1.value, z2.value))
 
-    def generatedWithin(depth: Depth): Generated[ZCoord] =
-      depth.generatedCoord
+//    def generatedWithin(depth: Depth): Generated[ZCoord] =
+//      depth.generatedCoord
   
   

@@ -4,7 +4,10 @@ package com.ezoky.ezgames.covideo.component
  * @author gweinbach on 03/01/2022
  * @since 0.2.0
  */
-trait Sprites[T: Dimension]:
+trait Sprites[T: Dimension]
+  extends Positions[T]:
+
+  import CoordsDimension.*
   
   trait Sprite:
   

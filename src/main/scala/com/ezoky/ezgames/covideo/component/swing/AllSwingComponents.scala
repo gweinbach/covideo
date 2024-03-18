@@ -1,5 +1,6 @@
 package com.ezoky.ezgames.covideo.component.swing
 
-trait AllSwingComponents {
+import com.ezoky.ezgames.covideo.component.Dimension
 
-}
+trait AllSwingComponents[D: Dimension]
+  extends SwingSprites[D]

@@ -2,6 +2,8 @@ package com.ezoky.ezgames.covideo.entity
 
 import com.ezoky.ezgames.covideo.component.Identifiable
 
+import scala.annotation.targetName
+
 trait Entities[I: Identifiable]:
   
   trait Entity:
@@ -18,9 +20,19 @@ trait Entities[I: Identifiable]:
       id.hashCode()
 
   
-  opaque type Population[+E <: Entity] = Map[I, E]
+  opaque type Population[+E] = Map[I, E]
 
+  /**
+   * Things are easy when the Population is populated with Entities
+   */
   extension [A <: Entity](population: Population[A])
+
+    @targetName("addEntity")
+    infix def +(v: A): Population[A] =
+      population + (v.id -> v)
+    
+  
+  extension [A](population: Population[A])
 
     @targetName("populationSize")
     def number: Int =
@@ -30,7 +42,7 @@ trait Entities[I: Identifiable]:
       population.values
 
     @targetName("add")
-    infix def +(kv: (PersonId, A)): Population[A] =
+    infix def +(kv: (I, A)): Population[A] =
       population + kv
 
     @targetName("populationMerge")
@@ -46,24 +58,24 @@ trait Entities[I: Identifiable]:
   
   object Population:
 
-    def apply[T <: Entity](people: Iterable[T]): Population[T] =
-      people.foldLeft(empty) {
-        case (map, person) =>
-          map + (person.id -> person)
+    def apply[T <: Entity](entities: Iterable[T]): Population[T] =
+      entities.foldLeft(empty) {
+        case (map, entity) =>
+          map + (entity.id -> entity)
       }
 
-    def apply[T <: Entity](people: (I, T)*): Population[T] =
-      Map.from(people)
+    def apply[T](keyValues: (I, T)*): Population[T] =
+      Map.from(keyValues)
 
-    def empty[T <: Entity]: Population[T] =
+    def empty[T]: Population[T] =
       Map.empty[I, T]
 
-    def map[A <: Entity, B <: Entity](population: Population[A])(f: A => B): Population[B] =
+    def map[A, B](population: Population[A])(f: A => B): Population[B] =
       population.map {
         case (id, a) =>
           val b = f(a)
           (id, b)
       }
 
-    def foldLeft[A <: Entity, B <: Entity](population: Population[A])(z: B)(op: (B, (I, A)) => B): B =
+    def foldLeft[A, B](population: Population[A])(z: B)(op: (B, (I, A)) => B): B =
       population.foldLeft(z)(op)

@@ -16,40 +16,41 @@ import reflect.Selectable.reflectiveSelectable
  */
 trait Controls[I: Identifiable, D: Dimension]
   extends Displays[I, D]:
-  
+
+  import CoordsDimension.{*, given}
+
   object Control:
     self =>
-  
-    private[swing] var model: ControlModel =
+
+    private var model: ControlModel =
       ControlModel(
-        ViewFrustumControl(0, 0, 0),
+        ViewFrustumControl(),
         CameraControl()
       )
-  
-    case class Callback(notifyMethod: () => Unit):
+
+    private case class Callback(notifyMethod: () => Unit):
       def notifySubscriber: Unit =
         notifyMethod()
-  
+
     private var subscribers: List[Callback] =
       List.empty
-  
-    def subscribe(notifyMethod: () => Unit): Unit =
+
+    private[swing] def subscribe(notifyMethod: () => Unit): Unit =
       subscribers = Callback(notifyMethod) :: subscribers
-  
-    private[swing] def setModel(newModel: ControlModel): Unit =
-      self.model = newModel
-  
-    def popModel(item: ControlledItem): ControlModel =
+
+    private[swing] def getControl(controlledItem: ControlledItem): controlledItem.ItemControlType =
+      model.control(controlledItem)
+
+    private[swing] def updateControl(controlledItem: ControlledItem,
+                                     update: controlledItem.ItemControlType => controlledItem.ItemControlType): Unit =
+      self.model = model.updateControl(controlledItem, update)
+
+    private[swing] def popModel(item: ControlledItem): ControlModel =
       val currentModel = self.model
       self.model = currentModel.acknowledgeUpdates(item)
       currentModel
-  
-    def updateModel(newModel: ControlModel): Unit =
+
+    private[swing] def updateModel(newModel: ControlModel): Unit =
       if !newModel.equalsState(self.model) then
         self.model = newModel
         subscribers.foreach(_.notifySubscriber)
-  //      println(s"modelA: near=${self.model.viewFrustum.near}, far=${self.model.viewFrustum.far}")
-  //      _nearSlider.notifyChange()
-  //      println(s"modelB: near=${self.model.viewFrustum.near}, far=${self.model.viewFrustum.far}")
-  //      _farSlider.notifyChange()
-  //      println(s"modelC: near=${self.model.viewFrustum.near}, far=${self.model.viewFrustum.far}")

@@ -4,8 +4,8 @@
 
 package com.ezoky.ezgames.covideo.system
 
-import com.ezoky.ezgames.covideo.component.{Box, Position, Speed}
-import com.ezoky.ezgames.covideo.entity.Game
+import com.ezoky.ezgames.covideo.component.{Dimension, Identifiable}
+import com.ezoky.ezgames.covideo.entity.Games
 
 /**
  * @author gweinbach on 14/11/2020
@@ -14,9 +14,12 @@ import com.ezoky.ezgames.covideo.entity.Game
 trait Rotate[T]:
   extension (entity: T) def rotate: T
 
-given Rotate[Game] with
-  extension (entity: Game)
-    override def rotate: Game =
-      entity.copy(
-        people = entity.people.map(_.rotate)
-      )
+trait Rotates[I: Identifiable, D: Dimension]
+  extends Games[I, D]:
+
+  given Rotate[Game] with
+    extension (entity: Game)
+      override def rotate: Game =
+        entity.copy(
+          people = entity.people.map(_.rotate)
+        )

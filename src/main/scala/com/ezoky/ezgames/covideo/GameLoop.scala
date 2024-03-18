@@ -1,18 +1,20 @@
 package com.ezoky.ezgames.covideo
 
-import com.ezoky.ezcategory.{Endomorphism, IO}
+import com.ezoky.ezcategory.IO
 import com.ezoky.ezgames.covideo.component.Generate.*
-import com.ezoky.ezgames.covideo.entity.Game
 
 import scala.annotation.tailrec
 
+import MainConfig.{*, given}
+import MainConfig.Everything.{*, given}
+
 case class GameLoopConfig(fps: Int)
 
-class GameLoop(initialGame: Generated[Game],
+class GameLoop(initialGame: Generated[MainConfig.Everything.Game],
                gameStep: Generated[Game] => Generated[IO[Game]],
                seed: Generator,
                gameLoopConfig: GameLoopConfig)
-  extends Runnable :
+  extends Runnable:
 
   val stepDurationInNanoseconds = GameLoop.NanosecondsInOneSecond / gameLoopConfig.fps
 

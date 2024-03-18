@@ -4,7 +4,6 @@ import com.ezoky.ezcategory.IO
 import com.ezoky.ezgames.covideo.component.Generate.*
 import com.ezoky.ezgames.covideo.component.double.DoubleDimension
 import com.ezoky.ezgames.covideo.component.{Dimension, Identifiable, UUIDIdentifiable}
-
 import spire.implicits.*
 
 import java.util.UUID
@@ -16,7 +15,7 @@ import java.util.UUID
 
 def msg = s"I was compiled by scala 3 but using scala ${util.Properties.versionNumberString} stdlib :)"
 
-object Main:
+object MainConfig:
 
   given Dimension[Double] = DoubleDimension
 
@@ -24,18 +23,18 @@ object Main:
 
   object Everything
     extends GameBootstrap[UUID, Double]
-  
+
   import Everything.DisplaySystem
 
-  given DisplaySystem = Everything.SwingDisplaySystem
+  given DisplaySystem = Everything.SwingDisplaySystem(Config.UserControl)
 
-import Main.{*, given}
-import Main.Everything.{*, given}
-//import Main.Everything.CoordsDimension.{*, given}
+
+import com.ezoky.ezgames.covideo.MainConfig.Everything.{*, given}
+import com.ezoky.ezgames.covideo.MainConfig.{*, given}
 
 @main def main: Unit =
   println(msg)
-  
+
 
   val generator = new RandomGenerator()
   val game = GameBuilder(Config.Game).build

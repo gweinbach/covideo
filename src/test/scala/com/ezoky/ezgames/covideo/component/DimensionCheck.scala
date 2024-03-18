@@ -4,15 +4,14 @@
 
 package com.ezoky.ezgames.covideo.component
 
-import com.ezoky.ezgames.covideo.component.Dimension.*
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Prop.{delay, propBoolean}
 import org.scalacheck.{Arbitrary, Gen, Prop, Properties}
 //import Ordering.Implicits.*
 
 import spire.*
-import spire.math.*
 import spire.implicits.*
+import spire.math.*
 
 /**
  * @author gweinbach on 17/11/2020
@@ -20,6 +19,7 @@ import spire.implicits.*
  */
 class DimensionCheck extends Properties("Dimensions") {
 
+  import com.ezoky.ezgames.covideo.component.double.DoubleDimension.{*, given}
   import Prop.forAll
 
   implicit lazy val DurationArbitrary: Arbitrary[DurationValue] =
@@ -58,12 +58,14 @@ class DimensionCheck extends Properties("Dimensions") {
   property("Position is always smaller than Maximum Position and greater or equal than Minimum") =
     forAll { (d: Double, boundary: SizeValue, geometry: Geometry) =>
       val position = PositionValue(d, boundary, geometry)
+
       given Geometry = geometry
+
       ("boundary == 0" |: (boundary == SizeValue.Zero)) ||
-      ("geometry == Geometry.Flat" |: (geometry == Geometry.Flat)) ||
+        ("geometry == Geometry.Flat" |: (geometry == Geometry.Flat)) ||
         (
           (s"position $position >= #2.minPosition" |: (position >= boundary.minPosition)) &&
-          (s"position $position < #2.maxPosition" |:   (position < boundary.maxPosition))
+            (s"position $position < #2.maxPosition" |: (position < boundary.maxPosition))
           )
     }
 
@@ -76,6 +78,7 @@ class DimensionCheck extends Properties("Dimensions") {
   property("Min position is Zero") =
     forAll { (boundary: SizeValue, geometry: Geometry) =>
       given Geometry = geometry
+
       boundary.minPosition == PositionValue.Zero
     }
 }

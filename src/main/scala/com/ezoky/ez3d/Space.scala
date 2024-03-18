@@ -22,7 +22,7 @@ trait Space[T: Numeric : Precision]:
 
   private val _SpatialNumeric: Numeric[T] = summon[Numeric[T]]
 
-  private val _0: T = _SpatialNumeric.zero
+  private val __0: T = _SpatialNumeric.zero
   private val __1: T = _SpatialNumeric.one // double '_' to avoid conflict with Product<X>._1
 
   type Object3D = SpacePoint | SpaceVector
@@ -71,11 +71,11 @@ trait Space[T: Numeric : Precision]:
 
 
   object SpacePoint:
-    val Origin = SpacePoint(_0, _0, _0)
+    val Origin = SpacePoint(__0, __0, __0)
 
-    val OneX = SpacePoint(__1, _0, _0)
-    val OneY = SpacePoint(_0, __1, _0)
-    val OneZ = SpacePoint(_0, _0, __1)
+    val OneX = SpacePoint(__1, __0, __0)
+    val OneY = SpacePoint(__0, __1, __0)
+    val OneZ = SpacePoint(__0, __0, __1)
 
 
   sealed trait SpaceVector:
@@ -106,7 +106,7 @@ trait Space[T: Numeric : Precision]:
     def isCollinear(v: SpaceVector): Boolean
 
     infix def isOrthogonal(v: SpaceVector): Boolean =
-      this ⋅ v ~= _0
+      this ⋅ v ~= __0
 
     lazy val inverse: Option[SpaceVector]
 
@@ -139,9 +139,9 @@ trait Space[T: Numeric : Precision]:
 
   case object NullSpaceVector
     extends SpaceVector :
-    override val x: T = _0
-    override val y: T = _0
-    override val z: T = _0
+    override val x: T = __0
+    override val y: T = __0
+    override val z: T = __0
 
     override def unary_- = NullSpaceVector
 
@@ -175,13 +175,13 @@ trait Space[T: Numeric : Precision]:
       NullSpaceVector
 
     override def /(n: T): Option[NullSpaceVector.type] =
-      if n ~= _0 then
+      if n ~= __0 then
         None
       else
         Some(NullSpaceVector)
 
     override infix def ⋅(v: SpaceVector): T =
-      _0
+      __0
 
     override infix def ∧(v: SpaceVector): NullSpaceVector.type =
       NullSpaceVector
@@ -202,13 +202,13 @@ trait Space[T: Numeric : Precision]:
       (this ∧ v).isNull
 
     override lazy val inverse: Option[NonNullSpaceVector] =
-      if (x ~= _0) || (y ~= _0) || (z ~= _0) then
+      if (x ~= __0) || (y ~= __0) || (z ~= __0) then
         None
       else
         Some(NonNullSpaceVector(__1 / x, __1 / y, __1 / z))
 
     override def *(n: T): SpaceVector =
-      if n ~= _0 then
+      if n ~= __0 then
         NullSpaceVector
       else
         NonNullSpaceVector(
@@ -225,7 +225,7 @@ trait Space[T: Numeric : Precision]:
       )
 
     override final def /(n: T): Option[NonNullSpaceVector] =
-      if n ~= _0 then
+      if n ~= __0 then
         None
       else
         Some(
@@ -236,12 +236,12 @@ trait Space[T: Numeric : Precision]:
       SpaceVector.nonNullCrossProduct(this, v).fold(NullSpaceVector)(v => v)
 
   object NonNullSpaceVector:
-    val OneX = NonNullSpaceVector(__1, _0, _0)
-    val OneY = NonNullSpaceVector(_0, __1, _0)
-    val OneZ = NonNullSpaceVector(_0, _0, __1)
+    val OneX = NonNullSpaceVector(__1, __0, __0)
+    val OneY = NonNullSpaceVector(__0, __1, __0)
+    val OneZ = NonNullSpaceVector(__0, __0, __1)
 
     def isNullTuple(x: T, y: T, z: T): Boolean =
-      (x ~= _0) && (y ~= _0) && (z ~= _0)
+      (x ~= __0) && (y ~= __0) && (z ~= __0)
 
     def safe(x: T,
              y: T,
@@ -253,14 +253,14 @@ trait Space[T: Numeric : Precision]:
 
     def nonNull(magnitude: T,
                 axis: Axis): Option[NonNullSpaceVector] =
-      if magnitude ~= _0 then
+      if magnitude ~= __0 then
         None
       else
         Some(
           axis match
-            case Axis.X => NonNullSpaceVector(magnitude, _0, _0)
-            case Axis.Y => NonNullSpaceVector(_0, magnitude, _0)
-            case Axis.Z => NonNullSpaceVector(_0, _0, magnitude)
+            case Axis.X => NonNullSpaceVector(magnitude, __0, __0)
+            case Axis.Y => NonNullSpaceVector(__0, magnitude, __0)
+            case Axis.Z => NonNullSpaceVector(__0, __0, magnitude)
         )
 
 

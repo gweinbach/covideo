@@ -40,7 +40,7 @@ object Screen:
 
   case class ScreenDimension(width: Pixel,
                              height: Pixel):
-    def withMargin(margin: Margin): ScreenDimension =
+    infix def withMargin(margin: Margin): ScreenDimension =
       ScreenDimension(
         width + margin.left + margin.right,
         height + margin.top + margin.bottom

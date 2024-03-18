@@ -4,8 +4,8 @@
 
 package com.ezoky.ezgames.covideo.component
 
-import com.ezoky.ezgames.covideo.component.Dimension.*
-import com.ezoky.ezgames.covideo.component.Dimension.Ez3D.*
+import com.ezoky.ezgames.covideo.component.double.DoubleDimension.*
+import com.ezoky.ezgames.covideo.component.double.DoubleDimension.Ez3D.*
 import org.junit.Assert.*
 import org.junit.Test
 

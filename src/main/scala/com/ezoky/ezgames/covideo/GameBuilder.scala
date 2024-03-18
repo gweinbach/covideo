@@ -3,21 +3,21 @@ package com.ezoky.ezgames.covideo
 
 import com.ezoky.ez3d.Screen.*
 import com.ezoky.ezgames.covideo.component.*
-import com.ezoky.ezgames.covideo.component.Dimension.*
-import com.ezoky.ezgames.covideo.component.Dimension.Ez3D.*
 import com.ezoky.ezgames.covideo.component.Generate.*
 import com.ezoky.ezgames.covideo.component.HealthCondition.*
-import com.ezoky.ezgames.covideo.entity.*
-import com.ezoky.ezgames.covideo.entity.People.*
-import com.ezoky.ezgames.covideo.system.DisplaySystem
-import com.ezoky.ezgames.covideo.system.swing.*
+import com.ezoky.ezgames.covideo.entity.Builder
+
+import MainConfig.{*, given}
+import MainConfig.Everything.{*, given}
+import MainConfig.Everything.CoordsDimension.{*, given}
+import MainConfig.Everything.CoordsDimension.Ez3D.*
 
 /**
- * @author gweinbach on 03/01/2022
- * @since 0.2.0
- */
+* @author gweinbach on 03/01/2022
+* @since 0.2.0
+*/
 case class GameBuilder(gameConfig: GameConfig)
-                      (using DisplaySystem)
+                      (using displaySystem: DisplaySystem)
   extends Builder[Game]:
 
   override def build: Generated[Game] =
@@ -32,7 +32,7 @@ case class GameBuilder(gameConfig: GameConfig)
 
 
 case class WorldBuilder(worldConfig: WorldConfig)
-                       (using DisplaySystem)
+                       (using displaySystem: DisplaySystem)
   extends Builder[World]:
 
   override def build: Generated[World] =
@@ -63,13 +63,13 @@ private case class AreaBuilder(areaConfig: AreaConfig)
     )
 
 private case class SceneBuilder(sceneConfig: SceneConfig)
-                               (using DisplaySystem)
+                               (using displaySystem: DisplaySystem)
   extends Builder[Scene]:
 
   lazy val sceneDimension =
     sceneConfig.sceneSize match
       case DefaultScreenSize =>
-        summon[DisplaySystem].defaultScreenSceneDimension
+        displaySystem.defaultScreenSceneDimension
       case sceneSize: ScreenDimension =>
         sceneSize
 
@@ -86,7 +86,6 @@ private case class SceneBuilder(sceneConfig: SceneConfig)
         camera = camera
       )
 
-    
 
 case class CameraBuilder(cameraConfig: CameraConfig)
   extends Builder[Camera]:
@@ -99,12 +98,12 @@ case class CameraBuilder(cameraConfig: CameraConfig)
         sceneWidth = cameraConfig.far - cameraConfig.near,
         cameraDistance = cameraConfig.near
       ).getOrElse(Camera.Default)
-//        Orthographic.viewBoxFromTop(
-//      sceneWidth = cameraConfig.right * 10,
-//      sceneHeight = cameraConfig.top * 10,
-//      sceneDepth = cameraConfig.far - cameraConfig.near,
-//      cameraDistance = cameraConfig.near
-//    ).getOrElse(Camera.Default)
+      //        Orthographic.viewBoxFromTop(
+      //      sceneWidth = cameraConfig.right * 10,
+      //      sceneHeight = cameraConfig.top * 10,
+      //      sceneDepth = cameraConfig.far - cameraConfig.near,
+      //      cameraDistance = cameraConfig.near
+      //    ).getOrElse(Camera.Default)
     )
 
 
@@ -149,7 +148,7 @@ case class SolidBuilder(area: Box,
 
 case class PersonBuilder(area: Box,
                          personConfig: PersonConfig)
-                        (using DisplaySystem)
+                        (using displaySystem: DisplaySystem)
   extends Builder[Person]:
 
   override def build: Generated[Person] =
@@ -158,11 +157,10 @@ case class PersonBuilder(area: Box,
       shape <- personConfig.shape
     yield
       Person(
-        id = PersonId(),
-        solid,
-        Healthy,
-        summon[DisplaySystem].spriteByHealthCondition(Healthy),
-        shape
+        solid = solid,
+        healthCondition = Healthy,
+        sprite = displaySystem.spriteByHealthCondition(Healthy),
+        shape = shape
       )
 
 

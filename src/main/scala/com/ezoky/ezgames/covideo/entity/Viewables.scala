@@ -5,17 +5,24 @@
 
 package com.ezoky.ezgames.covideo.entity
 
-import com.ezoky.ezgames.covideo.component.{Components, Dimension, Identifiable}
+import com.ezoky.ezgames.covideo.component.{AllComponents, Dimension, Identifiable}
+
+import spire.*
+import spire.implicits.{*, given}
+import spire.math.{*, given}
 
 /**
  * @since 0.2.0
  * @author gweinbach on 02/07/2022
  */
-trait Viewables[I: Identifiable, D: Dimension : Trig]
+trait Viewables[I: Identifiable, D: Dimension : Numeric]
   extends Entities[I]
-    with Components[D]
+    with AllComponents[D]
     with Games[I, D]
     with Worlds[I, D]:
+
+  import CoordsDimension.*
+  import CoordsDimension.Ez3D.*
 
   trait Viewable[T, V]:
     extension (viewable: T)
@@ -71,7 +78,7 @@ trait Viewables[I: Identifiable, D: Dimension : Trig]
       SpacePoint(
         position.x.value,
         position.y.value,
-        -position.z.value
+        Zero-position.z.value
       )
 
 
@@ -97,7 +104,7 @@ trait Viewables[I: Identifiable, D: Dimension : Trig]
             depth = world.area.depth.value
           )
         val origin =
-          Cross.Uniform((10))
+          Cross.Uniform(Ten)
         Population(
           world.id -> Component3D(
             SpacePoint(boundaries.width / Two, boundaries.height / Two, -boundaries.depth / Two),

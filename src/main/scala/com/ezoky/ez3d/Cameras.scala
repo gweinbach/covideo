@@ -23,7 +23,7 @@ trait Cameras[T: Numeric : Trig : Precision]
     with Angles[T] :
 
   private val _Numeric = summon[Numeric[T]]
-  private val _0 = _Numeric.zero
+  private val __0 = _Numeric.zero
   private val __1 = _Numeric.one // double '_' to avoid conflict with Product<X>._1
   private val __2 = _Numeric.fromInt(2) // double '_' to avoid conflict with Product<X>._1
 
@@ -46,7 +46,7 @@ trait Cameras[T: Numeric : Trig : Precision]
       if newNear == this.near then
         this
       else
-        val near = if (newNear > _0) then newNear else this.near
+        val near = if (newNear > __0) then newNear else this.near
         val far = near + depth
         setNearAndFar(near = near, far = far)
 
@@ -54,7 +54,7 @@ trait Cameras[T: Numeric : Trig : Precision]
       if newFar == this.far then
         this
       else
-        val far = if (newFar - depth > _0) then newFar else this.far
+        val far = if (newFar - depth > __0) then newFar else this.far
         val near = far - depth
         setNearAndFar(near = near, far = far)
 
@@ -87,7 +87,7 @@ trait Cameras[T: Numeric : Trig : Precision]
     final lazy val farBottomRight = SpacePoint(maxXf, minYf, minZ)
     final lazy val farTopRight = SpacePoint(maxXf, maxYf, minZ)
 
-    final lazy val center = SpacePoint(_0, _0, middleZ)
+    final lazy val center = SpacePoint(__0, __0, middleZ)
 
     final lazy val shape: Shape =
       Shape(
@@ -183,7 +183,7 @@ trait Cameras[T: Numeric : Trig : Precision]
   object Camera:
 
     private case class SimpleCamera(position: SpacePoint = SpacePoint.Origin,
-                                    target: SpacePoint = SpacePoint(_0, _0, -__1),
+                                    target: SpacePoint = SpacePoint(__0, __0, -__1),
                                     basis: Basis = Basis.NormalDirect,
                                     viewFrustum: ViewFrustum = ViewFrustum.Default)
       extends Camera :
@@ -225,7 +225,7 @@ trait Cameras[T: Numeric : Trig : Precision]
 
     final override def move(dx: T,
                             dy: T): Camera =
-      if dx == _0 && dy == _0 then
+      if dx == __0 && dy == __0 then
         this
       else
         val targetDistance = look.magnitude
@@ -331,23 +331,23 @@ trait Cameras[T: Numeric : Trig : Precision]
       final override lazy val projectionMatrix =
         Matrix(
           y00 = __2 / (right - left),
-          y01 = _0,
-          y02 = _0,
+          y01 = __0,
+          y02 = __0,
           y03 = (right + left) / (left - right),
 
-          y10 = _0,
+          y10 = __0,
           y11 = __2 / (top - bottom),
-          y12 = _0,
+          y12 = __0,
           y13 = (top + bottom) / (bottom - top),
 
-          y20 = _0,
-          y21 = _0,
+          y20 = __0,
+          y21 = __0,
           y22 = __2 / (near - far),
           y23 = (far + near) / (near - far),
 
-          y30 = _0,
-          y31 = _0,
-          y32 = _0,
+          y30 = __0,
+          y31 = __0,
+          y32 = __0,
           y33 = __1
         )
 
@@ -380,10 +380,10 @@ trait Cameras[T: Numeric : Trig : Precision]
                                                      farDistance: T,
                                                      topDistance: T,
                                                      rightDistance: T): Option[ViewFrustum] =
-      if (nearDistance <= _0) ||
+      if (nearDistance <= __0) ||
         (farDistance <= nearDistance) ||
-        (topDistance <= _0) ||
-        (rightDistance <= _0) then
+        (topDistance <= __0) ||
+        (rightDistance <= __0) then
         None
       else
         Some(
@@ -407,24 +407,24 @@ trait Cameras[T: Numeric : Trig : Precision]
       final lazy val projectionMatrix =
         Matrix(
           y00 = __2 * near / (right - left),
-          y01 = _0,
+          y01 = __0,
           y02 = (right + left) / (right - left),
-          y03 = _0,
+          y03 = __0,
 
-          y10 = _0,
+          y10 = __0,
           y11 = __2 * near / (top - bottom),
           y12 = (top + bottom) / (top - bottom),
-          y13 = _0,
+          y13 = __0,
 
-          y20 = _0,
-          y21 = _0,
+          y20 = __0,
+          y21 = __0,
           y22 = (far + near) / (near - far),
           y23 = __2 * far * near / (near - far),
 
-          y30 = _0,
-          y31 = _0,
+          y30 = __0,
+          y31 = __0,
           y32 = -__1,
-          y33 = _0
+          y33 = __0
         )
 
       final lazy val focalLength: T = near / top
@@ -460,10 +460,10 @@ trait Cameras[T: Numeric : Trig : Precision]
                                                      farDistance: T,
                                                      topDistance: T,
                                                      rightDistance: T): Option[ViewFrustum] =
-      if (nearDistance <= _0) ||
+      if (nearDistance <= __0) ||
         (farDistance <= nearDistance) ||
-        (topDistance <= _0) ||
-        (rightDistance <= _0) then
+        (topDistance <= __0) ||
+        (rightDistance <= __0) then
         None
       else
         Some(
@@ -479,10 +479,10 @@ trait Cameras[T: Numeric : Trig : Precision]
                                            farDistance: T,
                                            aspectRatio: T,
                                            height: Radians): Option[ViewFrustum] =
-        if (nearDistance <= _0) ||
+        if (nearDistance <= __0) ||
           (farDistance <= nearDistance) ||
-          (aspectRatio <= _0) ||
-          (height <= (_0 radians)) ||
+          (aspectRatio <= __0) ||
+          (height <= (__0 radians)) ||
           (height >= pi[Radians]) then
           None
         else
@@ -500,24 +500,24 @@ trait Cameras[T: Numeric : Trig : Precision]
             //              final lazy val alternateProjectionMatrix =
             //                Matrix(
             //                  y00 = focalLength / aspectRatio,
-            //                  y01 = _0,
-            //                  y02 = _0,
-            //                  y03 = _0,
+            //                  y01 = __0,
+            //                  y02 = __0,
+            //                  y03 = __0,
             //
-            //                  y10 = _0,
+            //                  y10 = __0,
             //                  y11 = focalLength,
-            //                  y12 = _0,
-            //                  y13 = _0,
+            //                  y12 = __0,
+            //                  y13 = __0,
             //
-            //                  y20 = _0,
-            //                  y21 = _0,
+            //                  y20 = __0,
+            //                  y21 = __0,
             //                  y22 = (far + near) / (near - far),
             //                  y23 = __2 * far * near / (near - far),
             //
-            //                  y30 = _0,
-            //                  y31 = _0,
+            //                  y30 = __0,
+            //                  y31 = __0,
             //                  y32 = -__1,
-            //                  y33 = _0
+            //                  y33 = __0
             //                )
             //              assert(projectionMatrix == alternateProjectionMatrix)
           )

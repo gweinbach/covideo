@@ -2,17 +2,19 @@ package com.ezoky.ezgames.covideo.component
 
 import com.ezoky.ezgames.covideo.component.Generate.*
 
+import spire.algebra.Trig
 import spire.*
 import spire.implicits.*
-import spire.math.*
 
-trait AngularAccelerations[T: Dimension]
-  extends Coords[T]:
+trait AngularAccelerations[T: Dimension: Trig]
+  extends Spins[T]:
 
+  import CoordsDimension.*
+  
   case class AngularAcceleration(xAngularAcceleration: XAngularAcceleration,
                                  yAngularAcceleration: YAngularAcceleration,
                                  zAngularAcceleration: ZAngularAcceleration):
-  
+
     def accelerate(spin: Spin,
                    within: SpinRange): Spin =
       Spin(

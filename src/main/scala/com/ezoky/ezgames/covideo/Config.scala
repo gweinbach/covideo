@@ -1,20 +1,22 @@
 package com.ezoky.ezgames.covideo
 
-import com.ezoky.ezgames.covideo.component.*
-import com.ezoky.ezgames.covideo.component.Dimension.*
-import com.ezoky.ezgames.covideo.component.Dimension.Ez3D.*
-import com.ezoky.ez3d.Screen.*
+import com.ezoky.ezgames.covideo.MainConfig.*
+import com.ezoky.ezgames.covideo.MainConfig.Everything.CoordsDimension.Ez3D.*
+import com.ezoky.ezgames.covideo.MainConfig.Everything.CoordsDimension.{*, given}
+import com.ezoky.ezgames.covideo.MainConfig.Everything.{*, given}
 import com.ezoky.ezgames.covideo.component.Generate.generatedBetweenFractional
-import com.ezoky.ezgames.covideo.entity.*
-import com.ezoky.ezgames.covideo.entity.People.*
+import spire.*
+import spire.math.*
 
 object Config:
-  
-  val AreaWidth = 1200
+
+  val AreaWidth = 1000
   val AreaHeight = 1000
-  val AreaDepth = 1200
-  
+  val AreaDepth = 1000
+
   val NearDistance = 1500
+
+  val PopulationSize = 200
 
   val Area =
     AreaConfig(
@@ -36,9 +38,9 @@ object Config:
   val Scene =
     SceneConfig(
       name = "COVIDEO",
-//      sceneSize = SceneDimension(width = 1200 px, height = 800 px), // DefaultScreenSize
-      sceneSize = ScreenDimension(width = AreaWidth px, height = AreaHeight px), // DefaultScreenSize
-//      margin = Margin(top = 100 px, left = 100 px, bottom = 100 px, right = 100 px)
+      //      sceneSize = SceneDimension(width = 1200 px, height = 800 px), // DefaultScreenSize
+      sceneSize = DefaultScreenSize, //ScreenDimension(width = AreaWidth px, height = AreaHeight px), // DefaultScreenSize
+      //      margin = Margin(top = 100 px, left = 100 px, bottom = 100 px, right = 100 px),
       zoomRatio = 1.0, // not used in 3D
       camera = Camera
     )
@@ -58,14 +60,18 @@ object Config:
     )
   val Person =
     PersonConfig(
-      shape = generatedBetweenFractional(10.0,50.0).map(Cube(_)),
+      shape = generatedBetweenFractional(10.0, 50.0).map(Cube(_)),
       solidConfig = Solid,
     )
   val Game =
     GameConfig(
-      populationSize = 10,
+      populationSize = PopulationSize,
       Person, World
     )
+  val CameraControl =
+    CameraControlConfig(10, 10, 10, 10)
+  val UserControl =
+    UserControlConfig(CameraControl)
   val Loop =
     GameLoopConfig(
       fps = 60

@@ -4,16 +4,20 @@
 
 package com.ezoky.ezgames.covideo.entity
 
-import com.ezoky.ezgames.covideo.component.Identifiable
+import com.ezoky.ezgames.covideo.component.{AllComponents, Dimension, Identifiable}
 
 /**
  * @author gweinbach on 14/11/2020
  * @since 0.1.0
  */
-trait Games[I: Identifiable]
-  extends Worlds[I]
-    with Entities[I]:
+trait Games[I: Identifiable, D: Dimension]
+  extends Worlds[I, D]
+    with Persons[I, D]
+    with Entities[I]
+    with AllComponents[D]:
 
+  import CoordsDimension.{*, given}
+  
   case class Game(world: World,
                   people: Population[Person]):
   

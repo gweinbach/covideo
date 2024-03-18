@@ -13,6 +13,8 @@ import com.ezoky.ezgames.covideo.component.Generate.*
 trait Positions[T: Dimension]
   extends Coords[T]:
 
+  import CoordsDimension.*
+  
   case class Position(x: XCoord,
                       y: YCoord,
                       z: ZCoord)
@@ -30,22 +32,22 @@ trait Positions[T: Dimension]
         ZCoord.middle(pos1.z, pos2.z),
       )
   
-    def generatedWithin(width: Width,
-                        height: Height,
-                        depth: Depth): Generated[Position] =
-      Generated.map3(
-        XCoord.generatedWithin(width),
-        YCoord.generatedWithin(height),
-        ZCoord.generatedWithin(depth)
-      )(Position(_, _, _))
+//    def generatedWithin(width: Width,
+//                        height: Height,
+//                        depth: Depth): Generated[Position] =
+//      Generated.map3(
+//        XCoord.generatedWithin(width),
+//        YCoord.generatedWithin(height),
+//        ZCoord.generatedWithin(depth)
+//      )(Position(_, _, _))
+//  
+//    def generatedWithin(area: Box): Generated[Position] =
+//      generatedWithin(
+//        area.width,
+//        area.height,
+//        area.depth
+//      )
   
-    def generatedWithin(area: Box): Generated[Position] =
-      generatedWithin(
-        area.width,
-        area.height,
-        area.depth
-      )
-  
-  trait Positioned[T]:
-    extension (positioned: T) 
+  trait Positioned[P]:
+    extension (positioned: P) 
       def position: Position

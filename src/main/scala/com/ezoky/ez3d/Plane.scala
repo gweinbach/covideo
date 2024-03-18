@@ -64,7 +64,7 @@ trait Plane[T: Numeric : Precision]:
 
     def unary_- : PlaneVector
 
-    def isColinear(v: PlaneVector): Boolean
+    infix def isColinear(v: PlaneVector): Boolean
 
     infix def isOrthogonal(v: PlaneVector): Boolean =
       this ⋅ v ~= _0
@@ -151,7 +151,7 @@ trait Plane[T: Numeric : Precision]:
     override def unary_- : NonNullPlaneVector =
       NonNullPlaneVector(-x, -y)
 
-    override def isColinear(v: PlaneVector): Boolean =
+    override infix def isColinear(v: PlaneVector): Boolean =
       x * v.y ~= y * v.x
 
     override lazy val inverse: Option[NonNullPlaneVector] =

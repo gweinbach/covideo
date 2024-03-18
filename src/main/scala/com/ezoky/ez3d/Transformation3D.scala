@@ -352,7 +352,7 @@ trait Transformation3D[T: Numeric : Trig : Precision]
         Segment(s, t)
 
   
-  // Some 2D trqnsformations
+  // Some 2D transformations
 
   trait AffineTransformation extends Matrix :
     final override val x30: T = _0

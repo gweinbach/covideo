@@ -5,10 +5,9 @@
 package com.ezoky.ezgames.covideo.entity
 
 import com.ezoky.ezgames.covideo.component.Generate.Generated
-import com.ezoky.ezgames.covideo.component.{Components, Identifiable}
-import com.ezoky.ezgames.covideo.component.double.Components.*
-import spire.*
-import spire.implicits.*
+import com.ezoky.ezgames.covideo.component.{AllComponents, Dimension, HealthCondition, Identifiable}
+//import spire.*
+//import spire.implicits.*
 
 import scala.annotation.targetName
 
@@ -17,9 +16,12 @@ import scala.annotation.targetName
  * @author gweinbach on 14/11/2020
  * @since 0.1.0
  */
-trait Persons[I: Identifiable: D: Dimension]
-  extends Entites[I]
-  with Components[D]:
+trait Persons[I: Identifiable, D: Dimension]
+  extends Entities[I]
+  with AllComponents[D]:
+
+  import CoordsDimension.{*, given}
+  import CoordsDimension.Ez3D.*
   
   case class Person(id: I = summon[Identifiable[I]].id,
                     solid: Solid,
