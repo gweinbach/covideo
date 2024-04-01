@@ -8,18 +8,17 @@ package com.ezoky.ez3d
 
 import com.ezoky.ez3d.Screen.*
 import com.ezoky.eznumber.{Angles, Precision}
+import org.scalatest.flatspec.AnyFlatSpec
 import spire.*
-import spire.algebra.Trig
 import spire.implicits.*
 import spire.math.*
-import org.scalatest.flatspec.AnyFlatSpec
 
 /**
  * @since 0.2.0
  * @author gweinbach on 21/06/2022
  */
 class Model3DTest
-  extends AnyFlatSpec :
+  extends AnyFlatSpec:
 
   "A Point in Space" can "be projected on a scene using a camera" in {
 
@@ -41,7 +40,7 @@ class Model3DTest
     val segmentCenter = Segment(SpacePoint(0, 0, 0), SpacePoint(0, 0, -1))
     val simpleShape = Shape(segmentCenter)
 
-    assert(pipeline3D.run(simpleShape) === ScreenShape(ScreenSegment(ScreenPosition(100 px, 50px), ScreenPosition(100 px, 50px))))
+    assert(pipeline3D.run(simpleShape) === ScreenShape(ScreenSegment(ScreenPosition(100 px, 50 px), ScreenPosition(100 px, 50 px))))
 
 
     val diagonalShape =
@@ -53,13 +52,37 @@ class Model3DTest
       )
     val screenDiagonalShape =
       ScreenShape(
-        ScreenSegment(ScreenPosition(0px, 0 px), ScreenPosition(100 px, 50px)),
-        ScreenSegment(ScreenPosition(0 px, 100px), ScreenPosition(100 px, 50px)),
-        ScreenSegment(ScreenPosition(200 px, 0 px), ScreenPosition(100 px, 50px)),
-        ScreenSegment(ScreenPosition(200 px, 100 px), ScreenPosition(100 px, 50px))
+        ScreenSegment(ScreenPosition(0 px, 0 px), ScreenPosition(100 px, 50 px)),
+        ScreenSegment(ScreenPosition(0 px, 100 px), ScreenPosition(100 px, 50 px)),
+        ScreenSegment(ScreenPosition(200 px, 0 px), ScreenPosition(100 px, 50 px)),
+        ScreenSegment(ScreenPosition(200 px, 100 px), ScreenPosition(100 px, 50 px))
       )
 
     assert(pipeline3D.run(diagonalShape) === screenDiagonalShape)
+  }
+
+  "A simple segment" should "be simply viewed on the screen whatever size the scene is" in {
+    
+    val cameraDistance = 1
+    val sceneWidth = 2
+    val sceneHeight = 2
+    val sceneDepth = 3
+
+    val model3D = SimpleModel3D(sceneWidth, sceneHeight, cameraDistance)
+    import model3D.{*, given}
+
+    val camera: Camera =
+      Perspective.viewBoxFromTop(sceneWidth, sceneHeight, sceneDepth, cameraDistance).get
+
+    val window = Window(ScreenDimension(200 px, 100 px))
+
+    val pipeline3D = new Pipeline3D(camera, window)
+
+    val segmentCenter = Segment(SpacePoint(0, 0, 0), SpacePoint(0, 0, -1))
+    val simpleShape = Shape(segmentCenter)
+
+    assert(pipeline3D.run(simpleShape) === ScreenShape(ScreenSegment(ScreenPosition(100 px, 50 px), ScreenPosition(100 px, 50 px))))
+
   }
 
   "Every point in the View Frustum" should "be visible in the projection" in {
@@ -80,27 +103,27 @@ class Model3DTest
 
     val pipeline3D = new Pipeline3D(camera, window)
 
-    val componentPosition=SpacePoint(835.0271736662914,781.3540128758344,-164.91732501822892)
+    val componentPosition = SpacePoint(835.0271736662914, 781.3540128758344, -164.91732501822892)
     val componentBasis =
       Basis.orthonormal(
-        NonNullSpaceVector.safe(0.8122271271740444,-0.47947675976152787,0.33224859778663435).get,
-        NonNullSpaceVector.safe(0.33224859778663635,0.8483945455193908,0.4121135333882649).get,
-        NonNullSpaceVector.safe(-0.4794767597615279,-0.22434066056230295,0.848394545519392).get
+        NonNullSpaceVector.safe(0.8122271271740444, -0.47947675976152787, 0.33224859778663435).get,
+        NonNullSpaceVector.safe(0.33224859778663635, 0.8483945455193908, 0.4121135333882649).get,
+        NonNullSpaceVector.safe(-0.4794767597615279, -0.22434066056230295, 0.848394545519392).get
       ).get
-    val v=Segment(SpacePoint(-20.0,-20.0,-20.0),SpacePoint(20.0,-20.0,-20.0))
+    val v = Segment(SpacePoint(-20.0, -20.0, -20.0), SpacePoint(20.0, -20.0, -20.0))
     val shape = Shape(v)
     val componentTransformation = ComponentTransformation((componentPosition, componentBasis, shape))
 
-    val worldV=Segment(SpacePoint(821.7271943623084,778.4624703719232,-196.77245855211476),SpacePoint(854.2162794492701,759.2833999814621,-183.48251464064938))
-    val cameraV=Segment(SpacePoint(221.7271943623084,278.46247037192325,-1696.7724585521148),SpacePoint(254.21627944927013,259.28339998146214,-1683.4825146406495))
-    val projectionV=Segment(SpacePoint(0.32668964133162565,0.49233909172984824,-0.33318010262841086),SpacePoint(0.37751547348790593,0.4620482797888897,-0.3733083355433978))
+    val worldV = Segment(SpacePoint(821.7271943623084, 778.4624703719232, -196.77245855211476), SpacePoint(854.2162794492701, 759.2833999814621, -183.48251464064938))
+    val cameraV = Segment(SpacePoint(221.7271943623084, 278.46247037192325, -1696.7724585521148), SpacePoint(254.21627944927013, 259.28339998146214, -1683.4825146406495))
+    val projectionV = Segment(SpacePoint(0.32668964133162565, 0.49233909172984824, -0.33318010262841086), SpacePoint(0.37751547348790593, 0.4620482797888897, -0.3733083355433978))
 
-    val flippedV=PlaneSegment(PlanePoint(0.32668964133162565,0.49233909172984824),PlanePoint(0.37751547348790593,0.4620482797888897))
-    val planeV=PlaneSegment(PlanePoint(1.3266896413316256,1.4923390917298482),PlanePoint(1.377515473487906,1.4620482797888896))
-    val windowV=PlaneSegment(PlanePoint(796.0137847989754,746.1695458649241),PlanePoint(826.5092840927437,731.0241398944448))
+    val flippedV = PlaneSegment(PlanePoint(0.32668964133162565, 0.49233909172984824), PlanePoint(0.37751547348790593, 0.4620482797888897))
+    val planeV = PlaneSegment(PlanePoint(1.3266896413316256, 1.4923390917298482), PlanePoint(1.377515473487906, 1.4620482797888896))
+    val windowV = PlaneSegment(PlanePoint(796.0137847989754, 746.1695458649241), PlanePoint(826.5092840927437, 731.0241398944448))
 
-//    println(pipeline3D.viewMatrix(worldV).get)
-//    println(pipeline3D.projectionMatrix(pipeline3D.viewMatrix(worldV).get).get)
+    //    println(pipeline3D.viewMatrix(worldV).get)
+    //    println(pipeline3D.projectionMatrix(pipeline3D.viewMatrix(worldV).get).get)
 
     assert(componentTransformation.modelMatrix(v).get === worldV)
 
@@ -120,7 +143,7 @@ class Model3DTest
 
     assert(clipMatrix(v).get === projectionV)
 
-    val windowMatrix = pipeline3D.windowFlip  ×: (pipeline3D.windowTranslation ×: pipeline3D.windowScaling)
+    val windowMatrix = pipeline3D.windowFlip ×: (pipeline3D.windowTranslation ×: pipeline3D.windowScaling)
 
     assert(windowMatrix(projectionV).get === windowV)
   }
@@ -154,11 +177,11 @@ class SimpleModel3D(sceneWidth: Double,
   // No rotation for a simple Basis
   given ComponentModel[Shape] with
     extension (model: Shape)
-      override def position: SpacePoint = SpacePoint(sceneWidth/2, sceneHeight/2, 0)
+      override def position: SpacePoint = SpacePoint(sceneWidth / 2, sceneHeight / 2, 0)
       override def basis: Basis = Basis.NormalDirect
       override def shape: Shape = model
 
-  given [B <: Basis]:ComponentModel[(SpacePoint, B, Shape)] with
+  given [B <: Basis]: ComponentModel[(SpacePoint, B, Shape)] with
     extension (model: (SpacePoint, B, Shape))
       override def position: SpacePoint = model._1
       override def basis: B = model._2

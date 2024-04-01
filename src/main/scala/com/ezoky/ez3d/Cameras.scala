@@ -29,7 +29,7 @@ trait Cameras[T: Numeric : Trig : Precision]
 
   sealed trait ViewFrustum:
 
-    println(s"viewFrustum: near=$near, far=$far, depth = $depth")
+//    println(s"viewFrustum: near=$near, far=$far, depth = $depth")
 
     val top: T
     val bottom: T

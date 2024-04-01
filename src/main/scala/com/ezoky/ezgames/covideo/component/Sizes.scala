@@ -39,10 +39,6 @@ trait Sizes[T: Dimension]
       else
         Some(coord(relativePosition(numericN.div(numericN.one, n))))
 
-  //  @deprecated("Use generatedCoord instead")
-  //  final def randomCoord: C =
-  //    coord(value.randomPosition)
-
     final def minCoord: C =
       coord(value.minPosition)
 

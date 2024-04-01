@@ -14,7 +14,7 @@ import com.ezoky.ezgames.covideo.system.Displays
 trait SwingDisplaySystems[I: Identifiable, D: Dimension]
   extends SceneWindows[I, D]
     with ControlWindows[I, D]
-    with Controls[I, D]
+    with SceneControls[I, D]
     with Displays[I, D]
     with Scenes[I, D]
     with Entities[I]
@@ -36,12 +36,12 @@ trait SwingDisplaySystems[I: Identifiable, D: Dimension]
 
     override def popControlModel(item: ControlledItem): IO[ControlModel] =
       IO {
-        Control.popModel(item)
+        SceneControl.popModel(item)
       }
 
     override def updateControlModel(model: ControlModel): IO[Unit] =
       IO {
-        Control.updateModel(model)
+        SceneControl.updateModel(model)
       }
 
     override def displayControl(): IO[Unit] =
@@ -56,6 +56,13 @@ trait SwingDisplaySystems[I: Identifiable, D: Dimension]
         sceneWindow.updateTitle(scene.name)
         sceneWindow.resizeScene(scene.preferredDimension)
         sceneWindow.draw(scene)
+      }
+
+    override def dispose(doDispose: Boolean): IO[Unit] =
+      IO {
+        if doDispose then
+          ControlWindow().dispose()
+          SceneWindow.all().map(_.dispose())
       }
 
     override def spriteByHealthCondition(healthCondition: HealthCondition): Sprite =

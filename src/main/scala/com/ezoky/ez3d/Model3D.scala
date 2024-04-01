@@ -90,7 +90,7 @@ trait Model3D[T: Numeric : Precision]
 
   trait WindowView[M]:
     extension (windowed: M)
-    // windowOrigin in Clip space where coordinates go from -1 to 1 on both Axises
+    // windowOrigin in Clip space where coordinates go from -1 to 1 on both Axis
       def windowOrigin: PlanePoint // Example: TopLeft = PlanePoint(-1, -1)
       def flipX: Boolean
       def flipY: Boolean
@@ -145,7 +145,8 @@ trait Model3D[T: Numeric : Precision]
 
   // Conversion tools
   extension (point: SpacePoint)
-    def withoutZ: PlanePoint = PlanePoint(point.x, point.y)
+    def withoutZ: PlanePoint = 
+      PlanePoint(point.x, point.y)
 
   extension (point: PlanePoint)
     def withZ(z: T): SpacePoint =

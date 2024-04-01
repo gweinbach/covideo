@@ -91,8 +91,15 @@ case class CameraBuilder(cameraConfig: CameraConfig)
   extends Builder[Camera]:
 
   override def build: Generated[Camera] =
+    val projection =
+      cameraConfig.projectionType match
+        case ProjectionType.Perspective =>
+          Perspective
+        case ProjectionType.Orthographic =>
+          Orthographic
+
     Generated.unit(
-      Orthographic.viewBoxFromLeft(
+      projection.viewBoxFromTop(
         sceneDepth = cameraConfig.right * 2,
         sceneHeight = cameraConfig.top * 2,
         sceneWidth = cameraConfig.far - cameraConfig.near,

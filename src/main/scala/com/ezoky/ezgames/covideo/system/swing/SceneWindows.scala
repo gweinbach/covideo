@@ -39,14 +39,15 @@ extension (awtDimension: AWTDimension)
       (awtDimension.width == 0)
 
 trait SceneWindows[I: Identifiable, D: Dimension]
-  extends Controls[I, D]
+  extends SceneControls[I, D]
     with Scenes[I, D]
     with UserCommands[I, D]:
 
   import CoordsDimension.given
   import CoordsDimension.Ez3D.*
 
-  private[swing] class SceneWindow(userControlConfig: UserControlConfig)
+  private[swing] class SceneWindow(userControlConfig: UserControlConfig,
+                                   control: SceneControl)
     extends JFrame:
 
     println("Creating a SceneWindow")
@@ -56,13 +57,13 @@ trait SceneWindows[I: Identifiable, D: Dimension]
 
     display()
 
-    def resizeScene(size: ScreenDimension): Unit =
-      if (size.awtDimension != panelSize)
-        panel.setPreferredSize(
-          size.awtDimension
-        )
-        panelSize = size.awtDimension
+    def resizeScene(size: ScreenDimension): Unit = {
+      val awtSize = size.awtDimension
+      if (awtSize != panelSize)
+        panel.setPreferredSize(awtSize)
+        panelSize = awtSize
         pack()
+    }
     //      repaint()
 
     def updateTitle(newTitle: String): Unit =
@@ -77,12 +78,12 @@ trait SceneWindows[I: Identifiable, D: Dimension]
         panel.setPreferredSize(panelSize)
 
       panel.setFocusable(true)
-      panel.addKeyListener(new KeyHandler(userControlConfig))
+      panel.addKeyListener(new KeyHandler(userControlConfig, control))
       add(panel)
 
       setLocationRelativeTo(null) // centered on screen
       //    setResizable(false)
-      setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
+      setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE)
       pack()
       setVisible(true)
 
@@ -95,10 +96,13 @@ trait SceneWindows[I: Identifiable, D: Dimension]
     def apply(sceneId: I,
               userControlConfig: UserControlConfig): SceneWindow =
       _SceneWindows.getOrElse(sceneId, {
-        val mainWindow = new SceneWindow(userControlConfig)
+        val mainWindow = new SceneWindow(userControlConfig, SceneControl)
         _SceneWindows.addOne(sceneId, mainWindow)
         mainWindow
       })
+      
+    def all(): Iterable[SceneWindow] =
+      _SceneWindows.values
 
   /**
    * Drawing Panel
@@ -153,8 +157,8 @@ trait SceneWindows[I: Identifiable, D: Dimension]
       //              g2d.clearRect(
       //                previousScenePosition.x,
       //                previousScenePosition.y,
-      ////                awtImage.getWidth(this),
-      ////                awtImage.getHeight(this)
+      //                awtImage.getWidth(this),
+      //                awtImage.getHeight(this)
       //                20,20
       //              )
 
@@ -180,8 +184,10 @@ trait SceneWindows[I: Identifiable, D: Dimension]
       repaint()
 
 
-  class KeyHandler(userControlConfig: UserControlConfig) extends KeyListener :
+  class KeyHandler(userControlConfig: UserControlConfig,
+                   control: SceneControl) extends KeyListener:
 
+    given GameControlConfig = userControlConfig.gameConfig
     given CameraControlConfig = userControlConfig.cameraConfig
 
     def keyTyped(e: KeyEvent): Unit = {
@@ -193,21 +199,19 @@ trait SceneWindows[I: Identifiable, D: Dimension]
       e.getKeyCode() match
         case KeyEvent.VK_UP =>
           println("UP")
-          Control.updateControl(ControlledItem.Camera, _.control(KeyboardCommand.KeyUp))
+          control.updateControl(ControlledItem.Camera, _.control(KeyboardCommand.KeyUp))
         case KeyEvent.VK_DOWN =>
           println("DOWN")
-          Control.updateControl(ControlledItem.Camera, _.control(KeyboardCommand.KeyDown))
+          control.updateControl(ControlledItem.Camera, _.control(KeyboardCommand.KeyDown))
         case KeyEvent.VK_LEFT =>
           println("LEFT")
-          Control.updateControl(ControlledItem.Camera, _.control(KeyboardCommand.KeyLeft))
+          control.updateControl(ControlledItem.Camera, _.control(KeyboardCommand.KeyLeft))
         case KeyEvent.VK_RIGHT =>
           println("RIGHT")
-          Control.updateControl(ControlledItem.Camera, _.control(KeyboardCommand.KeyRight))
-        case KeyEvent.VK_X =>
-          println("X")
-          System.exit(0)
+          control.updateControl(ControlledItem.Camera, _.control(KeyboardCommand.KeyRight))
         case _ =>
-          ()
+          println(e.getKeyChar)
+          control.updateControl(ControlledItem.Game, _.control(KeyboardCommand.KeyChar(e.getKeyChar)))
     }
 
     def keyReleased(e: KeyEvent): Unit = {

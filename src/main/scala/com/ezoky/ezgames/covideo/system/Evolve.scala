@@ -1,8 +1,8 @@
 package com.ezoky.ezgames.covideo.system
 
 import com.ezoky.ezgames.covideo.component.Generate.*
-import com.ezoky.ezgames.covideo.component.{Identifiable, Dimension, Mobiles, Solids}
-import com.ezoky.ezgames.covideo.entity.{Games, Worlds, Scenes, Persons}
+import com.ezoky.ezgames.covideo.component.{Dimension, Identifiable, Mobiles, Solids}
+import com.ezoky.ezgames.covideo.entity.{Games, Persons, Scenes, Viewables, Worlds}
 
 
 trait Evolve[T]:
@@ -13,6 +13,7 @@ trait Evolves[I: Identifiable, D: Dimension]
     with Worlds[I, D]
     with Scenes[I, D]
     with Persons[I, D]
+    with Viewables[I, D]
     with Mobiles[D]
     with Solids[D]:
 
@@ -53,5 +54,15 @@ trait Evolves[I: Identifiable, D: Dimension]
         for
           game <- generatedGame
           evolvedPeople <- Generated.flatMapSet(game.people.values.toSet, _.evolve)
+
+          // We get all sprites
+          sprites: Population[Sprite] = game.allViewables
+
+          // We get all 3D components
+          components: Population[Component3D] = game.allViewables
+
+          evolvedWorld = game.world.withSprites(sprites).withComponents(components)
+
         yield
-          game.withPeople(people = Population(evolvedPeople))
+          game.withPeople(people = Population(evolvedPeople)).withWorld(evolvedWorld)
+          

@@ -17,16 +17,27 @@ trait Games[I: Identifiable, D: Dimension]
     with AllComponents[D]:
 
   import CoordsDimension.{*, given}
-  
+
+  trait GameStatus
+
+  object GameStatus:
+    case object Running extends GameStatus
+
+    case object Terminated extends GameStatus
+
   case class Game(world: World,
-                  people: Population[Person]):
-  
+                  people: Population[Person],
+                  status: GameStatus = GameStatus.Running):
+
     def withWorld(world: World): Game =
       copy(world = world)
-  
+
     def withPeople(people: Population[Person]): Game =
       copy(people = people)
-  
+
+    def terminate(): Game =
+      copy(status = GameStatus.Terminated)
+
   case class GameConfig(populationSize: Int,
                         personConfig: PersonConfig,
                         worldConfig: WorldConfig)

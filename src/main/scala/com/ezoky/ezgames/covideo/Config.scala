@@ -1,5 +1,6 @@
 package com.ezoky.ezgames.covideo
 
+import com.ezoky.ez3d.Screen.*
 import com.ezoky.ezgames.covideo.MainConfig.*
 import com.ezoky.ezgames.covideo.MainConfig.Everything.CoordsDimension.Ez3D.*
 import com.ezoky.ezgames.covideo.MainConfig.Everything.CoordsDimension.{*, given}
@@ -10,13 +11,13 @@ import spire.math.*
 
 object Config:
 
-  val AreaWidth = 1000
-  val AreaHeight = 1000
-  val AreaDepth = 1000
+  val AreaWidth = 800
+  val AreaHeight = 400
+  val AreaDepth = 800
 
   val NearDistance = 1500
 
-  val PopulationSize = 200
+  val PopulationSize = 100
 
   val Area =
     AreaConfig(
@@ -29,6 +30,7 @@ object Config:
     )
   val Camera =
     CameraConfig(
+      projectionType = ProjectionType.Perspective,
       position = PlanePoint(AreaWidth / 2, AreaHeight / 2),
       near = NearDistance,
       far = NearDistance + AreaDepth,
@@ -38,8 +40,8 @@ object Config:
   val Scene =
     SceneConfig(
       name = "COVIDEO",
-      //      sceneSize = SceneDimension(width = 1200 px, height = 800 px), // DefaultScreenSize
-      sceneSize = DefaultScreenSize, //ScreenDimension(width = AreaWidth px, height = AreaHeight px), // DefaultScreenSize
+      sceneSize = ScreenDimension(width = 1000 px, height = 1000 px), // DefaultScreenSize
+      //      sceneSize = DefaultScreenSize, //ScreenDimension(width = AreaWidth px, height = AreaHeight px), // DefaultScreenSize
       //      margin = Margin(top = 100 px, left = 100 px, bottom = 100 px, right = 100 px),
       zoomRatio = 1.0, // not used in 3D
       camera = Camera
@@ -68,10 +70,15 @@ object Config:
       populationSize = PopulationSize,
       Person, World
     )
+  val GameControl =
+    GameControlConfig(exitChar = 'x')
   val CameraControl =
     CameraControlConfig(10, 10, 10, 10)
   val UserControl =
-    UserControlConfig(CameraControl)
+    UserControlConfig(
+      GameControl,
+      CameraControl
+    )
   val Loop =
     GameLoopConfig(
       fps = 60

@@ -31,10 +31,6 @@ trait Boxes[T: Dimension]
       Position.middle(minPosition, maxPosition)
 
     def generatedPosition: Generated[Position] =
-//      Position.generatedWithin(this)
-  
-//  extension (lhs: Position.type)
-//    def generatedWithin(area: Box): Generated[Position] =
       Position.generatedWithin(
         width,
         height,

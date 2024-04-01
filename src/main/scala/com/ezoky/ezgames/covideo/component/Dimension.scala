@@ -33,9 +33,6 @@ abstract class Dimension[T: Precision: Numeric: Trig: Generated: Ez3D: Epsilon]:
   // rather use explicit conversion even if implicit one is private
   protected def _NumberToDimensionConverter[N: Numeric]: (N) => T
 
-//  private given [N: Numeric]: Conversion[N, _DimensionType] with
-//    def apply(n: N): _DimensionType = summon[Numeric[N]].toDouble(n)
-
   // end of Dimension type specific implementation
   
   
@@ -70,6 +67,8 @@ abstract class Dimension[T: Precision: Numeric: Trig: Generated: Ez3D: Epsilon]:
 
     case Bounded
 
+    case Unbounded
+
     private[Dimension] def normalizePosition(value: T,
                                              boundary: SizeValue): T =
       this match
@@ -82,8 +81,17 @@ abstract class Dimension[T: Precision: Numeric: Trig: Generated: Ez3D: Epsilon]:
         case Bounded =>
           boundary.bounce(value)
 
+        case Unbounded =>
+          value
 
-  // SizeValue
+   /**
+   * SizeValue
+   *
+   * Properties :
+   * <ul>
+   *   <li>Always positive</li>
+   * </ul>
+   */
   opaque type SizeValue = T
 
   object SizeValue:
@@ -121,7 +129,6 @@ abstract class Dimension[T: Precision: Numeric: Trig: Generated: Ez3D: Epsilon]:
                                     (using geometry: Geometry): PositionValue =
       PositionValue(
         sizeValue * _NumberToDimensionConverter.apply(n),
-//        sizeValue * n,
         sizeValue,
         geometry
       )
@@ -148,7 +155,7 @@ abstract class Dimension[T: Precision: Numeric: Trig: Generated: Ez3D: Epsilon]:
     def axisVector(axis: Axis): SpaceVector =
       SpaceVector(sizeValue, axis)
 
-    private[Dimension] def remainder(dimensionValue: T): T =
+    private[Dimension] final def remainder(dimensionValue: T): T =
       if (isNull) {
         __0
       }
@@ -179,10 +186,12 @@ abstract class Dimension[T: Precision: Numeric: Trig: Generated: Ez3D: Epsilon]:
   val GeneratedSizeValue: Generated[SizeValue] = _DimensionGenerated
 
   val NumericSizeValue: Numeric[SizeValue] = _DimensionNumeric
+  
+  val OrderSizeValue: Order[SizeValue] = _DimensionOrder
   // end SizeValue
 
 
-  // Position
+  // PositionValue
   opaque type PositionValue = T
 
   object PositionValue:
@@ -243,7 +252,7 @@ abstract class Dimension[T: Precision: Numeric: Trig: Generated: Ez3D: Epsilon]:
   val OrderPositionValue: Order[PositionValue] = _DimensionOrder
 
 
-  // Timeval
+  // DurationValue
   type _StepType = Long
 
   opaque type DurationValue = _StepType

@@ -10,18 +10,21 @@ import MainConfig.Everything.{*, given}
 
 case class GameLoopConfig(fps: Int)
 
-class GameLoop(initialGame: Generated[MainConfig.Everything.Game],
+class GameLoop(initialGame: Generated[Game],
                gameStep: Generated[Game] => Generated[IO[Game]],
                seed: Generator,
-               gameLoopConfig: GameLoopConfig)
-  extends Runnable:
+               gameLoopConfig: GameLoopConfig):
+//  extends Runnable:
 
   val stepDurationInNanoseconds = GameLoop.NanosecondsInOneSecond / gameLoopConfig.fps
 
-  val thread = new Thread(this)
-  thread.start()
+//  private val _thread = new Thread(this)
 
-  def run(): Unit =
+  final def start(): Unit =
+//    if !_thread.isAlive then
+//      _thread.start()
+//
+//  def run(): Unit =
     val nextStep = System.nanoTime() + stepDurationInNanoseconds
     loop(initialGame, seed, nextStep)
 
@@ -43,7 +46,8 @@ class GameLoop(initialGame: Generated[MainConfig.Everything.Game],
         (remainingNs / GameLoop.NanosecondsInOneMillisecond, (remainingNs % GameLoop.NanosecondsInOneMillisecond).intValue)
     Thread.sleep(remainingMilliseconds, remainingNanoseconds)
 
-    loop(nextGame, nextGen, System.nanoTime() + stepDurationInNanoseconds)
+    if (nextGame.get(generator).status == GameStatus.Running) then
+      loop(nextGame, nextGen, System.nanoTime() + stepDurationInNanoseconds)
 
 object GameLoop:
   val NanosecondsInOneSecond = 1000000000L

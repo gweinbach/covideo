@@ -12,6 +12,7 @@ import org.scalacheck.{Arbitrary, Gen, Prop, Properties}
 import spire.*
 import spire.implicits.*
 import spire.math.*
+import spire.algebra.Order
 
 /**
  * @author gweinbach on 17/11/2020
@@ -21,9 +22,6 @@ class DimensionCheck extends Properties("Dimensions") {
 
   import com.ezoky.ezgames.covideo.component.double.DoubleDimension.{*, given}
   import Prop.forAll
-
-  implicit lazy val DurationArbitrary: Arbitrary[DurationValue] =
-    Arbitrary(Gen.long.map(DurationValue(_)))
 
   implicit lazy val GeometryArbitrary: Arbitrary[Geometry] =
     Arbitrary(Gen.oneOf(Geometry.Flat, Geometry.Toric, Geometry.Bounded))
@@ -44,6 +42,17 @@ class DimensionCheck extends Properties("Dimensions") {
         PositionValue(d, size, geometry)
       }
     )
+
+  implicit lazy val DurationArbitrary: Arbitrary[DurationValue] =
+    Arbitrary(Gen.long.map(DurationValue(_)))
+
+
+  given Order[SizeValue] = OrderSizeValue
+
+  property("Size is always positive") =
+    forAll { (size: SizeValue) =>
+      size >= SizeValue.Zero
+    }
 
   property("In a Flat Geometry, there is one single available Position") =
     forAll { (d: Double, boundary: SizeValue) =>

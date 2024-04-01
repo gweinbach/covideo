@@ -572,12 +572,13 @@ trait Transformation3D[T: Numeric : Trig : Precision]
         override val x01 = __2 * x * y - __2 * w * z
         override val x02 = __2 * x * z + __2 * w * y
 
-        override val x10 = __2 * x * y + __2 * w * z
+        override val x10 = __2 * y * x + __2 * w * z
         override val x11 = __1 - __2 * x * x - __2 * z * z
         override val x12 = __2 * y * z - __2 * w * x
 
-        override val x20 = __2 * x * z - __2 * w * y
-        override val x21 = __2 * y * z - __2 * w * x
+        override val x20 = __2 * z * x - __2 * w * y
+//        override val x21 = __2 * z * y - __2 * w * x
+        override val x21 = __2 * z * y + __2 * w * x
         override val x22 = __1 - __2 * x * x - __2 * y * y
 
 

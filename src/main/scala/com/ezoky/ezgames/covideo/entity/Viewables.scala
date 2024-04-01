@@ -41,7 +41,7 @@ trait Viewables[I: Identifiable, D: Dimension : Numeric]
       override def allViewables: Population[V] =
         game.world.allViewables ++ game.people.allViewables
 
-
+  // Sprites that might be viewed
   trait ViewableSprite[T]
     extends Viewable[T, Sprite]
 
@@ -59,6 +59,7 @@ trait Viewables[I: Identifiable, D: Dimension : Numeric]
         )
 
 
+  // 3D components that might be viewed
   trait Viewable3D[T]
     extends Viewable[T, Component3D]
 

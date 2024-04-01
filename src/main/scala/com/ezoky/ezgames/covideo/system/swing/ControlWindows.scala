@@ -7,62 +7,97 @@ package com.ezoky.ezgames.covideo.system.swing
 
 import com.ezoky.ezgames.covideo.component.{Dimension, Identifiable}
 import com.ezoky.ezgames.covideo.system.Displays
-
-import java.awt.{BorderLayout, Graphics2D, GraphicsDevice, GraphicsEnvironment, GridLayout, Color as AWTColor, Dimension as AWTDimension, EventQueue as AWTEventQueue}
-import javax.swing.*
-import javax.swing.event.{ChangeEvent, ChangeListener}
-
 import spire.*
 import spire.implicits.*
 import spire.math.{*, given}
+
+import java.awt.event.{ActionEvent, ActionListener}
+import java.awt.{BorderLayout, GridBagConstraints, GridBagLayout, GridLayout}
+import javax.swing.*
+import javax.swing.event.{ChangeEvent, ChangeListener}
 
 /**
  * @since 0.2.0
  * @author gweinbach on 30/06/2022
  */
-trait ControlWindows[I: Identifiable, D: Dimension: Numeric]
-  extends Controls[I, D]
-  with Displays[I, D]:
+trait ControlWindows[I: Identifiable, D: Dimension : Numeric]
+  extends SceneControls[I, D]
+    with Displays[I, D]:
 
   import CoordsDimension.{*, given}
 
-  private[swing] class ControlWindow()
-    extends JFrame :
+  private[swing] class ControlWindow(control: SceneControl)
+    extends JFrame:
 
     self =>
 
     println("Creating a ControlWindow")
+    control.subscribeToUpdates(_nearSlider.notifyChange)
+    control.subscribeToUpdates(_farSlider.notifyChange)
 
     def display(): Unit =
       initUI()
 
     private lazy val _nearSlider = ControlSlider(
-      () => Control.getControl(ControlledItem.ViewFrustum).near.toInt,
-      value => Control.updateControl(ControlledItem.ViewFrustum, _.withNear(near = value.baseValue)),
+      () => control.getControl(ControlledItem.ViewFrustum).near.toInt,
+      value => control.updateControl(ControlledItem.ViewFrustum, _.withNear(near = value.baseValue)),
       label = "near",
-      min = Control.getControl(ControlledItem.ViewFrustum).minNear.toInt,
-      max = Control.getControl(ControlledItem.ViewFrustum).maxNear.toInt
+      min = control.getControl(ControlledItem.ViewFrustum).minNear.toInt,
+      max = control.getControl(ControlledItem.ViewFrustum).maxNear.toInt
     )
 
     private lazy val _farSlider = ControlSlider(
-      () => Control.getControl(ControlledItem.ViewFrustum).far.toInt,
-      value => Control.updateControl(ControlledItem.ViewFrustum, _.withFar(far = value.baseValue)),
+      () => control.getControl(ControlledItem.ViewFrustum).far.toInt,
+      value => control.updateControl(ControlledItem.ViewFrustum, _.withFar(far = value.baseValue)),
       label = "far",
-      min = Control.getControl(ControlledItem.ViewFrustum).minFar.toInt,
-      max = Control.getControl(ControlledItem.ViewFrustum).maxFar.toInt
+      min = control.getControl(ControlledItem.ViewFrustum).minFar.toInt,
+      max = control.getControl(ControlledItem.ViewFrustum).maxFar.toInt
     )
+
+    private lazy val _sliderPanel =
+      val sliderPanel: JPanel = new JPanel(new GridLayout(1, 0))
+      getContentPane().add(sliderPanel)
+
+      sliderPanel.add(_nearSlider)
+      sliderPanel.add(_farSlider)
+      sliderPanel
 
     private lazy val _container =
 
-      val panel: JPanel = new JPanel(new GridLayout(1, 0))
-      getContentPane().add(panel)
+      val gbLayout = new GridBagLayout()
+      val gbConstraints = new GridBagConstraints()
 
-      panel.add(_nearSlider)
-      panel.add(_farSlider)
+      val panel = getContentPane()
+      panel.setLayout(gbLayout)
+
+      val checkbox = new JCheckBox("lock depth", true)
+      gbConstraints.fill = GridBagConstraints.HORIZONTAL
+      gbConstraints.anchor = GridBagConstraints.PAGE_START
+      gbConstraints.gridx = 0
+      gbConstraints.gridy = 0
+      gbConstraints.gridwidth = 1
+      panel.add(checkbox,gbConstraints)
+
+      gbConstraints.anchor = GridBagConstraints.CENTER
+      gbConstraints.gridx = 0
+      gbConstraints.gridy = 1
+      panel.add(_sliderPanel, gbConstraints)
+
+      val exitButton = new JButton("Exit")
+      gbConstraints.anchor = GridBagConstraints.SOUTH
+      gbConstraints.gridx = 0
+      gbConstraints.gridy = 2
+      panel.add(exitButton, gbConstraints)
+
+      exitButton.addActionListener(new ActionListener {
+        override def actionPerformed(e: ActionEvent): Unit =
+          control.updateControl(ControlledItem.Game, _.exit())
+      })
+
       //    setSize(frameSize)
-      setLocationRelativeTo(null) // centered on screen
+//      setLocationRelativeTo(null) // centered on screen
       //    setResizable(false)
-      setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
+      setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE)
       pack()
       setVisible(true)
       panel
@@ -72,7 +107,7 @@ trait ControlWindows[I: Identifiable, D: Dimension: Numeric]
 
   private[swing] object ControlWindow:
 
-    lazy val _ControlWindow = new ControlWindow()
+    lazy val _ControlWindow = new ControlWindow(SceneControl)
 
     def apply(): ControlWindow = _ControlWindow
 
@@ -82,7 +117,7 @@ trait ControlWindows[I: Identifiable, D: Dimension: Numeric]
                                      label: String = "",
                                      min: Int = 1,
                                      max: Int = 1000)
-    extends JPanel :
+    extends JPanel:
     setLayout(new BorderLayout)
     val jLabel = new JLabel(label, SwingConstants.CENTER)
     val initialValue = getter()
@@ -103,7 +138,6 @@ trait ControlWindows[I: Identifiable, D: Dimension: Numeric]
     )
     add(jLabel, BorderLayout.NORTH)
     add(jSlider, BorderLayout.SOUTH)
-    Control.subscribe(this.notifyChange)
 
     jSlider.addChangeListener(new ChangeListener() {
       override def stateChanged(e: ChangeEvent): Unit = {
@@ -113,5 +147,5 @@ trait ControlWindows[I: Identifiable, D: Dimension: Numeric]
     })
 
     def notifyChange(): Unit =
-      println(s"value = ${getter()}")
+//      println(s"value = ${getter()}")
       jSlider.setValue(getter())

@@ -1,12 +1,10 @@
 package com.ezoky.ezgames.covideo.system
 
-import com.ezoky.ez3d.Cameras
 import com.ezoky.ez3d.Screen.ScreenDimension
 import com.ezoky.ezcategory.IO
 import com.ezoky.ezgames.covideo.component.{Dimension, HealthCondition, Identifiable}
 import com.ezoky.ezgames.covideo.entity.{Games, Scenes, Viewables, Worlds}
 import spire.*
-import spire.implicits.*
 import spire.math.*
 
 /**
@@ -14,7 +12,19 @@ import spire.math.*
  * @since 0.2.0
  */
 trait Display[T]:
-  extension (entity: T) def display: IO[T]
+  extension (entity: T)
+    /**
+     * Should update display according to:
+     * <ul>
+     * <li>displayed content</li>
+     * <li>control model values (that might influence display)</li>
+     * </ul>
+     *
+     * Control model itself might also be updated as a consequence of evolution of displayed content.
+     *
+     * @return IO[T] as displaying is a side effect
+     */
+    def display: IO[T]
 
 trait Displays[I: Identifiable, D: Dimension : Numeric]
   extends Games[I, D]
@@ -24,12 +34,14 @@ trait Displays[I: Identifiable, D: Dimension : Numeric]
     with UserCommands[I, D]:
 
   import CoordsDimension.Ez3D.*
-  import CoordsDimension.{*, given}
+  import CoordsDimension.given
 
   abstract class DisplaySystem(userControlConfig: UserControlConfig):
 
     // Generic
     def defaultScreenSceneDimension: ScreenDimension
+
+    def displayControl(): IO[Unit]
 
     def popControlModel(item: ControlledItem): IO[ControlModel]
 
@@ -37,7 +49,7 @@ trait Displays[I: Identifiable, D: Dimension : Numeric]
 
     def displayScene(scene: Scene): IO[Unit]
 
-    def displayControl(): IO[Unit]
+    def dispose(doDispose: Boolean): IO[Unit]
 
     // Game specific
     def spriteByHealthCondition(healthCondition: HealthCondition): Sprite
@@ -72,6 +84,7 @@ trait Displays[I: Identifiable, D: Dimension : Numeric]
                   controlModelWithNear.updateControl(ControlledItem.ViewFrustum, _.withFar(viewFrustumWithFar.far).withNear(viewFrustumWithFar.near))
                 else
                   controlModelWithNear
+
               displaySystem.updateControlModel(controlModelWithFar).map(_ => viewFrustumWithFar)
         }
 
@@ -96,7 +109,16 @@ trait Displays[I: Identifiable, D: Dimension : Numeric]
   given (using DisplaySystem, Display[Scene]): Display[World] with
     extension (world: World)
       override def display: IO[World] =
-        world.scene.display.map(world.withScene(_))
+
+        val displaySystem = summon[DisplaySystem]
+        for
+          displayedScene <- world.scene.display
+
+          // side effects
+          _ <- displaySystem.displayScene(displayedScene)
+          _ <- displaySystem.displayControl()
+        yield
+          world.withScene(displayedScene)
 
   given (using DisplaySystem, Display[World]): Display[Game] with
     extension (game: Game)
@@ -104,31 +126,30 @@ trait Displays[I: Identifiable, D: Dimension : Numeric]
 
         val displaySystem = summon[DisplaySystem]
         for
-          displayedWorld <- game.world.display
+          controlModel <- displaySystem.popControlModel(ControlledItem.Game)
+          gameControl = controlModel.control(ControlledItem.Game)
+          controlledGame = if gameControl.doExit then
+            game.terminate()
+          else
+            game
 
-          scene = displayedWorld.scene
+          displayedWorld <- controlledGame.world.display
 
-          // We get all sprites
-          sprites: Population[Sprite] = game.allViewables
+          // side effects
+          _ <- displaySystem.dispose(gameControl.doExit) 
 
-          // We get all 3D components
-          components: Population[Component3D] = game.allViewables
-
-          displayedScene = scene.withSprites(sprites).withComponents(components)
-
-          _ <- displaySystem.displayControl()
-          _ <- displaySystem.displayScene(displayedScene)
         yield
-          game.withWorld(
-            displayedWorld.withScene(
-              displayedScene
-            )
+          controlledGame.withWorld(
+            displayedWorld
           )
 
   sealed trait ControlledItem:
     type ItemControlType <: ItemControl
 
   object ControlledItem:
+    case object Game extends ControlledItem:
+      override type ItemControlType = GameControl
+
     case object ViewFrustum extends ControlledItem:
       override type ItemControlType = ViewFrustumControl
 
@@ -157,8 +178,7 @@ trait Displays[I: Identifiable, D: Dimension : Numeric]
 
     def withControl(controlledItem: ControlledItem,
                     itemControl: controlledItem.ItemControlType): ControlModel =
-      val optController = controllers.get(controlledItem)
-      optController match
+      controllers.get(controlledItem) match
         case Some(controller) if !controller.itemControl.equalsState(itemControl) =>
           copy(controllers = controllers + (controlledItem -> controller.updateItem(itemControl.asInstanceOf[controller.controlledItem.ItemControlType])))
         case None =>
@@ -184,10 +204,12 @@ trait Displays[I: Identifiable, D: Dimension : Numeric]
       }
 
   object ControlModel:
-    def apply(viewFrustum: ViewFrustumControl,
+    def apply(game: GameControl,
+              viewFrustum: ViewFrustumControl,
               camera: CameraControl): ControlModel =
       new ControlModel(
         Map(
+          ControlledItem.Game -> Controller(ControlledItem.Game, game),
           ControlledItem.ViewFrustum -> Controller(ControlledItem.ViewFrustum, viewFrustum),
           ControlledItem.Camera -> Controller(ControlledItem.Camera, camera)
         )

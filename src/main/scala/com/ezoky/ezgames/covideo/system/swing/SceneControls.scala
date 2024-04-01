@@ -8,35 +8,29 @@ package com.ezoky.ezgames.covideo.system.swing
 import com.ezoky.ezgames.covideo.component.{Dimension, Identifiable}
 import com.ezoky.ezgames.covideo.system.Displays
 
-import reflect.Selectable.reflectiveSelectable
-
 /**
  * @since 0.2.0
  * @author gweinbach on 16/07/2022
  */
-trait Controls[I: Identifiable, D: Dimension]
+trait SceneControls[I: Identifiable, D: Dimension]
   extends Displays[I, D]:
 
-  import CoordsDimension.{*, given}
+  import CoordsDimension.given
 
-  object Control:
+  class SceneControl(initialModel: ControlModel):
     self =>
 
-    private var model: ControlModel =
-      ControlModel(
-        ViewFrustumControl(),
-        CameraControl()
-      )
+    private var model: ControlModel = initialModel
 
     private case class Callback(notifyMethod: () => Unit):
       def notifySubscriber: Unit =
         notifyMethod()
 
-    private var subscribers: List[Callback] =
+    private var subscribersToUpdate: List[Callback] =
       List.empty
 
-    private[swing] def subscribe(notifyMethod: () => Unit): Unit =
-      subscribers = Callback(notifyMethod) :: subscribers
+    private[swing] def subscribeToUpdates(notifyMethod: () => Unit): Unit =
+      subscribersToUpdate = Callback(notifyMethod) :: subscribersToUpdate
 
     private[swing] def getControl(controlledItem: ControlledItem): controlledItem.ItemControlType =
       model.control(controlledItem)
@@ -53,4 +47,12 @@ trait Controls[I: Identifiable, D: Dimension]
     private[swing] def updateModel(newModel: ControlModel): Unit =
       if !newModel.equalsState(self.model) then
         self.model = newModel
-        subscribers.foreach(_.notifySubscriber)
+        subscribersToUpdate.foreach(_.notifySubscriber)
+
+
+  object SceneControl
+    extends SceneControl(ControlModel(
+      GameControl(),
+      ViewFrustumControl(),
+      CameraControl()
+    ))
