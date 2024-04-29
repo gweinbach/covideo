@@ -11,7 +11,7 @@ import spire.*
 import spire.implicits.*
 import spire.math.{*, given}
 
-import java.awt.event.{ActionEvent, ActionListener}
+import java.awt.event.{ActionEvent, ItemEvent, WindowAdapter, WindowEvent}
 import java.awt.{BorderLayout, GridBagConstraints, GridBagLayout, GridLayout}
 import javax.swing.*
 import javax.swing.event.{ChangeEvent, ChangeListener}
@@ -38,6 +38,9 @@ trait ControlWindows[I: Identifiable, D: Dimension : Numeric]
     def display(): Unit =
       initUI()
 
+    /**
+     * Use to control View Frustum's near pane distance from Camera
+     */
     private lazy val _nearSlider = ControlSlider(
       () => control.getControl(ControlledItem.ViewFrustum).near.toInt,
       value => control.updateControl(ControlledItem.ViewFrustum, _.withNear(near = value.baseValue)),
@@ -46,6 +49,9 @@ trait ControlWindows[I: Identifiable, D: Dimension : Numeric]
       max = control.getControl(ControlledItem.ViewFrustum).maxNear.toInt
     )
 
+    /**
+     * Use to control View Frustum's far pane distance from Camera
+     */
     private lazy val _farSlider = ControlSlider(
       () => control.getControl(ControlledItem.ViewFrustum).far.toInt,
       value => control.updateControl(ControlledItem.ViewFrustum, _.withFar(far = value.baseValue)),
@@ -76,7 +82,11 @@ trait ControlWindows[I: Identifiable, D: Dimension : Numeric]
       gbConstraints.gridx = 0
       gbConstraints.gridy = 0
       gbConstraints.gridwidth = 1
-      panel.add(checkbox,gbConstraints)
+      panel.add(checkbox, gbConstraints)
+      checkbox.addItemListener((e: ItemEvent) =>
+        val lockDepth = (e.getStateChange() == ItemEvent.SELECTED)
+        control.updateControl(ControlledItem.ViewFrustum, _.withLockDepth(lockDepth))
+      )
 
       gbConstraints.anchor = GridBagConstraints.CENTER
       gbConstraints.gridx = 0
@@ -84,20 +94,27 @@ trait ControlWindows[I: Identifiable, D: Dimension : Numeric]
       panel.add(_sliderPanel, gbConstraints)
 
       val exitButton = new JButton("Exit")
-      gbConstraints.anchor = GridBagConstraints.SOUTH
+      gbConstraints.anchor = GridBagConstraints.PAGE_END
       gbConstraints.gridx = 0
       gbConstraints.gridy = 2
       panel.add(exitButton, gbConstraints)
 
-      exitButton.addActionListener(new ActionListener {
-        override def actionPerformed(e: ActionEvent): Unit =
+
+      exitButton.addActionListener((e: ActionEvent) =>
+        control.updateControl(ControlledItem.Game, _.exit())
+      )
+
+      setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE)
+      addWindowListener(new WindowAdapter() {
+        override def windowClosing(e: WindowEvent): Unit = {
           control.updateControl(ControlledItem.Game, _.exit())
+        }
       })
 
       //    setSize(frameSize)
-//      setLocationRelativeTo(null) // centered on screen
       //    setResizable(false)
-      setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE)
+      setLocationRelativeTo(null) // centered on screen
+
       pack()
       setVisible(true)
       panel
@@ -114,9 +131,9 @@ trait ControlWindows[I: Identifiable, D: Dimension : Numeric]
 
   private[swing] class ControlSlider(getter: () => Int,
                                      setter: Int => Unit,
-                                     label: String = "",
-                                     min: Int = 1,
-                                     max: Int = 1000)
+                                     label: String,
+                                     min: Int,
+                                     max: Int)
     extends JPanel:
     setLayout(new BorderLayout)
     val jLabel = new JLabel(label, SwingConstants.CENTER)
@@ -147,5 +164,5 @@ trait ControlWindows[I: Identifiable, D: Dimension : Numeric]
     })
 
     def notifyChange(): Unit =
-//      println(s"value = ${getter()}")
+      println(s"value = ${getter()}")
       jSlider.setValue(getter())

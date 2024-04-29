@@ -23,7 +23,7 @@ trait H[T: Numeric : Precision]
 
   private val _Numeric = summon[Numeric[T]]
 
-  private val _0 = _Numeric.zero
+  private val __0 = _Numeric.zero
   private val __1 = _Numeric.one // double '_' to avoid conflict with Product<X>._1
 
   case class Quaternion(a: T,
@@ -33,13 +33,13 @@ trait H[T: Numeric : Precision]
 
     infix def *(x: T): Quaternion = Quaternion(a * x, b * x, c * x, d * x)
 
-    private def divideBy(y: T): Quaternion = Quaternion(a / y, b / y, c / y, d / y)
+    private def divideByNonNull(y: T): Quaternion = Quaternion(a / y, b / y, c / y, d / y)
 
     infix def /(y: T): Option[Quaternion] =
-      if y == _0 then
+      if y == __0 then
         None
       else
-        Some(divideBy(y))
+        Some(divideByNonNull(y))
 
     @targetName("times")
     infix def ×(q2: Quaternion): Quaternion =
@@ -71,7 +71,7 @@ trait H[T: Numeric : Precision]
       NullSpaceVector
 
     def rotateNonNull(vector: NonNullSpaceVector): NonNullSpaceVector =
-      (this × Quaternion(_0, vector) × conjugate).imaginary.asInstanceOf[NonNullSpaceVector] // TODO: don't cast
+      (this × Quaternion(__0, vector) × conjugate).imaginary.asInstanceOf[NonNullSpaceVector] // TODO: don't cast
 
     def rotate(vector: SpaceVector): SpaceVector =
       vector match
@@ -101,6 +101,7 @@ trait H[T: Numeric : Precision]
 
 
   object Quaternion:
+    
     def apply(real: T,
               imaginary: SpaceVector): Quaternion =
       new Quaternion(real, imaginary.x, imaginary.y, imaginary.z)
@@ -126,8 +127,8 @@ trait H[T: Numeric : Precision]
       fromRotationVectorAndAngle(axis.normalized, angle)
 
 
-    val Zero = Quaternion(_0, _0, _0, _0)
-    val One = Quaternion(__1, _0, _0, _0)
-    val I = Quaternion(_0, __1, _0, _0)
-    val J = Quaternion(_0, _0, __1, _0)
-    val K = Quaternion(_0, _0, _0, __1)
+    val Zero = Quaternion(__0, __0, __0, __0)
+    val One = Quaternion(__1, __0, __0, __0)
+    val I = Quaternion(__0, __1, __0, __0)
+    val J = Quaternion(__0, __0, __1, __0)
+    val K = Quaternion(__0, __0, __0, __1)

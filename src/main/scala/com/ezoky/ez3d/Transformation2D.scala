@@ -65,7 +65,7 @@ trait Transformation2D[T: Numeric : Trig : Precision]
     val One = HVector2D(__1, __1, __1)
   
 
-  extension (o: Object2D)
+  extension (o: PlaneObject)
     def homogeneous: HVector2D =
       o match
         case p: PlanePoint =>
@@ -84,7 +84,7 @@ trait Transformation2D[T: Numeric : Trig : Precision]
     /**
      * the trailling colon is to enforce right associativity (only operators
      * ending with a colon are right associative in scala) required by
-     * Column mqjor convention.
+     * Column major convention.
      */
     @targetName("times")
     infix def ×:(m: Matrix2D): Matrix2D =

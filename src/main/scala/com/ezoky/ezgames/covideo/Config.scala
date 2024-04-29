@@ -12,7 +12,7 @@ import spire.math.*
 object Config:
 
   val AreaWidth = 800
-  val AreaHeight = 400
+  val AreaHeight = 800
   val AreaDepth = 800
 
   val NearDistance = 1500
@@ -22,7 +22,7 @@ object Config:
   val Area =
     AreaConfig(
       AreaWidth size,
-      xGeometry = Geometry.Bounded,
+      xGeometry = Geometry.Toric,
       AreaHeight size,
       yGeometry = Geometry.Bounded,
       AreaDepth size,
@@ -40,7 +40,7 @@ object Config:
   val Scene =
     SceneConfig(
       name = "COVIDEO",
-      sceneSize = ScreenDimension(width = 1000 px, height = 1000 px), // DefaultScreenSize
+      sceneSize = ScreenDimension(width = 800 px, height = 800 px), // DefaultScreenSize
       //      sceneSize = DefaultScreenSize, //ScreenDimension(width = AreaWidth px, height = AreaHeight px), // DefaultScreenSize
       //      margin = Margin(top = 100 px, left = 100 px, bottom = 100 px, right = 100 px),
       zoomRatio = 1.0, // not used in 3D
@@ -70,15 +70,28 @@ object Config:
       populationSize = PopulationSize,
       Person, World
     )
+
+  // Control Config
   val GameControl =
     GameControlConfig(exitChar = 'x')
   val CameraControl =
     CameraControlConfig(10, 10, 10, 10)
+  val ViewFrustumControl =
+    ViewFrustumControlConfig(
+      minNear = 1,
+      maxNear = 2 * Camera.far,
+      minFar = 1,
+      maxFar = 2 * Camera.far,
+      initialNear = Camera.near,
+      initialFar = Camera.far
+    )
   val UserControl =
     UserControlConfig(
       GameControl,
-      CameraControl
+      CameraControl,
+      ViewFrustumControl
     )
+
   val Loop =
     GameLoopConfig(
       fps = 60

@@ -25,7 +25,7 @@ trait Space[T: Numeric : Precision]:
   private val __0: T = _SpatialNumeric.zero
   private val __1: T = _SpatialNumeric.one // double '_' to avoid conflict with Product<X>._1
 
-  type Object3D = SpacePoint | SpaceVector
+  type SpaceObject = SpacePoint | SpaceVector
 
   sealed trait Axis:
     def base: NonNullSpaceVector
@@ -100,6 +100,9 @@ trait Space[T: Numeric : Precision]:
 
     final def dest(origin: SpacePoint = SpacePoint.Origin): SpacePoint =
       SpacePoint(origin.x + x, origin.y + y, origin.z + z)
+      
+    final def origin(dest: SpacePoint): SpacePoint =
+      SpacePoint(dest.x - x, dest.y - y, dest.z - z)
 
     def unary_- : SpaceVector
 
@@ -360,13 +363,13 @@ trait Space[T: Numeric : Precision]:
     override def toString: String =
       s"Basis($i, $j, $k)"
 
-  trait NormalizedBasis extends Basis :
+  sealed trait NormalizedBasis extends Basis :
 
     override lazy val normalized: NormalizedBasis =
       this
 
 
-  trait OrthogonalBasis extends Basis :
+  sealed trait OrthogonalBasis extends Basis :
     self =>
 
     override lazy val normalized: OrthonormalBasis =
@@ -375,7 +378,7 @@ trait Space[T: Numeric : Precision]:
         override val j: NonNullSpaceVector = self.j.normalized
         override val k: NonNullSpaceVector = self.k.normalized
 
-  trait OrthonormalBasis extends OrthogonalBasis with NormalizedBasis :
+  sealed trait OrthonormalBasis extends OrthogonalBasis with NormalizedBasis :
 
     override lazy val normalized: OrthonormalBasis =
       this

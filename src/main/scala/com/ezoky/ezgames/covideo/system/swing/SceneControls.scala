@@ -6,7 +6,8 @@
 package com.ezoky.ezgames.covideo.system.swing
 
 import com.ezoky.ezgames.covideo.component.{Dimension, Identifiable}
-import com.ezoky.ezgames.covideo.system.Displays
+import com.ezoky.ezgames.covideo.system.{Displays, ControlModel, ControlledItem}
+
 
 /**
  * @since 0.2.0
@@ -33,7 +34,7 @@ trait SceneControls[I: Identifiable, D: Dimension]
       subscribersToUpdate = Callback(notifyMethod) :: subscribersToUpdate
 
     private[swing] def getControl(controlledItem: ControlledItem): controlledItem.ItemControlType =
-      model.control(controlledItem)
+      model.getControl(controlledItem)
 
     private[swing] def updateControl(controlledItem: ControlledItem,
                                      update: controlledItem.ItemControlType => controlledItem.ItemControlType): Unit =
@@ -50,6 +51,10 @@ trait SceneControls[I: Identifiable, D: Dimension]
         subscribersToUpdate.foreach(_.notifySubscriber)
 
 
+  /**
+   * Game specific
+   * TODO: extract this to a specific package
+   */
   object SceneControl
     extends SceneControl(ControlModel(
       GameControl(),

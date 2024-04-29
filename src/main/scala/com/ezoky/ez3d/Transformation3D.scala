@@ -47,7 +47,7 @@ trait Transformation3D[T: Numeric : Trig : Precision]
         x * m.x02 + y * m.x12 + z * m.x22 + w * m.x32,
         x * m.x03 + y * m.x13 + z * m.x23 + w * m.x33
       )
-    
+
     override def equals(obj: Any): Boolean =
       obj match
         case that: HVector3D if (that != null) =>
@@ -69,12 +69,12 @@ trait Transformation3D[T: Numeric : Trig : Precision]
     val One = HVector3D(__1, __1, __1, __1)
 
 
-  extension (o: Object3D)
+  extension (o: SpaceObject)
     def homogeneous: HVector3D =
       o match
         case p: SpacePoint =>
           HVector3D.point(p)
-        case v:SpaceVector =>
+        case v: SpaceVector =>
           HVector3D.vector(v)
 
   /**
@@ -114,27 +114,27 @@ trait Transformation3D[T: Numeric : Trig : Precision]
         y32 = x30 * m.x02 + x31 * m.x12 + x32 * m.x22 + x33 * m.x32,
         y33 = x30 * m.x03 + x31 * m.x13 + x32 * m.x23 + x33 * m.x33
       )
-//      Matrix(
-//        y00 = x00 * m.x00 + x10 * m.x01 + x20 * m.x02 + x30 * m.x03,
-//        y01 = x00 * m.x10 + x10 * m.x11 + x20 * m.x12 + x30 * m.x13,
-//        y02 = x00 * m.x20 + x10 * m.x21 + x20 * m.x22 + x30 * m.x23,
-//        y03 = x00 * m.x30 + x10 * m.x31 + x20 * m.x32 + x30 * m.x33,
-//
-//        y10 = x01 * m.x00 + x11 * m.x01 + x21 * m.x02 + x31 * m.x03,
-//        y11 = x01 * m.x10 + x11 * m.x11 + x21 * m.x12 + x31 * m.x13,
-//        y12 = x01 * m.x20 + x11 * m.x21 + x21 * m.x22 + x31 * m.x23,
-//        y13 = x01 * m.x30 + x11 * m.x31 + x21 * m.x32 + x31 * m.x33,
-//
-//        y20 = x02 * m.x00 + x12 * m.x01 + x22 * m.x02 + x32 * m.x03,
-//        y21 = x02 * m.x10 + x12 * m.x11 + x22 * m.x12 + x32 * m.x13,
-//        y22 = x02 * m.x20 + x12 * m.x21 + x22 * m.x22 + x32 * m.x23,
-//        y23 = x02 * m.x30 + x12 * m.x31 + x22 * m.x32 + x32 * m.x33,
-//
-//        y30 = x03 * m.x00 + x13 * m.x01 + x23 * m.x02 + x33 * m.x03,
-//        y31 = x03 * m.x10 + x13 * m.x11 + x23 * m.x12 + x33 * m.x13,
-//        y32 = x03 * m.x20 + x13 * m.x21 + x23 * m.x22 + x33 * m.x23,
-//        y33 = x03 * m.x30 + x13 * m.x31 + x23 * m.x32 + x33 * m.x33
-//      ).transpose
+    //      Matrix(
+    //        y00 = x00 * m.x00 + x10 * m.x01 + x20 * m.x02 + x30 * m.x03,
+    //        y01 = x00 * m.x10 + x10 * m.x11 + x20 * m.x12 + x30 * m.x13,
+    //        y02 = x00 * m.x20 + x10 * m.x21 + x20 * m.x22 + x30 * m.x23,
+    //        y03 = x00 * m.x30 + x10 * m.x31 + x20 * m.x32 + x30 * m.x33,
+    //
+    //        y10 = x01 * m.x00 + x11 * m.x01 + x21 * m.x02 + x31 * m.x03,
+    //        y11 = x01 * m.x10 + x11 * m.x11 + x21 * m.x12 + x31 * m.x13,
+    //        y12 = x01 * m.x20 + x11 * m.x21 + x21 * m.x22 + x31 * m.x23,
+    //        y13 = x01 * m.x30 + x11 * m.x31 + x21 * m.x32 + x31 * m.x33,
+    //
+    //        y20 = x02 * m.x00 + x12 * m.x01 + x22 * m.x02 + x32 * m.x03,
+    //        y21 = x02 * m.x10 + x12 * m.x11 + x22 * m.x12 + x32 * m.x13,
+    //        y22 = x02 * m.x20 + x12 * m.x21 + x22 * m.x22 + x32 * m.x23,
+    //        y23 = x02 * m.x30 + x12 * m.x31 + x22 * m.x32 + x32 * m.x33,
+    //
+    //        y30 = x03 * m.x00 + x13 * m.x01 + x23 * m.x02 + x33 * m.x03,
+    //        y31 = x03 * m.x10 + x13 * m.x11 + x23 * m.x12 + x33 * m.x13,
+    //        y32 = x03 * m.x20 + x13 * m.x21 + x23 * m.x22 + x33 * m.x23,
+    //        y33 = x03 * m.x30 + x13 * m.x31 + x23 * m.x32 + x33 * m.x33
+    //      ).transpose
 
     @targetName("add")
     infix def +(m: Matrix): Matrix =
@@ -191,14 +191,14 @@ trait Transformation3D[T: Numeric : Trig : Precision]
         y32 = x23,
         y33 = x33
       )
-      
+
     lazy val determinant: T =
-        x03*x12*x21*x30 - x02*x13*x21*x30 - x03*x11*x22*x30 + x01*x13*x22*x30+
-        x02*x11*x23*x30 - x01*x12*x23*x30 - x03*x12*x20*x31 + x02*x13*x20*x31+
-        x03*x10*x22*x31 - x00*x13*x22*x31 - x02*x10*x23*x31 + x00*x12*x23*x31+
-        x03*x11*x20*x32 - x01*x13*x20*x32 - x03*x10*x21*x32 + x00*x13*x21*x32+
-        x01*x10*x23*x32 - x00*x11*x23*x32 - x02*x11*x20*x33 + x01*x12*x20*x33+
-        x02*x10*x21*x33 - x00*x12*x21*x33 - x01*x10*x22*x33 + x00*x11*x22*x33
+      x03 * x12 * x21 * x30 - x02 * x13 * x21 * x30 - x03 * x11 * x22 * x30 + x01 * x13 * x22 * x30 +
+        x02 * x11 * x23 * x30 - x01 * x12 * x23 * x30 - x03 * x12 * x20 * x31 + x02 * x13 * x20 * x31 +
+        x03 * x10 * x22 * x31 - x00 * x13 * x22 * x31 - x02 * x10 * x23 * x31 + x00 * x12 * x23 * x31 +
+        x03 * x11 * x20 * x32 - x01 * x13 * x20 * x32 - x03 * x10 * x21 * x32 + x00 * x13 * x21 * x32 +
+        x01 * x10 * x23 * x32 - x00 * x11 * x23 * x32 - x02 * x11 * x20 * x33 + x01 * x12 * x20 * x33 +
+        x02 * x10 * x21 * x33 - x00 * x12 * x21 * x33 - x01 * x10 * x22 * x33 + x00 * x11 * x22 * x33
 
     /**
      * Should be overriden when simplifications are possible
@@ -223,34 +223,34 @@ trait Transformation3D[T: Numeric : Trig : Precision]
         y33 = x01 * x12 * x20 - x02 * x11 * x20 + x02 * x10 * x21 - x00 * x12 * x21 - x01 * x10 * x22 + x00 * x11 * x22
       ) / determinant
 
-    final infix def /(s:T): Option[Matrix] =
+    final infix def /(s: T): Option[Matrix] =
       if s == 0 then
         None
       else
-       Some(
-         Matrix(
-          y00 = x00 / s,
-          y01 = x10 / s,
-          y02 = x20 / s,
-          y03 = x30 / s,
+        Some(
+          Matrix(
+            y00 = x00 / s,
+            y01 = x10 / s,
+            y02 = x20 / s,
+            y03 = x30 / s,
 
-          y10 = x01 / s,
-          y11 = x11 / s,
-          y12 = x21 / s,
-          y13 = x31 / s,
+            y10 = x01 / s,
+            y11 = x11 / s,
+            y12 = x21 / s,
+            y13 = x31 / s,
 
-          y20 = x02 / s,
-          y21 = x12 / s,
-          y22 = x22 / s,
-          y23 = x32 / s,
+            y20 = x02 / s,
+            y21 = x12 / s,
+            y22 = x22 / s,
+            y23 = x32 / s,
 
-          y30 = x03 / s,
-          y31 = x13 / s,
-          y32 = x23 / s,
-          y33 = x33 / s
+            y30 = x03 / s,
+            y31 = x13 / s,
+            y32 = x23 / s,
+            y33 = x33 / s
+          )
         )
-       )
-        
+
     final override def equals(obj: Any): Boolean =
       obj match
         case that: Matrix if (that != null) =>
@@ -275,12 +275,12 @@ trait Transformation3D[T: Numeric : Trig : Precision]
             (this.x33 ~= that.x33)
         case _ =>
           false
-    
+
     override def toString: String =
       s"""$x00, $x01, $x02, $x03
          |$x10, $x11, $x12, $x13
          |$x20, $x21, $x22, $x23
-         |$x30, $x31, $x32, $x33""".stripMargin 
+         |$x30, $x31, $x32, $x33""".stripMargin
 
   object Matrix:
     def apply(y00: T, y01: T, y02: T, y03: T,
@@ -337,10 +337,10 @@ trait Transformation3D[T: Numeric : Trig : Precision]
 
     val Identity =
       diagonal(__1, __1, __1, __1)
-  
-  
+
+
   extension (matrix: Matrix)
-  
+
     def apply(point: SpacePoint): Option[SpacePoint] =
       (matrix × point.homogeneous).cartesian
 
@@ -351,10 +351,10 @@ trait Transformation3D[T: Numeric : Trig : Precision]
       yield
         Segment(s, t)
 
-  
+
   // Some 2D transformations
 
-  trait AffineTransformation extends Matrix :
+  trait AffineTransformation extends Matrix:
     final override val x30: T = _0
     final override val x31: T = _0
     final override val x32: T = _0
@@ -389,7 +389,7 @@ trait Transformation3D[T: Numeric : Trig : Precision]
       )
 
   case class Homothety(ratio: T)
-    extends AffineTransformation :
+    extends AffineTransformation:
     override val x00 = ratio
     override val x01 = _0
     override val x02 = _0
@@ -412,7 +412,7 @@ trait Transformation3D[T: Numeric : Trig : Precision]
         Some(Homothety(_1 / ratio))
 
   case class Scaling3D(ratio: SpaceVector)
-    extends AffineTransformation :
+    extends AffineTransformation:
     override val x00 = ratio.x
     override val x01 = _0
     override val x02 = _0
@@ -437,7 +437,7 @@ trait Transformation3D[T: Numeric : Trig : Precision]
 
 
   case class Translation3D(vector: SpaceVector)
-    extends AffineTransformation :
+    extends AffineTransformation:
     override val x00 = __1
     override val x01 = _0
     override val x02 = _0
@@ -461,7 +461,7 @@ trait Transformation3D[T: Numeric : Trig : Precision]
 
 
   case class StandardPerspectiveProjection private(planeDistance: T)
-    extends Matrix :
+    extends Matrix:
     override val x00 = __1
     override val x01 = _0
     override val x02 = _0
@@ -565,7 +565,7 @@ trait Transformation3D[T: Numeric : Trig : Precision]
       val x = q.b
       val y = q.c
       val z = q.d
-      new AxisRotation :
+      new AxisRotation:
         override val angle: Radians = q.rotationAngle
 
         override val x00 = __1 - __2 * y * y - __2 * z * z
@@ -577,17 +577,17 @@ trait Transformation3D[T: Numeric : Trig : Precision]
         override val x12 = __2 * y * z - __2 * w * x
 
         override val x20 = __2 * z * x - __2 * w * y
-//        override val x21 = __2 * z * y - __2 * w * x
+        //        override val x21 = __2 * z * y - __2 * w * x
         override val x21 = __2 * z * y + __2 * w * x
         override val x22 = __1 - __2 * x * x - __2 * y * y
 
 
   trait BaseAxisRotation
-    extends AxisRotation :
+    extends AxisRotation:
     val axis: Axis
 
   case class OxRotation(angle: Radians)
-    extends BaseAxisRotation :
+    extends BaseAxisRotation:
     override val axis: Axis = Axis.X
 
     override val x00 = __1
@@ -603,7 +603,7 @@ trait Transformation3D[T: Numeric : Trig : Precision]
     override val x22 = cos(angle)
 
   case class OyRotation(angle: Radians)
-    extends BaseAxisRotation :
+    extends BaseAxisRotation:
     override val axis: Axis = Axis.Y
 
     override val x00 = cos(angle)
@@ -619,7 +619,7 @@ trait Transformation3D[T: Numeric : Trig : Precision]
     override val x22 = cos(angle)
 
   case class OzRotation(angle: Radians)
-    extends BaseAxisRotation :
+    extends BaseAxisRotation:
     override val axis: Axis = Axis.Z
 
     override val x00 = cos(angle)

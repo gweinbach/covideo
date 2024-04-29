@@ -5,7 +5,7 @@ import com.ezoky.ezcategory.IO
 import com.ezoky.ezgames.covideo.component.swing.SwingSprites
 import com.ezoky.ezgames.covideo.component.{Dimension, HealthCondition, Identifiable, Sprites}
 import com.ezoky.ezgames.covideo.entity.{Entities, Scenes, given}
-import com.ezoky.ezgames.covideo.system.Displays
+import com.ezoky.ezgames.covideo.system.{Displays, LifeCycleEvent, ControlledItem, ControlModel}
 
 /**
  * @author gweinbach on 14/05/2022 12:29
@@ -44,15 +44,26 @@ trait SwingDisplaySystems[I: Identifiable, D: Dimension]
         SceneControl.updateModel(model)
       }
 
-    override def displayControl(): IO[Unit] =
+    override def displayControls(): IO[Unit] =
       IO {
-        ControlWindow().display()
+        val controlWindow = ControlWindow()
+        if !controlWindow.isVisible then
+          given ViewFrustumControlConfig = userControlConfig.viewFrustumConfig
+          SceneControl.updateControl(ControlledItem.ViewFrustum, _.control(LifeCycleEvent.DisplayControls))
+
+          controlWindow.display()
       }
 
     override def displayScene(scene: Scene): IO[Unit] =
       IO {
-        // side effects, not pure
         val sceneWindow = SceneWindow(scene.id, userControlConfig)
+        if !sceneWindow.isVisible then
+          given ViewFrustumControlConfig = userControlConfig.viewFrustumConfig
+          SceneControl.updateControl(ControlledItem.ViewFrustum, _.control(LifeCycleEvent.DisplayScene))
+
+          sceneWindow.display()
+          
+        // side effects, not pure
         sceneWindow.updateTitle(scene.name)
         sceneWindow.resizeScene(scene.preferredDimension)
         sceneWindow.draw(scene)
@@ -61,7 +72,13 @@ trait SwingDisplaySystems[I: Identifiable, D: Dimension]
     override def dispose(doDispose: Boolean): IO[Unit] =
       IO {
         if doDispose then
+
+          given ViewFrustumControlConfig = userControlConfig.viewFrustumConfig
+
+          SceneControl.updateControl(ControlledItem.ViewFrustum, _.control(LifeCycleEvent.DisposeControls))
           ControlWindow().dispose()
+
+          SceneControl.updateControl(ControlledItem.ViewFrustum, _.control(LifeCycleEvent.DisplayScene))
           SceneWindow.all().map(_.dispose())
       }
 

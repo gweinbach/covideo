@@ -54,9 +54,7 @@ trait SceneWindows[I: Identifiable, D: Dimension]
 
     private val panel: DrawingPanel = new DrawingPanel()
     private var panelSize: AWTDimension = new AWTDimension()
-
-    display()
-
+    
     def resizeScene(size: ScreenDimension): Unit = {
       val awtSize = size.awtDimension
       if (awtSize != panelSize)
@@ -73,7 +71,7 @@ trait SceneWindows[I: Identifiable, D: Dimension]
     def draw(scene: Scene): Unit =
       panel.updateScene(scene)
 
-    private def display(): Unit =
+    def display(): Unit =
       if !panelSize.isNull then
         panel.setPreferredSize(panelSize)
 
@@ -100,7 +98,7 @@ trait SceneWindows[I: Identifiable, D: Dimension]
         _SceneWindows.addOne(sceneId, mainWindow)
         mainWindow
       })
-      
+
     def all(): Iterable[SceneWindow] =
       _SceneWindows.values
 

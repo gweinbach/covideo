@@ -24,7 +24,7 @@ class CamerasTest extends AnyFlatSpec :
 
   import projection3D.*
 
-  "View Frustrum" can "define plane projection of a volume of space" in {
+  "View Frustum" can "define plane projection of a volume of space" in {
     //    val perspectiveViewFrustum =
     //      Perspective.ViewFrustum.fromFieldOfView(10.0, 50.0, 1.0, 90.0 degrees).get
     val perspectiveViewFrustum =

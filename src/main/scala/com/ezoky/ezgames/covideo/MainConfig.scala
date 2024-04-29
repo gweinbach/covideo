@@ -35,12 +35,11 @@ import com.ezoky.ezgames.covideo.MainConfig.{*, given}
 @main def main: Unit =
   println(msg)
 
-
   val generator = new RandomGenerator()
   val game = GameBuilder(Config.Game).build
 
   new GameLoop(game, step, generator, Config.Loop).start()
-
+  
 
 def step(game: Generated[Game]): Generated[IO[Game]] =
   for

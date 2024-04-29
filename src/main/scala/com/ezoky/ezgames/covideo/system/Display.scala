@@ -41,7 +41,7 @@ trait Displays[I: Identifiable, D: Dimension : Numeric]
     // Generic
     def defaultScreenSceneDimension: ScreenDimension
 
-    def displayControl(): IO[Unit]
+    def displayControls(): IO[Unit]
 
     def popControlModel(item: ControlledItem): IO[ControlModel]
 
@@ -51,7 +51,10 @@ trait Displays[I: Identifiable, D: Dimension : Numeric]
 
     def dispose(doDispose: Boolean): IO[Unit]
 
-    // Game specific
+    /**
+     * Game specific
+     * TODO: extract this to a specific package
+     */
     def spriteByHealthCondition(healthCondition: HealthCondition): Sprite
 
 
@@ -64,23 +67,23 @@ trait Displays[I: Identifiable, D: Dimension : Numeric]
               IO(viewFrustum)
             else
               val viewFrustumWithNear =
-                if controlModel.control(ControlledItem.ViewFrustum).updatedNear then
-                  viewFrustum.withNear(controlModel.control(ControlledItem.ViewFrustum).near)
+                if controlModel.getControl(ControlledItem.ViewFrustum).updatedNear then
+                  viewFrustum.withNear(controlModel.getControl(ControlledItem.ViewFrustum).near)
                 else
                   viewFrustum
               val controlModelWithNear =
-                if controlModel.control(ControlledItem.ViewFrustum).updatedNear then
+                if controlModel.getControl(ControlledItem.ViewFrustum).updatedNear then
                   controlModel.updateControl(ControlledItem.ViewFrustum, _.withNear(viewFrustumWithNear.near).withFar(viewFrustumWithNear.far))
                 else
                   controlModel
 
               val viewFrustumWithFar =
-                if controlModel.control(ControlledItem.ViewFrustum).updatedFar then
-                  viewFrustumWithNear.withFar(controlModelWithNear.control(ControlledItem.ViewFrustum).far)
+                if controlModel.getControl(ControlledItem.ViewFrustum).updatedFar then
+                  viewFrustumWithNear.withFar(controlModelWithNear.getControl(ControlledItem.ViewFrustum).far)
                 else
                   viewFrustumWithNear
               val controlModelWithFar =
-                if controlModel.control(ControlledItem.ViewFrustum).updatedFar then
+                if controlModel.getControl(ControlledItem.ViewFrustum).updatedFar then
                   controlModelWithNear.updateControl(ControlledItem.ViewFrustum, _.withFar(viewFrustumWithFar.far).withNear(viewFrustumWithFar.near))
                 else
                   controlModelWithNear
@@ -93,7 +96,7 @@ trait Displays[I: Identifiable, D: Dimension : Numeric]
       override def display: IO[Camera] =
         for
           controlModel <- summon[DisplaySystem].popControlModel(ControlledItem.Camera)
-          cameraControl = controlModel.control(ControlledItem.Camera)
+          cameraControl = controlModel.getControl(ControlledItem.Camera)
           movedCamera = camera.move(cameraControl.dx, cameraControl.dy)
           displayedViewFrustum <- movedCamera.viewFrustum.display
         yield
@@ -116,7 +119,7 @@ trait Displays[I: Identifiable, D: Dimension : Numeric]
 
           // side effects
           _ <- displaySystem.displayScene(displayedScene)
-          _ <- displaySystem.displayControl()
+          _ <- displaySystem.displayControls()
         yield
           world.withScene(displayedScene)
 
@@ -127,7 +130,7 @@ trait Displays[I: Identifiable, D: Dimension : Numeric]
         val displaySystem = summon[DisplaySystem]
         for
           controlModel <- displaySystem.popControlModel(ControlledItem.Game)
-          gameControl = controlModel.control(ControlledItem.Game)
+          gameControl = controlModel.getControl(ControlledItem.Game)
           controlledGame = if gameControl.doExit then
             game.terminate()
           else
@@ -143,76 +146,5 @@ trait Displays[I: Identifiable, D: Dimension : Numeric]
             displayedWorld
           )
 
-  sealed trait ControlledItem:
-    type ItemControlType <: ItemControl
-
-  object ControlledItem:
-    case object Game extends ControlledItem:
-      override type ItemControlType = GameControl
-
-    case object ViewFrustum extends ControlledItem:
-      override type ItemControlType = ViewFrustumControl
-
-    case object Camera extends ControlledItem:
-      override type ItemControlType = CameraControl
-
-
-  private class Controller(val controlledItem: ControlledItem,
-                           val itemControl: controlledItem.ItemControlType,
-                           val updatedControl: Boolean = true):
-
-    def updateItem(newItemControl: controlledItem.ItemControlType): Controller =
-      new Controller(controlledItem, newItemControl, updatedControl = true)
-
-    def ackowledgeUpdates(): Controller =
-      new Controller(controlledItem, itemControl.ackowledgeUpdates().asInstanceOf[controlledItem.ItemControlType], updatedControl = false)
-
-
-  case class ControlModel private(private val controllers: Map[ControlledItem, Controller]):
-
-    def control(controlledItem: ControlledItem): controlledItem.ItemControlType =
-      controllers.apply(controlledItem).itemControl.asInstanceOf[controlledItem.ItemControlType]
-
-    def isUpdated(controlledItem: ControlledItem): Boolean =
-      controllers.apply(controlledItem).updatedControl
-
-    def withControl(controlledItem: ControlledItem,
-                    itemControl: controlledItem.ItemControlType): ControlModel =
-      controllers.get(controlledItem) match
-        case Some(controller) if !controller.itemControl.equalsState(itemControl) =>
-          copy(controllers = controllers + (controlledItem -> controller.updateItem(itemControl.asInstanceOf[controller.controlledItem.ItemControlType])))
-        case None =>
-          copy(controllers = controllers + (controlledItem -> Controller(controlledItem, itemControl)))
-        case _ =>
-          this
-
-    def updateControl(controlledItem: ControlledItem,
-                      update: controlledItem.ItemControlType => controlledItem.ItemControlType): ControlModel =
-      withControl(controlledItem, update(control(controlledItem)))
-
-    def acknowledgeUpdates(controlledItem: ControlledItem): ControlModel =
-      val controller = controllers.apply(controlledItem)
-      copy(controllers = controllers + (controlledItem -> controller.ackowledgeUpdates()))
-
-    def equalsState(that: ControlModel): Boolean =
-      controllers.foldLeft(true) {
-        case (eq, (controlledItem, controller)) =>
-          that.controllers.get(controlledItem).fold(false)(
-            thatController =>
-              eq && controller.itemControl.equalsState(thatController.itemControl)
-          )
-      }
-
-  object ControlModel:
-    def apply(game: GameControl,
-              viewFrustum: ViewFrustumControl,
-              camera: CameraControl): ControlModel =
-      new ControlModel(
-        Map(
-          ControlledItem.Game -> Controller(ControlledItem.Game, game),
-          ControlledItem.ViewFrustum -> Controller(ControlledItem.ViewFrustum, viewFrustum),
-          ControlledItem.Camera -> Controller(ControlledItem.Camera, camera)
-        )
-      )
 
 

@@ -18,10 +18,10 @@ trait Plane[T: Numeric : Precision]:
 
   private val _Numeric = summon[Numeric[T]]
 
-  private val _0: T = _Numeric.zero
+  private val __0: T = _Numeric.zero
   private val __1: T = _Numeric.one // double '_' to avoid conflict with Product<X>._1
 
-  type Object2D = PlanePoint | PlaneVector
+  type PlaneObject = PlanePoint | PlaneVector
 
   case class PlanePoint(x: T,
                         y: T):
@@ -36,9 +36,9 @@ trait Plane[T: Numeric : Precision]:
 
   object PlanePoint:
 
-    val Origin: PlanePoint = PlanePoint(_0, _0)
-    val OneX: PlanePoint = PlanePoint(__1, _0)
-    val OneY: PlanePoint = PlanePoint(_0, __1)
+    val Origin: PlanePoint = PlanePoint(__0, __0)
+    val OneX: PlanePoint = PlanePoint(__1, __0)
+    val OneY: PlanePoint = PlanePoint(__0, __1)
 
   sealed trait PlaneVector:
     val x: T
@@ -61,13 +61,16 @@ trait Plane[T: Numeric : Precision]:
 
     final def dest(origin: PlanePoint = PlanePoint.Origin): PlanePoint =
       PlanePoint(origin.x + x, origin.y + y)
+      
+    final def origin(dest: PlanePoint): PlanePoint =
+      PlanePoint(dest.x - x, dest.y - y)
 
     def unary_- : PlaneVector
 
     infix def isColinear(v: PlaneVector): Boolean
 
     infix def isOrthogonal(v: PlaneVector): Boolean =
-      this ⋅ v ~= _0
+      this ⋅ v ~= __0
 
     lazy val inverse: Option[PlaneVector]
 
@@ -97,8 +100,8 @@ trait Plane[T: Numeric : Precision]:
 
   case object NullPlaneVector
     extends PlaneVector :
-    override val x: T = _0
-    override val y: T = _0
+    override val x: T = __0
+    override val y: T = __0
 
     override def unary_- = NullPlaneVector
 
@@ -132,13 +135,13 @@ trait Plane[T: Numeric : Precision]:
       NullPlaneVector
 
     override def /(n: T): Option[NullPlaneVector.type] =
-      if n ~= _0 then
+      if n ~= __0 then
         None
       else
         Some(NullPlaneVector)
 
     override infix def ⋅(v: PlaneVector): T =
-      _0
+      __0
 
 
   case class NonNullPlaneVector private(x: T,
@@ -155,7 +158,7 @@ trait Plane[T: Numeric : Precision]:
       x * v.y ~= y * v.x
 
     override lazy val inverse: Option[NonNullPlaneVector] =
-      if (x ~= _0) || (y ~= _0) then
+      if (x ~= __0) || (y ~= __0) then
         None
       else
         Some(NonNullPlaneVector(__1 / x, __1 / y))
@@ -164,7 +167,7 @@ trait Plane[T: Numeric : Precision]:
       NonNullPlaneVector(-y, x)
 
     override def *(n: T): PlaneVector =
-      if n ~= _0 then
+      if n ~= __0 then
         NullPlaneVector
       else
         NonNullPlaneVector(
@@ -179,7 +182,7 @@ trait Plane[T: Numeric : Precision]:
       )
 
     override final def /(n: T): Option[NonNullPlaneVector] =
-      if n ~= _0 then
+      if n ~= __0 then
         None
       else
         Some(
@@ -188,11 +191,11 @@ trait Plane[T: Numeric : Precision]:
 
 
   object NonNullPlaneVector:
-    val OneX = NonNullPlaneVector(__1, _0)
-    val OneY = NonNullPlaneVector(_0, __1)
+    val OneX = NonNullPlaneVector(__1, __0)
+    val OneY = NonNullPlaneVector(__0, __1)
 
     inline def isNullTuple(x: T, y: T): Boolean =
-      (x ~= _0) && (y ~= _0)
+      (x ~= __0) && (y ~= __0)
 
     inline def safe(x: T,
                     y: T): Option[NonNullPlaneVector] =
@@ -203,13 +206,13 @@ trait Plane[T: Numeric : Precision]:
 
 //    def nonNull(magnitude: T,
 //                axis: Axis): Option[NonNullPlaneVector] =
-//      if magnitude ~= _0 then
+//      if magnitude ~= __0 then
 //        None
 //      else
 //        Some(
 //          axis match
-//            case Axis.X => NonNullPlaneVector(magnitude, _0)
-//            case Axis.Y => NonNullPlaneVector(_0, magnitude)
+//            case Axis.X => NonNullPlaneVector(magnitude, __0)
+//            case Axis.Y => NonNullPlaneVector(__0, magnitude)
 //        )
 
 
@@ -272,7 +275,7 @@ trait Plane[T: Numeric : Precision]:
 //      PlaneVector(-x, -y)
 //
 //    lazy val inverse: Option[PlaneVector] =
-//      if (x ~= _0) || (y ~= _0) then
+//      if (x ~= __0) || (y ~= __0) then
 //        None
 //      else
 //        Some(PlaneVector(__1 / x, __1 / y))
@@ -287,9 +290,9 @@ trait Plane[T: Numeric : Precision]:
 //
 //  object PlaneVector:
 //
-//    val Null: PlaneVector = PlaneVector(_0, _0)
-//    val OneX: PlaneVector = PlaneVector(__1, _0)
-//    val OneY: PlaneVector = PlaneVector(_0, __1)
+//    val Null: PlaneVector = PlaneVector(__0, __0)
+//    val OneX: PlaneVector = PlaneVector(__1, __0)
+//    val OneY: PlaneVector = PlaneVector(__0, __1)
 //
 //    def apply(p1: PlanePoint,
 //              p2: PlanePoint): PlaneVector =

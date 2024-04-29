@@ -72,8 +72,7 @@ private case class SceneBuilder(sceneConfig: SceneConfig)
         displaySystem.defaultScreenSceneDimension
       case sceneSize: ScreenDimension =>
         sceneSize
-
-
+  
   override def build: Generated[Scene] =
     for
       camera <- CameraBuilder(sceneConfig.camera).build
@@ -97,7 +96,7 @@ case class CameraBuilder(cameraConfig: CameraConfig)
           Perspective
         case ProjectionType.Orthographic =>
           Orthographic
-
+    
     Generated.unit(
       projection.viewBoxFromTop(
         sceneDepth = cameraConfig.right * 2,
@@ -105,12 +104,6 @@ case class CameraBuilder(cameraConfig: CameraConfig)
         sceneWidth = cameraConfig.far - cameraConfig.near,
         cameraDistance = cameraConfig.near
       ).getOrElse(Camera.Default)
-      //        Orthographic.viewBoxFromTop(
-      //      sceneWidth = cameraConfig.right * 10,
-      //      sceneHeight = cameraConfig.top * 10,
-      //      sceneDepth = cameraConfig.far - cameraConfig.near,
-      //      cameraDistance = cameraConfig.near
-      //    ).getOrElse(Camera.Default)
     )
 
 
