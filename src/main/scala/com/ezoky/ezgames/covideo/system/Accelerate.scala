@@ -9,11 +9,16 @@ trait Accelerate[T]:
 trait Accelerates[I: Identifiable, D: Dimension]
   extends Games[I, D]:
 
+  given Accelerate[Population[Person]] with
+    extension (people: Population[Person]) 
+      override def accelerate: Population[Person] =
+        people.map(_.accelerate)
+        
   given Accelerate[Game] with
-    extension (entity: Game)
+    extension (game: Game)
       override def accelerate: Game =
-        entity.copy(
-          people = entity.people.map(_.accelerate)
+        game.withPeople(
+          game.people.accelerate
         )
 
 

@@ -4,7 +4,6 @@ import com.ezoky.ezcategory.IO
 import com.ezoky.ezgames.covideo.component.Generate.*
 
 import scala.annotation.tailrec
-
 import MainConfig.{*, given}
 import MainConfig.Everything.{*, given}
 
@@ -14,17 +13,10 @@ class GameLoop(initialGame: Generated[Game],
                gameStep: Generated[Game] => Generated[IO[Game]],
                seed: Generator,
                gameLoopConfig: GameLoopConfig):
-//  extends Runnable:
 
   val stepDurationInNanoseconds = GameLoop.NanosecondsInOneSecond / gameLoopConfig.fps
 
-//  private val _thread = new Thread(this)
-
   final def start(): Unit =
-//    if !_thread.isAlive then
-//      _thread.start()
-//
-//  def run(): Unit =
     val nextStep = System.nanoTime() + stepDurationInNanoseconds
     loop(initialGame, seed, nextStep)
 
@@ -33,9 +25,12 @@ class GameLoop(initialGame: Generated[Game],
                  generator: Generator,
                  nextStep: Long): Unit =
 
-    val generatedGame: Generated[IO[Game]] = gameStep(game)
-    val (ioGame, nextGen) = generatedGame(generator)
-    val nextGame = Generated(ioGame.unsafeRun())
+    // what should be done during next step of the game
+    val generatedIOGame: Generated[IO[Game]] = gameStep(game)
+
+    // Let's get out of the monads
+    val (ioGame: IO[Game], nextGen) = generatedIOGame(generator)
+    val nextGame: Generated[Game] = Generated(ioGame.unsafeRun())
 
     val (remainingMilliseconds, remainingNanoseconds) =
       val remainingNs = nextStep - System.nanoTime()

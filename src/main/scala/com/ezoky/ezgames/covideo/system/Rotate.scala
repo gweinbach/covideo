@@ -18,8 +18,13 @@ trait Rotates[I: Identifiable, D: Dimension]
   extends Games[I, D]:
 
   given Rotate[Game] with
-    extension (entity: Game)
+    extension (game: Game)
       override def rotate: Game =
-        entity.copy(
-          people = entity.people.map(_.rotate)
+        game.withPeople(
+          people = game.people.rotate
         )
+
+  given Rotate[Population[Person]] with
+    extension (people: Population[Person]) 
+      override def rotate: Population[Person] =
+        people.map(_.rotate)

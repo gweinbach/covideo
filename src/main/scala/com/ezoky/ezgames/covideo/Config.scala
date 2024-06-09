@@ -11,18 +11,22 @@ import spire.math.*
 
 object Config:
 
-  val AreaWidth = 800
-  val AreaHeight = 800
-  val AreaDepth = 800
+  // Area
+  private val AreaWidth = 800
+  private val AreaHeight = 800
+  private val AreaDepth = 800
 
-  val NearDistance = 1500
+  // Camera
+  private val NearDistance = 1500
+  private val CameraType = ProjectionType.Perspective
 
-  val PopulationSize = 100
+  // Population
+  private val PopulationSize = 100
 
   val Area =
     AreaConfig(
       AreaWidth size,
-      xGeometry = Geometry.Toric,
+      xGeometry = Geometry.Unbounded,
       AreaHeight size,
       yGeometry = Geometry.Bounded,
       AreaDepth size,
@@ -30,7 +34,7 @@ object Config:
     )
   val Camera =
     CameraConfig(
-      projectionType = ProjectionType.Perspective,
+      projectionType = CameraType,
       position = PlanePoint(AreaWidth / 2, AreaHeight / 2),
       near = NearDistance,
       far = NearDistance + AreaDepth,
@@ -40,7 +44,7 @@ object Config:
   val Scene =
     SceneConfig(
       name = "COVIDEO",
-      sceneSize = ScreenDimension(width = 800 px, height = 800 px), // DefaultScreenSize
+      sceneSize = ScreenDimension(width = 600 px, height = 600 px), // DefaultScreenSize
       //      sceneSize = DefaultScreenSize, //ScreenDimension(width = AreaWidth px, height = AreaHeight px), // DefaultScreenSize
       //      margin = Margin(top = 100 px, left = 100 px, bottom = 100 px, right = 100 px),
       zoomRatio = 1.0, // not used in 3D

@@ -37,9 +37,9 @@ trait Entities[I: Identifiable]:
     @targetName("populationSize")
     def number: Int =
       population.size
-
-    def values: Iterable[A] =
-      population.values
+    
+    def toSet: Set[A] =
+      population.values.toSet
 
     @targetName("add")
     infix def +(kv: (I, A)): Population[A] =

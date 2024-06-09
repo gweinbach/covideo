@@ -16,10 +16,15 @@ trait Move[T]:
 
 trait Moves[I: Identifiable, D: Dimension]
   extends Games[I, D]:
-  
+
+  given Move[Population[Person]] with
+    extension (people: Population[Person])
+      override def move: Population[Person] =
+        people.map(_.move)
+        
   given Move[Game] with
-    extension(entity: Game)
+    extension(game: Game)
       override def move: Game =
-        entity.copy(
-          people = entity.people.map(_.move)
+        game.withPeople(
+          game.people.move
         )

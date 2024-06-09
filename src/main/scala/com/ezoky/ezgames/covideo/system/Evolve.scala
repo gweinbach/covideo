@@ -27,7 +27,7 @@ trait Evolves[I: Identifiable, D: Dimension]
         yield
           mobile.turn(newAcceleration)
   
-  given (using Evolve[Mobile]): Evolve[Solid] with
+  given Evolve[Solid] with
     extension (generatedSolid: Generated[Solid])
       override def evolve: Generated[Solid] =
         for
@@ -38,8 +38,7 @@ trait Evolves[I: Identifiable, D: Dimension]
         yield
           solid.twirl(newAccelerationRange).withMobile(evolvedMobile)
   
-  
-  given (using Evolve[Solid]): Evolve[Person] with
+  given Evolve[Person] with
     extension (generatedPerson: Generated[Person])
       override def evolve: Generated[Person] =
         for
@@ -47,13 +46,22 @@ trait Evolves[I: Identifiable, D: Dimension]
           evolvedSolid <- Generated(person.solid).evolve
         yield
           person.withSolid(solid = evolvedSolid)
-  
-  given (using Evolve[Person]): Evolve[Game] with
+
+  given Evolve[Population[Person]] with
+    extension (generatedPeople: Generated[Population[Person]])
+      override def evolve: Generated[Population[Person]] =
+        for
+          people <- generatedPeople
+          evolvedPeople <- Generated.flatMapSet(people.toSet, _.evolve)
+        yield
+          Population(evolvedPeople)
+
+  given Evolve[Game] with
     extension (generatedGame: Generated[Game])
       override def evolve: Generated[Game] =
         for
           game <- generatedGame
-          evolvedPeople <- Generated.flatMapSet(game.people.values.toSet, _.evolve)
+          evolvedPeople <- Generated(game.people).evolve
 
           // We get all sprites
           sprites: Population[Sprite] = game.allViewables
@@ -64,5 +72,4 @@ trait Evolves[I: Identifiable, D: Dimension]
           evolvedWorld = game.world.withSprites(sprites).withComponents(components)
 
         yield
-          game.withPeople(people = Population(evolvedPeople)).withWorld(evolvedWorld)
-          
+          game.withPeople(evolvedPeople).withWorld(evolvedWorld)

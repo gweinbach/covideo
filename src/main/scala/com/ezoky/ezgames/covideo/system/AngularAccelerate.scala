@@ -8,10 +8,16 @@ trait AngularAccelerate[T]:
   
 trait AngularAccelerates[I: Identifiable, D: Dimension]
   extends Games[I, D]:
-  
+
+  given AngularAccelerate[Population[Person]] with
+    extension (people: Population[Person])
+      override def angularAccelerate: Population[Person] =
+        people.map(_.angularAccelerate)
+
   given AngularAccelerate[Game] with
-    extension (entity: Game)
+    extension (game: Game)
       override def angularAccelerate: Game =
-        entity.copy(
-          people = entity.people.map(_.angularAccelerate)
+        game.withPeople(
+          game.people.angularAccelerate
         )
+        
