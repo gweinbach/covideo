@@ -23,14 +23,3 @@ extension (rate: Rate)
     val numeric = summon[Numeric[N]]
     numeric.fromDouble(numeric.toDouble(n) * rate)
 
-//private trait RateT:
-//  private[component] val _RateNumeric = summon[Numeric[Double]]
-//
-//given Numeric[Rate] = new RateT{}._RateNumeric
-
-type DeathRate = Rate
-
-type BirthRate = Rate
-
-case class Demographies(birthRate: BirthRate = 0.0`‰`,
-                        deathRate: DeathRate = 0.0`‰`)
