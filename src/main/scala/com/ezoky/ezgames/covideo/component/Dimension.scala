@@ -9,12 +9,14 @@ import com.ezoky.ez3d.{Ez3D, given}
 import com.ezoky.eznumber.{Epsilon, Precision, ε, given}
 
 import scala.annotation.{tailrec, targetName}
+
 import spire.*
 import spire.algebra.{EuclideanRing, Order, Trig}
 import spire.implicits.*
 import spire.math.*
+import spire.math.Numeric.*
 
-import scala.math.Integral.Implicits.infixIntegralOps
+//import scala.math.Integral.Implicits.infixIntegralOps
 import scala.util.Random
 
 /**
@@ -31,11 +33,8 @@ abstract class Dimension[T: Precision: Numeric: Trig: Generated: Ez3D: Epsilon]:
   // rather use explicit conversion even if implicit one is private
   protected def _NumberToDimensionConverter[N: Numeric]: (N) => T
 
-//  private given [N: Numeric]: Conversion[N, _DimensionType] with
-//    def apply(n: N): _DimensionType = summon[Numeric[N]].toDouble(n)
-
   // end of Dimension type specific implementation
-
+  
   
   // This means that _DimensionType is the same in 3D libraries
   val Ez3D: Ez3D[T] = summon[Ez3D[T]]
@@ -43,15 +42,22 @@ abstract class Dimension[T: Precision: Numeric: Trig: Generated: Ez3D: Epsilon]:
 
   private val _DimensionNumeric: Numeric[T] = summon[Numeric[T]]
   private val _DimensionOrder: Order[T] = summon[Order[T]]
-  private val _GeneratedDimension: Generated[T] = summon[Generated[T]]
-  
+  private val _DimensionGenerated: Generated[T] = summon[Generated[T]]
+
   private val __0: T = _DimensionNumeric.zero
   private val __1: T = _DimensionNumeric.one
   private val __2: T = _DimensionNumeric.fromInt(2)
+  private val __10: T = _DimensionNumeric.fromInt(10)
 
   val Zero: DimensionBase = __0
   val One: DimensionBase = __1
   val Two: DimensionBase = __2
+  val Ten: DimensionBase = __10
+  val MinusOne: DimensionBase = __0 - __1
+  val MinusTwo: DimensionBase = __0 - __2
+  val MinusTen: DimensionBase = __0 - __10
+
+
 
   enum Geometry:
 
@@ -60,6 +66,8 @@ abstract class Dimension[T: Precision: Numeric: Trig: Generated: Ez3D: Epsilon]:
     case Toric
 
     case Bounded
+
+    case Unbounded
 
     private[Dimension] def normalizePosition(value: T,
                                              boundary: SizeValue): T =
@@ -73,8 +81,17 @@ abstract class Dimension[T: Precision: Numeric: Trig: Generated: Ez3D: Epsilon]:
         case Bounded =>
           boundary.bounce(value)
 
+        case Unbounded =>
+          value
 
-  // SizeValue
+   /**
+   * SizeValue
+   *
+   * Properties :
+   * <ul>
+   *   <li>Always positive</li>
+   * </ul>
+   */
   opaque type SizeValue = T
 
   object SizeValue:
@@ -112,7 +129,6 @@ abstract class Dimension[T: Precision: Numeric: Trig: Generated: Ez3D: Epsilon]:
                                     (using geometry: Geometry): PositionValue =
       PositionValue(
         sizeValue * _NumberToDimensionConverter.apply(n),
-//        sizeValue * n,
         sizeValue,
         geometry
       )
@@ -167,13 +183,15 @@ abstract class Dimension[T: Precision: Numeric: Trig: Generated: Ez3D: Epsilon]:
       else
         dimensionValue
 
-  val GeneratedSizeValue: Generated[SizeValue] = _GeneratedDimension
+  val GeneratedSizeValue: Generated[SizeValue] = _DimensionGenerated
 
   val NumericSizeValue: Numeric[SizeValue] = _DimensionNumeric
+  
+  val OrderSizeValue: Order[SizeValue] = _DimensionOrder
   // end SizeValue
 
 
-  // Position
+  // PositionValue
   opaque type PositionValue = T
 
   object PositionValue:
@@ -227,14 +245,14 @@ abstract class Dimension[T: Precision: Numeric: Trig: Generated: Ez3D: Epsilon]:
       override def compare(x: PositionValue,
                            y: PositionValue): Int = _DimensionOrder.compare(x, y)
 
-  val GeneratedPositionValue: Generated[PositionValue] = _GeneratedDimension
+  val GeneratedPositionValue: Generated[PositionValue] = _DimensionGenerated
 
   val NumericPositionValue: Numeric[PositionValue] = _DimensionNumeric
 
   val OrderPositionValue: Order[PositionValue] = _DimensionOrder
 
 
-  // Timeval
+  // DurationValue
   type _StepType = Long
 
   opaque type DurationValue = _StepType
@@ -256,7 +274,7 @@ abstract class Dimension[T: Precision: Numeric: Trig: Generated: Ez3D: Epsilon]:
 
     def generatedBetween(min: SpeedValue,
                          max: SpeedValue): Generated[SpeedValue] =
-      _GeneratedDimension.map(d => min + (d * (max - min)))
+      _DimensionGenerated.map(d => min + (d * (max - min)))
 
     def apply(distance: T,
               duration: DurationValue = DurationValue.One): SpeedValue =
@@ -288,7 +306,7 @@ abstract class Dimension[T: Precision: Numeric: Trig: Generated: Ez3D: Epsilon]:
 
     def generatedBetween(min: AccelerationValue,
                          max: AccelerationValue): Generated[AccelerationValue] =
-      _GeneratedDimension.map(d => min + (d * (max - min)))
+      _DimensionGenerated.map(d => min + (d * (max - min)))
 
     def apply(acceleration: T): AccelerationValue =
       acceleration
@@ -311,7 +329,7 @@ abstract class Dimension[T: Precision: Numeric: Trig: Generated: Ez3D: Epsilon]:
 
     def generatedBetween(min: SpinValue,
                          max: SpinValue): Generated[SpinValue] =
-      _GeneratedDimension.map(d => min + (d * (max - min)))
+      _DimensionGenerated.map(d => min + (d * (max - min)))
 
     def apply(distance: T,
               duration: DurationValue = DurationValue.One): SpinValue =
@@ -348,7 +366,7 @@ abstract class Dimension[T: Precision: Numeric: Trig: Generated: Ez3D: Epsilon]:
 
     def generatedBetween(min: AngularAccelerationValue,
                          max: AngularAccelerationValue): Generated[AngularAccelerationValue] =
-      _GeneratedDimension.map(d => min + (d * (max - min)))
+      _DimensionGenerated.map(d => min + (d * (max - min)))
 
     def apply(angularAcceleration: T): AngularAccelerationValue =
       angularAcceleration
@@ -364,7 +382,7 @@ abstract class Dimension[T: Precision: Numeric: Trig: Generated: Ez3D: Epsilon]:
     (x: AngularAccelerationValue, y: AngularAccelerationValue) => x.compare(y)
   // end AngularAccelerationValue
 
-  
+
   /** Utilities methods added to [[T]] */
   extension (lhs: T)
 
@@ -387,9 +405,13 @@ abstract class Dimension[T: Precision: Numeric: Trig: Generated: Ez3D: Epsilon]:
 
     def spin: SpinValue =
       SpinValue(lhs)
-    
+
     def angularAcceleration: AngularAccelerationValue =
       AngularAccelerationValue(lhs)
+
+  extension [N: Numeric](numeric: N)
+    def baseValue: DimensionBase =
+      _NumberToDimensionConverter.apply(numeric)
 
 
   /** Utilities methods added to [[_StepType]] */
@@ -400,12 +422,4 @@ abstract class Dimension[T: Precision: Numeric: Trig: Generated: Ez3D: Epsilon]:
 
 
 
-given Precision[Double] = Precision(1E-10d)
-
-object DimensionDouble extends Dimension[Double]:
-
-  override def modulo(a: Double, b: Double): Double = a % b
-
-  final override protected def _NumberToDimensionConverter[N: Numeric]: (N) => Double =
-    (n: N) => summon[Numeric[N]].toDouble(n)
 

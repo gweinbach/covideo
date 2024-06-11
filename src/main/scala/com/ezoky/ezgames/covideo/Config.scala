@@ -1,25 +1,32 @@
 package com.ezoky.ezgames.covideo
 
-import com.ezoky.ezgames.covideo.component.*
-import com.ezoky.ezgames.covideo.component.Dimension.*
-import com.ezoky.ezgames.covideo.component.Dimension.Ez3D.*
 import com.ezoky.ez3d.Screen.*
+import com.ezoky.ezgames.covideo.MainConfig.*
+import com.ezoky.ezgames.covideo.MainConfig.Everything.CoordsDimension.Ez3D.*
+import com.ezoky.ezgames.covideo.MainConfig.Everything.CoordsDimension.{*, given}
+import com.ezoky.ezgames.covideo.MainConfig.Everything.{*, given}
 import com.ezoky.ezgames.covideo.component.Generate.generatedBetweenFractional
-import com.ezoky.ezgames.covideo.entity.*
-import com.ezoky.ezgames.covideo.entity.People.*
+import spire.*
+import spire.math.*
 
 object Config:
-  
-  val AreaWidth = 1200
-  val AreaHeight = 1000
-  val AreaDepth = 1200
-  
-  val NearDistance = 1500
+
+  // Area
+  private val AreaWidth = 800
+  private val AreaHeight = 800
+  private val AreaDepth = 800
+
+  // Camera
+  private val NearDistance = 1500
+  private val CameraType = ProjectionType.Perspective
+
+  // Population
+  private val PopulationSize = 100
 
   val Area =
     AreaConfig(
       AreaWidth size,
-      xGeometry = Geometry.Bounded,
+      xGeometry = Geometry.Unbounded,
       AreaHeight size,
       yGeometry = Geometry.Bounded,
       AreaDepth size,
@@ -27,6 +34,7 @@ object Config:
     )
   val Camera =
     CameraConfig(
+      projectionType = CameraType,
       position = PlanePoint(AreaWidth / 2, AreaHeight / 2),
       near = NearDistance,
       far = NearDistance + AreaDepth,
@@ -36,9 +44,9 @@ object Config:
   val Scene =
     SceneConfig(
       name = "COVIDEO",
-//      sceneSize = SceneDimension(width = 1200 px, height = 800 px), // DefaultScreenSize
-      sceneSize = ScreenDimension(width = AreaWidth px, height = AreaHeight px), // DefaultScreenSize
-//      margin = Margin(top = 100 px, left = 100 px, bottom = 100 px, right = 100 px)
+      sceneSize = ScreenDimension(width = 600 px, height = 600 px), // DefaultScreenSize
+      //      sceneSize = DefaultScreenSize, //ScreenDimension(width = AreaWidth px, height = AreaHeight px), // DefaultScreenSize
+      //      margin = Margin(top = 100 px, left = 100 px, bottom = 100 px, right = 100 px),
       zoomRatio = 1.0, // not used in 3D
       camera = Camera
     )
@@ -58,14 +66,36 @@ object Config:
     )
   val Person =
     PersonConfig(
-      shape = generatedBetweenFractional(10.0,50.0).map(Cube(_)),
+      shape = generatedBetweenFractional(10.0, 50.0).map(Cube(_)),
       solidConfig = Solid,
     )
   val Game =
     GameConfig(
-      populationSize = 10,
+      populationSize = PopulationSize,
       Person, World
     )
+
+  // Control Config
+  val GameControl =
+    GameControlConfig(exitChar = 'x')
+  val CameraControl =
+    CameraControlConfig(10, 10, 10, 10)
+  val ViewFrustumControl =
+    ViewFrustumControlConfig(
+      minNear = 1,
+      maxNear = 2 * Camera.far,
+      minFar = 1,
+      maxFar = 2 * Camera.far,
+      initialNear = Camera.near,
+      initialFar = Camera.far
+    )
+  val UserControl =
+    UserControlConfig(
+      GameControl,
+      CameraControl,
+      ViewFrustumControl
+    )
+
   val Loop =
     GameLoopConfig(
       fps = 60

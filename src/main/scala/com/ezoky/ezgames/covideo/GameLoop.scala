@@ -1,25 +1,22 @@
 package com.ezoky.ezgames.covideo
 
-import com.ezoky.ezcategory.{Endomorphism, IO}
+import com.ezoky.ezcategory.IO
 import com.ezoky.ezgames.covideo.component.Generate.*
-import com.ezoky.ezgames.covideo.entity.Game
 
 import scala.annotation.tailrec
+import MainConfig.{*, given}
+import MainConfig.Everything.{*, given}
 
 case class GameLoopConfig(fps: Int)
 
 class GameLoop(initialGame: Generated[Game],
                gameStep: Generated[Game] => Generated[IO[Game]],
                seed: Generator,
-               gameLoopConfig: GameLoopConfig)
-  extends Runnable :
+               gameLoopConfig: GameLoopConfig):
 
   val stepDurationInNanoseconds = GameLoop.NanosecondsInOneSecond / gameLoopConfig.fps
 
-  val thread = new Thread(this)
-  thread.start()
-
-  def run(): Unit =
+  final def start(): Unit =
     val nextStep = System.nanoTime() + stepDurationInNanoseconds
     loop(initialGame, seed, nextStep)
 
@@ -28,9 +25,12 @@ class GameLoop(initialGame: Generated[Game],
                  generator: Generator,
                  nextStep: Long): Unit =
 
-    val generatedGame: Generated[IO[Game]] = gameStep(game)
-    val (ioGame, nextGen) = generatedGame(generator)
-    val nextGame = Generated(ioGame.unsafeRun())
+    // what should be done during next step of the game
+    val generatedIOGame: Generated[IO[Game]] = gameStep(game)
+
+    // Let's get out of the monads
+    val (ioGame: IO[Game], nextGen) = generatedIOGame(generator)
+    val nextGame: Generated[Game] = Generated(ioGame.unsafeRun())
 
     val (remainingMilliseconds, remainingNanoseconds) =
       val remainingNs = nextStep - System.nanoTime()
@@ -41,7 +41,8 @@ class GameLoop(initialGame: Generated[Game],
         (remainingNs / GameLoop.NanosecondsInOneMillisecond, (remainingNs % GameLoop.NanosecondsInOneMillisecond).intValue)
     Thread.sleep(remainingMilliseconds, remainingNanoseconds)
 
-    loop(nextGame, nextGen, System.nanoTime() + stepDurationInNanoseconds)
+    if (nextGame.get(generator).status == GameStatus.Running) then
+      loop(nextGame, nextGen, System.nanoTime() + stepDurationInNanoseconds)
 
 object GameLoop:
   val NanosecondsInOneSecond = 1000000000L

@@ -74,8 +74,6 @@ private trait AngleTypes[T: Trig: Numeric]:
     def toRadians(a: Degrees): Radians = _trig.toRadians(a)
     def toDegrees(a: Degrees): Degrees = a
 
-//  given [U <: Angle]: Conversion[U, T] with
-//    def apply(angle: U): T = angle
 
 trait Angles[T: Trig: Numeric] extends AngleTypes[T]:
 
@@ -129,40 +127,4 @@ trait Angles[T: Trig: Numeric] extends AngleTypes[T]:
     def toDegrees: Degrees =
       summon[UniformTrig[U]].toDegrees(a)
 
-
-//  private val _trig = summon[Trig[T]]
-//
-//  given UniformTrig[Angle] with
-//    def pi: Angle = _trig.pi radians
-//
-//    def sin(a: Angle): T =
-//      a match
-//        case r: Radians => sin(r)
-//        case d: Degrees => sin(d)
-//
-//    def cos(a: Angle): T =
-//      a match
-//        case r: Radians => cos(r)
-//        case d: Degrees => cos(d)
-//
-//    def tan(a: Angle): T =
-//      a match
-//        case r: Radians => tan(r)
-//        case d: Degrees => tan(d)
-//
-//    def asin(t: T): Angle = (_trig.asin(t) radians)
-//    def acos(t: T): Angle = (_trig.acos(t) radians)
-//    def atan(t: T): Angle = (_trig.atan(t) radians)
-//    def atan2(y: T, x: T): Angle = (_trig.atan2(x, y) radians)
-//
-//    def toRadians(a: Angle): Radians =
-//      a match
-//        case r: Radians => r
-//        case d: Degrees => toRadians(d)
-//
-//    def toDegrees(a: Angle): Degrees =
-//      a match
-//        case r: Radians => toDegrees(r)
-//        case d: Degrees => d
-//
   

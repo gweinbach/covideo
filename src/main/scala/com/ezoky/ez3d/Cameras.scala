@@ -20,10 +20,10 @@ trait Cameras[T: Numeric : Trig : Precision]
   extends Space[T]
     with Plane[T]
     with Transformation3D[T]
-    with Angles[T] :
+    with Angles[T]:
 
   private val _Numeric = summon[Numeric[T]]
-  private val _0 = _Numeric.zero
+  private val __0 = _Numeric.zero
   private val __1 = _Numeric.one // double '_' to avoid conflict with Product<X>._1
   private val __2 = _Numeric.fromInt(2) // double '_' to avoid conflict with Product<X>._1
 
@@ -46,18 +46,20 @@ trait Cameras[T: Numeric : Trig : Precision]
       if newNear == this.near then
         this
       else
-        val near = if (newNear > _0) then newNear else this.near
-        val far = near + depth
-        setNearAndFar(near = near, far = far)
+        //        val mormalizedNear = if (newNear > __0) then newNear else this.mormalizedNear
+        //        val far = mormalizedNear + depth
+        val mormalizedNear = _Numeric.min(_Numeric.max(newNear, __0), far)
+        setNearAndFar(near = mormalizedNear, far = this.far)
 
     final def withFar(newFar: T): ViewFrustum =
       if newFar == this.far then
         this
       else
-        val far = if (newFar - depth > _0) then newFar else this.far
-        val near = far - depth
-        setNearAndFar(near = near, far = far)
-
+        //        val normalisedFar = if (newFar - depth > __0) then newFar else this.normalisedFar
+        //        val near = normalisedFar - depth
+        val normalisedFar = _Numeric.max(newFar, near)
+        println(s"near = ${this.near}, far = $normalisedFar")
+        setNearAndFar(near = this.near, far = normalisedFar)
 
     lazy val depth: T = far - near
 
@@ -87,7 +89,7 @@ trait Cameras[T: Numeric : Trig : Precision]
     final lazy val farBottomRight = SpacePoint(maxXf, minYf, minZ)
     final lazy val farTopRight = SpacePoint(maxXf, maxYf, minZ)
 
-    final lazy val center = SpacePoint(_0, _0, middleZ)
+    final lazy val center = SpacePoint(__0, __0, middleZ)
 
     final lazy val shape: Shape =
       Shape(
@@ -117,7 +119,7 @@ trait Cameras[T: Numeric : Trig : Precision]
 
 
   private[ez3d] trait DefaultViewFrustum
-    extends ViewFrustum :
+    extends ViewFrustum:
 
     val top: T = __1
     val bottom: T = -__1
@@ -183,10 +185,10 @@ trait Cameras[T: Numeric : Trig : Precision]
   object Camera:
 
     private case class SimpleCamera(position: SpacePoint = SpacePoint.Origin,
-                                    target: SpacePoint = SpacePoint(_0, _0, -__1),
+                                    target: SpacePoint = SpacePoint(__0, __0, -__1),
                                     basis: Basis = Basis.NormalDirect,
                                     viewFrustum: ViewFrustum = ViewFrustum.Default)
-      extends Camera :
+      extends Camera:
       final override def withPosition(newPosition: SpacePoint): Camera =
         copy(position = newPosition)
 
@@ -209,23 +211,36 @@ trait Cameras[T: Numeric : Trig : Precision]
                                   target: SpacePoint,
                                   basis: Basis,
                                   viewFrustum: ViewFrustum)
-    extends Camera :
+    extends Camera:
 
+    println(s"position = $position, target = $target, magnitude(look) = ${look.magnitude}")
     final override def withPosition(newPosition: SpacePoint): Camera =
-      copy(position = newPosition)
+      if newPosition == position then
+        this
+      else
+        copy(position = newPosition)
 
     final override def withTarget(newTarget: SpacePoint): Camera =
-      copy(target = newTarget)
+      if newTarget == target then 
+        this
+      else
+        copy(target = newTarget)
 
     final override def withBasis(newBasis: Basis): Camera =
-      copy(basis = newBasis)
+      if newBasis == basis then 
+        this
+      else
+        copy(basis = newBasis)
 
     final override def withViewFrustum(newViewFrustum: ViewFrustum): Camera =
-      copy(viewFrustum = newViewFrustum)
+      if newViewFrustum == viewFrustum then 
+        this
+      else
+        copy(viewFrustum = newViewFrustum)
 
     final override def move(dx: T,
                             dy: T): Camera =
-      if dx == _0 && dy == _0 then
+      if dx == __0 && dy == __0 then
         this
       else
         val targetDistance = look.magnitude
@@ -233,14 +248,13 @@ trait Cameras[T: Numeric : Trig : Precision]
         val verticalAngle: Radians = atan(dy / targetDistance)
         val qh = Quaternion.fromRotationVectorAndAngle(up, horizontalAngle)
         val qv = Quaternion.fromRotationVectorAndAngle(right, verticalAngle)
+        val rotation = qh × qv
+        val rotatedLook = rotation.rotate(look)
         (for
-          vector <- SpaceVector.nonNull(target, position)
-          rotation = qh × qv
-          rotated = rotation.rotate(vector)
           rotatedBasis <- rotation.rotate(basis)
         yield
           copy(
-            position = rotated.dest(target),
+            position = rotatedLook.origin(target),
             basis = rotatedBasis
           )).getOrElse(this) // TODO handle error
 
@@ -254,12 +268,12 @@ trait Cameras[T: Numeric : Trig : Precision]
         look <- SpaceVector.nonNull(position, target)
         up <- SpaceVector.nonNull(upVector)
         right <- SpaceVector.nonNullCrossProduct(-up, look)
-        basis <- Basis.orthogonal(right, up, -look)
+        basis <- Basis.orthonormal(right, up, -look)
       yield
         LookAtCamera(
           position = position,
           target = target,
-          basis = basis.normalized,
+          basis = basis,
           viewFrustum = viewFrustum
         )
 
@@ -269,6 +283,7 @@ trait Cameras[T: Numeric : Trig : Precision]
                                                 farDistance: T,
                                                 topDistance: T,
                                                 rightDistance: T): Option[ViewFrustum]
+
     /**
      * The projection screen is located on top side of the box.
      */
@@ -326,28 +341,28 @@ trait Cameras[T: Numeric : Trig : Precision]
     extends Projection:
 
     trait OrthographicViewFrustum
-      extends ViewFrustum :
+      extends ViewFrustum:
 
       final override lazy val projectionMatrix =
         Matrix(
           y00 = __2 / (right - left),
-          y01 = _0,
-          y02 = _0,
+          y01 = __0,
+          y02 = __0,
           y03 = (right + left) / (left - right),
 
-          y10 = _0,
+          y10 = __0,
           y11 = __2 / (top - bottom),
-          y12 = _0,
+          y12 = __0,
           y13 = (top + bottom) / (bottom - top),
 
-          y20 = _0,
-          y21 = _0,
+          y20 = __0,
+          y21 = __0,
           y22 = __2 / (near - far),
           y23 = (far + near) / (near - far),
 
-          y30 = _0,
-          y31 = _0,
-          y32 = _0,
+          y30 = __0,
+          y31 = __0,
+          y32 = __0,
           y33 = __1
         )
 
@@ -374,16 +389,19 @@ trait Cameras[T: Numeric : Trig : Precision]
 
       final override protected def setNearAndFar(near: T,
                                                  far: T): SymetricOrthographicViewFrustum =
-         copy(near = near, far = far)
+        if near == this.near && far == this.far then 
+          this
+        else
+          copy(near = near, far = far)
 
     final override def viewFrustumFromSymetricPlanes(nearDistance: T,
                                                      farDistance: T,
                                                      topDistance: T,
                                                      rightDistance: T): Option[ViewFrustum] =
-      if (nearDistance <= _0) ||
+      if (nearDistance <= __0) ||
         (farDistance <= nearDistance) ||
-        (topDistance <= _0) ||
-        (rightDistance <= _0) then
+        (topDistance <= __0) ||
+        (rightDistance <= __0) then
         None
       else
         Some(
@@ -396,35 +414,33 @@ trait Cameras[T: Numeric : Trig : Precision]
         )
 
 
-
-
   object Perspective
     extends Projection:
 
     trait PerspectiveViewFrustum
-      extends ViewFrustum :
+      extends ViewFrustum:
 
       final lazy val projectionMatrix =
         Matrix(
           y00 = __2 * near / (right - left),
-          y01 = _0,
+          y01 = __0,
           y02 = (right + left) / (right - left),
-          y03 = _0,
+          y03 = __0,
 
-          y10 = _0,
+          y10 = __0,
           y11 = __2 * near / (top - bottom),
           y12 = (top + bottom) / (top - bottom),
-          y13 = _0,
+          y13 = __0,
 
-          y20 = _0,
-          y21 = _0,
+          y20 = __0,
+          y21 = __0,
           y22 = (far + near) / (near - far),
           y23 = __2 * far * near / (near - far),
 
-          y30 = _0,
-          y31 = _0,
+          y30 = __0,
+          y31 = __0,
           y32 = -__1,
-          y33 = _0
+          y33 = __0
         )
 
       final lazy val focalLength: T = near / top
@@ -449,21 +465,25 @@ trait Cameras[T: Numeric : Trig : Precision]
                                                       top: T,
                                                       right: T)
       extends PerspectiveViewFrustum
-        with SymetricViewFrustum :
+        with SymetricViewFrustum:
 
       final override protected def setNearAndFar(near: T,
                                                  far: T): SymetricPerspectiveViewFrustum =
-        copy(near = near, far = far)
+        if near == this.near && far == this.far then
+          this
+        else
+          copy(near = near, far = far)
 
 
     final override def viewFrustumFromSymetricPlanes(nearDistance: T,
                                                      farDistance: T,
                                                      topDistance: T,
                                                      rightDistance: T): Option[ViewFrustum] =
-      if (nearDistance <= _0) ||
+      if (nearDistance <= __0) ||
         (farDistance <= nearDistance) ||
-        (topDistance <= _0) ||
-        (rightDistance <= _0) then
+        (topDistance <= __0) ||
+        (rightDistance <= __0) then
+        println(s"Error viewFrustumFromSymetricPlanes - bad distances: near=$nearDistance, far=$farDistance, top=$topDistance, right=$rightDistance")
         None
       else
         Some(
@@ -479,45 +499,45 @@ trait Cameras[T: Numeric : Trig : Precision]
                                            farDistance: T,
                                            aspectRatio: T,
                                            height: Radians): Option[ViewFrustum] =
-        if (nearDistance <= _0) ||
-          (farDistance <= nearDistance) ||
-          (aspectRatio <= _0) ||
-          (height <= (_0 radians)) ||
-          (height >= pi[Radians]) then
-          None
-        else
-          val focalLength = __1 / tan(height / (__2 radians))
-          val topDistance = nearDistance / focalLength
-          val rightDistance = aspectRatio * topDistance
-          Some(
-            SymetricPerspectiveViewFrustum(
-              near = nearDistance,
-              far = farDistance,
-              top = topDistance,
-              right = rightDistance
-            )
-            // used for control
-            //              final lazy val alternateProjectionMatrix =
-            //                Matrix(
-            //                  y00 = focalLength / aspectRatio,
-            //                  y01 = _0,
-            //                  y02 = _0,
-            //                  y03 = _0,
-            //
-            //                  y10 = _0,
-            //                  y11 = focalLength,
-            //                  y12 = _0,
-            //                  y13 = _0,
-            //
-            //                  y20 = _0,
-            //                  y21 = _0,
-            //                  y22 = (far + near) / (near - far),
-            //                  y23 = __2 * far * near / (near - far),
-            //
-            //                  y30 = _0,
-            //                  y31 = _0,
-            //                  y32 = -__1,
-            //                  y33 = _0
-            //                )
-            //              assert(projectionMatrix == alternateProjectionMatrix)
+      if (nearDistance <= __0) ||
+        (farDistance <= nearDistance) ||
+        (aspectRatio <= __0) ||
+        (height <= (__0 radians)) ||
+        (height >= pi[Radians]) then
+        None
+      else
+        val focalLength = __1 / tan(height / (__2 radians))
+        val topDistance = nearDistance / focalLength
+        val rightDistance = aspectRatio * topDistance
+        Some(
+          SymetricPerspectiveViewFrustum(
+            near = nearDistance,
+            far = farDistance,
+            top = topDistance,
+            right = rightDistance
           )
+          // used for control
+          //              final lazy val alternateProjectionMatrix =
+          //                Matrix(
+          //                  y00 = focalLength / aspectRatio,
+          //                  y01 = __0,
+          //                  y02 = __0,
+          //                  y03 = __0,
+          //
+          //                  y10 = __0,
+          //                  y11 = focalLength,
+          //                  y12 = __0,
+          //                  y13 = __0,
+          //
+          //                  y20 = __0,
+          //                  y21 = __0,
+          //                  y22 = (far + near) / (near - far),
+          //                  y23 = __2 * far * near / (near - far),
+          //
+          //                  y30 = __0,
+          //                  y31 = __0,
+          //                  y32 = -__1,
+          //                  y33 = __0
+          //                )
+          //              assert(projectionMatrix == alternateProjectionMatrix)
+        )

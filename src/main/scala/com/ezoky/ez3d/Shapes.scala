@@ -19,7 +19,7 @@ trait Shapes[T: Numeric: Precision]
   extends Space[T]:
   
   private val _Numeric = summon[Numeric[T]]
-  private val _0 = _Numeric.zero
+  private val __0 = _Numeric.zero
   private val __1 = _Numeric.one
   private val __2 = _Numeric.fromInt(2)
 
@@ -30,10 +30,10 @@ trait Shapes[T: Numeric: Precision]
 
     override val segments: Segments =
       scala.Vector(
-        Segment(SpacePoint(-halfSize, -halfSize, _0), SpacePoint(halfSize, -halfSize, _0)),
-        Segment(SpacePoint(halfSize, -halfSize, _0), SpacePoint(halfSize, halfSize, _0)),
-        Segment(SpacePoint(halfSize, halfSize, _0), SpacePoint(-halfSize, halfSize, _0)),
-        Segment(SpacePoint(-halfSize, halfSize, _0), SpacePoint(-halfSize, -halfSize, _0))
+        Segment(SpacePoint(-halfSize, -halfSize, __0), SpacePoint(halfSize, -halfSize, __0)),
+        Segment(SpacePoint(halfSize, -halfSize, __0), SpacePoint(halfSize, halfSize, __0)),
+        Segment(SpacePoint(halfSize, halfSize, __0), SpacePoint(-halfSize, halfSize, __0)),
+        Segment(SpacePoint(-halfSize, halfSize, __0), SpacePoint(-halfSize, -halfSize, __0))
       )
 
   case class Cube(size: T)
@@ -97,9 +97,9 @@ trait Shapes[T: Numeric: Precision]
 
     override val segments: Segments =
       scala.Vector(
-        Segment(SpacePoint(-halfWidth, _0, _0), SpacePoint(halfWidth, _0, _0)),
-        Segment(SpacePoint(_0, -halfHeight, _0), SpacePoint(_0, halfHeight, _0)),
-        Segment(SpacePoint(_0, _0, -halfDepth), SpacePoint(_0, _0, halfDepth))
+        Segment(SpacePoint(-halfWidth, __0, __0), SpacePoint(halfWidth, __0, __0)),
+        Segment(SpacePoint(__0, -halfHeight, __0), SpacePoint(__0, halfHeight, __0)),
+        Segment(SpacePoint(__0, __0, -halfDepth), SpacePoint(__0, __0, halfDepth))
       )
       
   object Cross:

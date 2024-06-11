@@ -16,7 +16,7 @@ object Generate:
     def map[B](f: A => B): Generated[B] =
       Generated.map(generated)(f)
 
-    def flatMap[B](f: A => Generated[B]) =
+    def flatMap[B](f: A => Generated[B]): Generated[B] =
       Generated.flatMap(generated)(f)
 
     def get(generator: Generator): A =
@@ -135,4 +135,14 @@ object Generate:
       (seed.nextLong(), new RandomGenerator(this))
 
     override def generateDouble: (Double, Generator) =
-      (seed.nextDouble(), new RandomGenerator((this)))
+      (seed.nextDouble(), new RandomGenerator(this))
+
+  class SequenceGenerator(val seed: Long)
+    extends Generator:
+
+    def this() =
+      this(0L)
+
+    override def generateLong: (Long, Generator) = (seed, new SequenceGenerator(seed + 1L))
+
+    override def generateDouble: (Double, Generator) = (seed.toDouble, new SequenceGenerator(seed + 1L))

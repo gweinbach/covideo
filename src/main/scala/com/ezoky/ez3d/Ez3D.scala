@@ -22,16 +22,16 @@ class Ez3D[T: Numeric : Trig : Precision]
 
   // Vector Transformations
   case class VectorRotation(angle: Radians,
-                            axis: NonNullSpaceVector) extends Rotation[SpaceVector] :
+                            axis: NonNullSpaceVector) extends Rotation[SpaceVector]:
 
-    private val quaternion = 
+    private val quaternion =
       Quaternion.fromRotationVectorAndAngle(axis, angle)
 
     final override def rotate(v: SpaceVector): SpaceVector =
       quaternion.rotate(v)
 
   case class VectorTranslation(translation: SpaceVector)
-    extends Translation[SpaceVector] :
+    extends Translation[SpaceVector]:
 
     final override def translate(v: SpaceVector): SpaceVector =
       v + translation
@@ -42,7 +42,7 @@ class Ez3D[T: Numeric : Trig : Precision]
   // Point Transformations
   case class PointRotation(center: SpacePoint,
                            angle: Radians,
-                           axis: NonNullSpaceVector) extends Rotation[SpacePoint] :
+                           axis: NonNullSpaceVector) extends Rotation[SpacePoint]:
 
     private val quaternion = Quaternion.fromRotationVectorAndAngle(axis, angle)
 
@@ -51,7 +51,7 @@ class Ez3D[T: Numeric : Trig : Precision]
 
 
   case class PointTranslation(translation: SpaceVector)
-    extends Translation[SpacePoint] :
+    extends Translation[SpacePoint]:
 
     final override def translate(v: SpacePoint): SpacePoint =
       v + translation
@@ -61,8 +61,8 @@ class Ez3D[T: Numeric : Trig : Precision]
 
   // Segment Transformations
   case class SegmentRotation(center: SpacePoint,
-                            angle: Radians,
-                            axis: NonNullSpaceVector) extends Rotation[Segment] :
+                             angle: Radians,
+                             axis: NonNullSpaceVector) extends Rotation[Segment]:
 
     private val quaternion = Quaternion.fromRotationVectorAndAngle(axis, angle)
 
@@ -74,7 +74,7 @@ class Ez3D[T: Numeric : Trig : Precision]
 
 
   case class SegmentTranslation(translation: SpaceVector)
-    extends Translation[Segment] :
+    extends Translation[Segment]:
 
     final override def translate(v: Segment): Segment =
       v + translation
@@ -82,7 +82,7 @@ class Ez3D[T: Numeric : Trig : Precision]
   // end Segment Transformations
 
 
-//  import Perspective.*
+  //  import Perspective.*
 
   given Model[Camera] with
     extension (camera: Camera)
@@ -93,5 +93,10 @@ class Ez3D[T: Numeric : Trig : Precision]
     extension (camera: Camera)
       override def projectionMatrix: Matrix = camera.viewFrustum.projectionMatrix
 
-
-given [T: Numeric: Trig: Precision]:Ez3D[T] = new Ez3D[T]
+/**
+ * Automatically provides an implicit Ez3D instance for any spire Numeric type
+ * 
+ * @tparam T any Spire Numeric type with a given [[com.ezoky.eznumber.Precision]]
+ * @return an implicit Ez3D instance
+ */
+given [T: Numeric : Trig : Precision]: Ez3D[T] = new Ez3D[T]
