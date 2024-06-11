@@ -8,8 +8,8 @@ import spire.implicits.*
 
 class RateTest extends AnyFlatSpec:
 
-  "% or ‰ operators" should "be used to define rates" in {
-    assert((1.0`‰`) === 0.001)
+  "% or ‰ operators" can "be used to define rates" in {
+    assert((1.0`‰`) === Rate(0.001))
 //    assert((1.0`%`) === 0.01)
   }
 

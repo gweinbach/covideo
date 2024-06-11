@@ -1,13 +1,18 @@
 package com.ezoky.ezgames.covideo.component
 
-import scala.annotation.targetName
-
 import spire.*
 import spire.math.*
-import spire.implicits.*
+
+import scala.annotation.targetName
 
 
 opaque type Rate = Double
+
+object Rate:
+  
+  def apply(double: Double): Rate = double
+
+  val Zero = Rate(0.0)
 
 extension (doubleRate: Double)
   @targetName("percent")
@@ -23,14 +28,3 @@ extension (rate: Rate)
     val numeric = summon[Numeric[N]]
     numeric.fromDouble(numeric.toDouble(n) * rate)
 
-//private trait RateT:
-//  private[component] val _RateNumeric = summon[Numeric[Double]]
-//
-//given Numeric[Rate] = new RateT{}._RateNumeric
-
-type DeathRate = Rate
-
-type BirthRate = Rate
-
-case class Demographies(birthRate: BirthRate = 0.0`‰`,
-                        deathRate: DeathRate = 0.0`‰`)

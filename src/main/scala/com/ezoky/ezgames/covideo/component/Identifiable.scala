@@ -9,4 +9,3 @@ import java.util.UUID
 
 object UUIDIdentifiable extends Identifiable[UUID]:
   def id: UUID = UUID.randomUUID()
-  

@@ -37,9 +37,15 @@ trait Entities[I: Identifiable]:
     @targetName("populationSize")
     def number: Int =
       population.size
-    
+
     def toSet: Set[A] =
       population.values.toSet
+
+    def values: Iterable[A] =
+      population.values
+
+    def indexOf(n: Int): A =
+      population.drop(n).take(1).head._2
 
     @targetName("add")
     infix def +(kv: (I, A)): Population[A] =
@@ -48,6 +54,10 @@ trait Entities[I: Identifiable]:
     @targetName("populationMerge")
     infix def ++(other: Population[A]): Population[A] =
       population ++ other
+
+    @targetName("populationRemove")
+    infix def --(other: Population[A]): Population[A] =
+      population.removedAll(other.keys)
 
     def map[B](f: A => B): Population[B] =
       Population.map(population)(f)

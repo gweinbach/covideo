@@ -136,3 +136,13 @@ object Generate:
 
     override def generateDouble: (Double, Generator) =
       (seed.nextDouble(), new RandomGenerator(this))
+
+  class SequenceGenerator(val seed: Long)
+    extends Generator:
+
+    def this() =
+      this(0L)
+
+    override def generateLong: (Long, Generator) = (seed, new SequenceGenerator(seed + 1L))
+
+    override def generateDouble: (Double, Generator) = (seed.toDouble, new SequenceGenerator(seed + 1L))
