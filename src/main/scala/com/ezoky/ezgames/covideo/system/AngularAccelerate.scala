@@ -14,10 +14,15 @@ trait AngularAccelerates[I: Identifiable, D: Dimension]
       override def angularAccelerate: Population[Person] =
         people.map(_.angularAccelerate)
 
+  given AngularAccelerate[Demography[Person]] with
+    extension (demography: Demography[Person])
+      override def angularAccelerate: Demography[Person] =
+        demography.withPopulation(demography.population.angularAccelerate)
+
   given AngularAccelerate[Game] with
     extension (game: Game)
       override def angularAccelerate: Game =
-        game.withPeople(
-          game.people.angularAccelerate
+        game.withDemography(
+          game.demography.angularAccelerate
         )
         

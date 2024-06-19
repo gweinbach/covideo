@@ -56,12 +56,21 @@ trait Evolves[I: Identifiable, D: Dimension]
         yield
           Population(evolvedPeople)
 
+  given Evolve[Demography[Person]] with
+    extension (generatedDemography: Generated[Demography[Person]])
+      override def evolve: Generated[Demography[Person]] =
+        for
+          demography <- generatedDemography
+          evolvedPopulation <- Generated(demography.population).evolve
+        yield
+          demography.withPopulation(evolvedPopulation)
+
   given Evolve[Game] with
     extension (generatedGame: Generated[Game])
       override def evolve: Generated[Game] =
         for
           game <- generatedGame
-          evolvedPeople <- Generated(game.people).evolve
+          evolvedDemography <- Generated(game.demography).evolve
 
           // We get all sprites
           sprites: Population[Sprite] = game.allViewables
@@ -72,4 +81,4 @@ trait Evolves[I: Identifiable, D: Dimension]
           evolvedWorld = game.world.withSprites(sprites).withComponents(components)
 
         yield
-          game.withPeople(evolvedPeople).withWorld(evolvedWorld)
+          game.withDemography(evolvedDemography).withWorld(evolvedWorld)

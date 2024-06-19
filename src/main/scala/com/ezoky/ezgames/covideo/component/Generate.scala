@@ -34,12 +34,13 @@ object Generate:
   given Generated[Int] = GeneratedLong.map(_.toInt)
   given Generated[Short] = GeneratedLong.map(_.toShort)
   given Generated[Byte] = GeneratedLong.map(_.toByte)
-
-
+  
+  // TODO: add some Property Based Tests
   def generatedBetweenFractional[T: Generated : Fractional](min: T,
                                                             max: T): Generated[T] =
     summon[Generated[T]].map(d => min + (d * (max - min)))
 
+  // TODO: add some Property Based Tests
   def generatedBetweenIntegral[T: Generated : Integral](min: T,
                                                         max: T): Generated[T] =
     summon[Generated[T]].map(d => min + (d emod (max - min)))

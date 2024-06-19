@@ -6,6 +6,8 @@ import com.ezoky.ezgames.covideo.MainConfig.Everything.CoordsDimension.Ez3D.*
 import com.ezoky.ezgames.covideo.MainConfig.Everything.CoordsDimension.{*, given}
 import com.ezoky.ezgames.covideo.MainConfig.Everything.{*, given}
 import com.ezoky.ezgames.covideo.component.Generate.generatedBetweenFractional
+import com.ezoky.ezgames.covideo.component.Rate
+import com.ezoky.ezgames.covideo.component.Rate.*
 import spire.*
 import spire.math.*
 
@@ -69,10 +71,17 @@ object Config:
       shape = generatedBetweenFractional(10.0, 50.0).map(Cube(_)),
       solidConfig = Solid,
     )
+  val Demography =
+    DemographyConfig(
+      populationSize = PopulationSize,
+      Person,
+      birthRate = Rate(0.011),
+      deathRate = Rate(0.01)
+    )
   val Game =
     GameConfig(
-      populationSize = PopulationSize,
-      Person, World
+      World,
+      Demography
     )
 
   // Control Config

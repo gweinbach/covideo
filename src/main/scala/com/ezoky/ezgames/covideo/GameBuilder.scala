@@ -6,7 +6,6 @@ import com.ezoky.ezgames.covideo.component.*
 import com.ezoky.ezgames.covideo.component.Generate.*
 import com.ezoky.ezgames.covideo.component.HealthCondition.*
 import com.ezoky.ezgames.covideo.entity.Builder
-
 import MainConfig.{*, given}
 import MainConfig.Everything.{*, given}
 import MainConfig.Everything.CoordsDimension.{*, given}
@@ -23,13 +22,34 @@ case class GameBuilder(gameConfig: GameConfig)
   override def build: Generated[Game] =
     for
       world <- WorldBuilder(gameConfig.worldConfig).build
-      people <- Generated.setOf(PersonBuilder(world.area, gameConfig.personConfig).build)(gameConfig.populationSize)
+      demography <- DemographyBuilder(world.area, gameConfig.demographyConfig).build
     yield
       Game(
         world,
-        Population(people)
+        demography
       )
 
+case class DemographyBuilder(area: Box,
+                             demographyConfig: DemographyConfig[PersonConfig])
+                            (using displaySystem: DisplaySystem)
+  extends Builder[Demography[Person]]:
+  
+  override def build: Generated[Demography[Person]] =
+    for
+      people <- Generated.setOf(PersonBuilder(area, demographyConfig.populationConfig).build)(demographyConfig.populationSize)
+    yield 
+      Demography(
+        Population(people),
+        birth = PopulationDynamics.RandomBirth(
+          demographyConfig.birthRate,
+          PopulationDynamicsStrategy.Flat,
+          PersonBuilder(area, demographyConfig.populationConfig).build
+        ),
+        death = PopulationDynamics.RandomDeath(
+          demographyConfig.deathRate,
+          PopulationDynamicsStrategy.Flat
+        )
+      )
 
 case class WorldBuilder(worldConfig: WorldConfig)
                        (using displaySystem: DisplaySystem)

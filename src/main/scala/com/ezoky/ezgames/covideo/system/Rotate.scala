@@ -17,14 +17,21 @@ trait Rotate[T]:
 trait Rotates[I: Identifiable, D: Dimension]
   extends Games[I, D]:
 
+  given Rotate[Population[Person]] with
+    extension (people: Population[Person])
+      override def rotate: Population[Person] =
+        people.map(_.rotate)
+
+  given Rotate[Demography[Person]] with
+    extension (demography: Demography[Person])
+      override def rotate: Demography[Person] =
+        demography.withPopulation(
+          demography.population.rotate
+        )
+
   given Rotate[Game] with
     extension (game: Game)
       override def rotate: Game =
-        game.withPeople(
-          people = game.people.rotate
+        game.withDemography(
+          game.demography.rotate
         )
-
-  given Rotate[Population[Person]] with
-    extension (people: Population[Person]) 
-      override def rotate: Population[Person] =
-        people.map(_.rotate)

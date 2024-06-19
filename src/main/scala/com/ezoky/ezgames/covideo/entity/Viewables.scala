@@ -35,11 +35,16 @@ trait Viewables[I: Identifiable, D: Dimension : Numeric]
           case (pop, (_, t)) =>
             pop ++ t.allViewables
         }
+        
+  given [V](using Viewable[Population[Person], V]): Viewable[Demography[Person], V] with
+    extension (demography: Demography[Person])
+      override def allViewables: Population[V] =
+        demography.population.allViewables
 
-  given [V](using Viewable[World, V])(using Viewable[Person, V]): Viewable[Game, V] with
+  given [V](using Viewable[World, V])(using Viewable[Demography[Person], V]): Viewable[Game, V] with
     extension (game: Game)
       override def allViewables: Population[V] =
-        game.world.allViewables ++ game.people.allViewables
+        game.world.allViewables ++ game.demography.allViewables
 
   // Sprites that might be viewed
   trait ViewableSprite[T]

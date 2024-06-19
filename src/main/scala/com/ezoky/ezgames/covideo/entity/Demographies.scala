@@ -72,7 +72,7 @@ trait Demographies[I: Identifiable]
     def NoEvolution[E <: Entity]: PopulationDynamics[E] =
       PopulationDynamics(
         strategy = PopulationDynamicsStrategy.Zero,
-        populationSelection = (_) => Generated.unit(Population.empty[E])
+        populationSelection = _ => Generated.unit(Population.empty[E])
       )
 
     def RandomBirth[E <: Entity](birthRate: Rate,
@@ -119,7 +119,10 @@ trait Demographies[I: Identifiable]
           birth = afterBirth._1,
           death = afterDeath._1
         )
-
+        
+    def withPopulation(population: Population[E]): Demography[E] =
+      copy(population = population)
+      
     def withBirthStrategy(birthStrategy: PopulationDynamicsStrategy): Demography[E] =
       copy(birth = birth.withStrategy(birthStrategy))
 
@@ -131,3 +134,8 @@ trait Demographies[I: Identifiable]
 
     def resetDeathStrategy: Demography[E] =
       copy(death = death.resetStrategy)
+
+  case class DemographyConfig[C](populationSize: Int,
+                                 populationConfig: C,
+                                 birthRate: Rate,
+                                 deathRate: Rate)

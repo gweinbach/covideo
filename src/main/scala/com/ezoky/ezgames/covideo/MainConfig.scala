@@ -43,6 +43,6 @@ import com.ezoky.ezgames.covideo.MainConfig.{*, given}
 
 def step(game: Generated[Game]): Generated[IO[Game]] =
   for
-    nextGame <- game.evolve
+    nextGame <- game.beBornAndDie.evolve
   yield
     nextGame.move.accelerate.rotate.angularAccelerate.display

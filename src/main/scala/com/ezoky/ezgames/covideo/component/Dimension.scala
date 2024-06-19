@@ -16,9 +16,6 @@ import spire.implicits.*
 import spire.math.*
 import spire.math.Numeric.*
 
-//import scala.math.Integral.Implicits.infixIntegralOps
-import scala.util.Random
-
 /**
  * @author gweinbach on 15/11/2020
  * @since 0.1.0

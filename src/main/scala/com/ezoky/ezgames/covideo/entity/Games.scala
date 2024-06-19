@@ -13,6 +13,7 @@ import com.ezoky.ezgames.covideo.component.{AllComponents, Dimension, Identifiab
 trait Games[I: Identifiable, D: Dimension]
   extends Worlds[I, D]
     with Persons[I, D]
+    with Demographies[I]
     with Entities[I]
     with AllComponents[D]:
 
@@ -26,19 +27,21 @@ trait Games[I: Identifiable, D: Dimension]
     case object Terminated extends GameStatus
 
   case class Game(world: World,
-                  people: Population[Person],
+                  demography: Demography[Person],
                   status: GameStatus = GameStatus.Running):
 
     def withWorld(world: World): Game =
       copy(world = world)
 
+    def withDemography(demography: Demography[Person]): Game =
+      copy(demography = demography)
+
     def withPeople(people: Population[Person]): Game =
-      copy(people = people)
+      copy(demography = demography.withPopulation(people))
 
     def terminate(): Game =
       copy(status = GameStatus.Terminated)
 
-  case class GameConfig(populationSize: Int,
-                        personConfig: PersonConfig,
-                        worldConfig: WorldConfig)
+  case class GameConfig(worldConfig: WorldConfig,
+                        demographyConfig: DemographyConfig[PersonConfig])
 

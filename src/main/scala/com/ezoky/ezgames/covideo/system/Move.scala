@@ -21,10 +21,17 @@ trait Moves[I: Identifiable, D: Dimension]
     extension (people: Population[Person])
       override def move: Population[Person] =
         people.map(_.move)
-        
+
+  given Move[Demography[Person]] with
+    extension (demography: Demography[Person])
+      override def move: Demography[Person] =
+        demography.withPopulation(
+          demography.population.move
+        )
+  
   given Move[Game] with
-    extension(game: Game)
+    extension (game: Game)
       override def move: Game =
-        game.withPeople(
-          game.people.move
+        game.withDemography(
+          game.demography.move
         )
