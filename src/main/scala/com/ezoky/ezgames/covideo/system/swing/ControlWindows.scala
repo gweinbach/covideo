@@ -34,12 +34,13 @@ trait ControlWindows[I: Identifiable, D: Dimension : Numeric]
     println("Creating a ControlWindow")
     control.subscribeToUpdates(_nearSlider.notifyChange)
     control.subscribeToUpdates(_farSlider.notifyChange)
+    control.subscribeToUpdates(_populationSizeValue.notifyChange)
 
     def display(): Unit =
       initUI()
 
     /**
-     * Use to control View Frustum's near pane distance from Camera
+     * Used to control View Frustum's near pane distance from Camera
      */
     private lazy val _nearSlider = ControlSlider(
       () => control.getControl(ControlledItem.ViewFrustum).near.toInt,
@@ -50,7 +51,7 @@ trait ControlWindows[I: Identifiable, D: Dimension : Numeric]
     )
 
     /**
-     * Use to control View Frustum's far pane distance from Camera
+     * Used to control View Frustum's far pane distance from Camera
      */
     private lazy val _farSlider = ControlSlider(
       () => control.getControl(ControlledItem.ViewFrustum).far.toInt,
@@ -58,6 +59,13 @@ trait ControlWindows[I: Identifiable, D: Dimension : Numeric]
       label = "far",
       min = control.getControl(ControlledItem.ViewFrustum).minFar.toInt,
       max = control.getControl(ControlledItem.ViewFrustum).maxFar.toInt
+    )
+
+    /**
+     * Used to disply population size
+     */
+    private lazy val _populationSizeValue = ValueDisplay(
+      () => control.getControl(ControlledItem.Game).populationSize.toString
     )
 
     private lazy val _sliderPanel =
@@ -76,11 +84,18 @@ trait ControlWindows[I: Identifiable, D: Dimension : Numeric]
       val panel = getContentPane()
       panel.setLayout(gbLayout)
 
-      val checkbox = new JCheckBox("lock depth", true)
       gbConstraints.fill = GridBagConstraints.HORIZONTAL
       gbConstraints.anchor = GridBagConstraints.PAGE_START
       gbConstraints.gridx = 0
       gbConstraints.gridy = 0
+      gbConstraints.gridwidth = 1
+      panel.add(_populationSizeValue, gbConstraints)
+
+      val checkbox = new JCheckBox("lock depth", true)
+      gbConstraints.fill = GridBagConstraints.HORIZONTAL
+      gbConstraints.anchor = GridBagConstraints.PAGE_START
+      gbConstraints.gridx = 0
+      gbConstraints.gridy = 1
       gbConstraints.gridwidth = 1
       panel.add(checkbox, gbConstraints)
       checkbox.addItemListener((e: ItemEvent) =>
@@ -90,13 +105,13 @@ trait ControlWindows[I: Identifiable, D: Dimension : Numeric]
 
       gbConstraints.anchor = GridBagConstraints.CENTER
       gbConstraints.gridx = 0
-      gbConstraints.gridy = 1
+      gbConstraints.gridy = 2
       panel.add(_sliderPanel, gbConstraints)
 
       val exitButton = new JButton("Exit")
       gbConstraints.anchor = GridBagConstraints.PAGE_END
       gbConstraints.gridx = 0
-      gbConstraints.gridy = 2
+      gbConstraints.gridy = 3
       panel.add(exitButton, gbConstraints)
 
 
@@ -135,28 +150,29 @@ trait ControlWindows[I: Identifiable, D: Dimension : Numeric]
                                      min: Int,
                                      max: Int)
     extends JPanel:
+
     setLayout(new BorderLayout)
-    val jLabel = new JLabel(label, SwingConstants.CENTER)
-    val initialValue = getter()
-    val actualValue =
-      if initialValue < min then
+    private val _jLabel = new JLabel(label, SwingConstants.CENTER)
+    private val _initialValue = getter()
+    private val _actualValue =
+      if _initialValue < min then
         setter(min)
         min
       else
-        initialValue
-    val actualMax =
-      if actualValue > max then actualValue else max
-    println(s"slider($label)=$initialValue, actualValue=$actualValue, actualMax=$actualMax")
-    val jSlider = new JSlider(
+        _initialValue
+    private val _actualMax =
+      if _actualValue > max then _actualValue else max
+    println(s"slider($label)=$_initialValue, actualValue=$_actualValue, actualMax=$_actualMax")
+    private val _jSlider = new JSlider(
       SwingConstants.VERTICAL,
       min,
-      actualMax,
-      actualValue
+      _actualMax,
+      _actualValue
     )
-    add(jLabel, BorderLayout.NORTH)
-    add(jSlider, BorderLayout.SOUTH)
+    add(_jLabel, BorderLayout.NORTH)
+    add(_jSlider, BorderLayout.SOUTH)
 
-    jSlider.addChangeListener(new ChangeListener() {
+    _jSlider.addChangeListener(new ChangeListener() {
       override def stateChanged(e: ChangeEvent): Unit = {
         val value = e.getSource.asInstanceOf[JSlider].getValue
         setter(value)
@@ -164,5 +180,15 @@ trait ControlWindows[I: Identifiable, D: Dimension : Numeric]
     })
 
     def notifyChange(): Unit =
-      println(s"value = ${getter()}")
-      jSlider.setValue(getter())
+//      println(s"slider value = ${getter()}")
+      _jSlider.setValue(getter())
+
+  
+  private[swing] class ValueDisplay(getter: () => String)
+    extends JLabel:
+
+    setText(getter())
+
+    def notifyChange(): Unit =
+//      println(s"displayed value = ${getter()}")
+      setText(getter())

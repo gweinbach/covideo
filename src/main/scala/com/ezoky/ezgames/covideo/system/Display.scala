@@ -123,6 +123,22 @@ trait Displays[I: Identifiable, D: Dimension : Numeric]
         yield
           world.withScene(displayedScene)
 
+  given [E <: Entity] (using DisplaySystem, Display[Scene]): Display[Demography[E]] with
+    extension (demography: Demography[E])
+      override def display: IO[Demography[E]] =
+
+        val displaySystem = summon[DisplaySystem]
+        for
+          controlModel <- displaySystem.popControlModel(ControlledItem.Game)
+          displayedGameControl =
+            controlModel.updateControl(ControlledItem.Game, _.withPopulationSize(demography.population.number))
+
+          // side effects
+          _ <- displaySystem.updateControlModel(displayedGameControl)
+        yield
+          demography // is not altered by "display"
+
+
   given (using DisplaySystem, Display[World]): Display[Game] with
     extension (game: Game)
       override def display: IO[Game] =
@@ -136,15 +152,16 @@ trait Displays[I: Identifiable, D: Dimension : Numeric]
           else
             game
 
+          displayedDemography <- controlledGame.demography.display
           displayedWorld <- controlledGame.world.display
 
           // side effects
-          _ <- displaySystem.dispose(gameControl.doExit) 
+          _ <- displaySystem.dispose(gameControl.doExit)
 
         yield
-          controlledGame.withWorld(
-            displayedWorld
-          )
+          controlledGame
+            .withDemography(displayedDemography)
+            .withWorld(displayedWorld)
 
 
 

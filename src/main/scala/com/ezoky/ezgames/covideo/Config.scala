@@ -75,7 +75,7 @@ object Config:
     DemographyConfig(
       populationSize = PopulationSize,
       Person,
-      birthRate = Rate(0.011),
+      birthRate = Rate(0.02),
       deathRate = Rate(0.01)
     )
   val Game =

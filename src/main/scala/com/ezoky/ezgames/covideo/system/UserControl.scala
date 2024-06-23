@@ -207,23 +207,29 @@ trait UserCommands[I: Identifiable, D: Dimension : Numeric]
             entityControl
 
 
-  case class GameControl(doExit: Boolean = false,
+  case class GameControl(populationSize: Int = 0,
+                         doExit: Boolean = false,
+                         updatedPopulationSize: Boolean = false,
                          updatedExited: Boolean = false)
     extends ItemControl:
 
+    def withPopulationSize(populationSize: Int): GameControl =
+      copy(populationSize = populationSize, updatedPopulationSize = true)
+
     def exit(): GameControl =
-      copy(doExit = true)
+      copy(doExit = true, updatedExited = true)
 
     override def isUpdated: Boolean =
-      updatedExited
+      updatedPopulationSize || updatedExited
 
     override def ackowledgeUpdates(): ItemControl =
-      copy(updatedExited = false)
+      copy(updatedPopulationSize = false, updatedExited = false)
 
     override def equalsState(obj: ItemControl): Boolean =
       obj match
         case that: GameControl =>
-          this.doExit == that.doExit
+          (this.populationSize == that.populationSize) &&
+            (this.doExit == that.doExit)
         case _ =>
           false
 
