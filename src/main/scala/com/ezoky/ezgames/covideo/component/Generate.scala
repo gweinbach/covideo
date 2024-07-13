@@ -30,20 +30,32 @@ object Generate:
 
   given Generated[Double] = GeneratedDouble
   given Generated[Float] = GeneratedDouble.map(_.toFloat)
+  given Generated[BigDecimal] = GeneratedDouble.map(_.toBigDecimal)
+
   given Generated[Long] = GeneratedLong
   given Generated[Int] = GeneratedLong.map(_.toInt)
   given Generated[Short] = GeneratedLong.map(_.toShort)
   given Generated[Byte] = GeneratedLong.map(_.toByte)
-  
-  // TODO: add some Property Based Tests
-  def generatedBetweenFractional[T: Generated : Fractional](min: T,
-                                                            max: T): Generated[T] =
+  given Generated[BigInt] = GeneratedLong.map(_.toBigInt)
+
+
+  /**
+   * Range is left and right opened, i.e. generates in range [minBound;maxBound]
+   */
+  def generatedBetweenFractional[T: Generated : Fractional](bound1: T,
+                                                            bound2: T): Generated[T] =
+    val min = Fractional[T].min(bound1, bound2)
+    val max = Fractional[T].max(bound1, bound2)
     summon[Generated[T]].map(d => min + (d * (max - min)))
 
-  // TODO: add some Property Based Tests
-  def generatedBetweenIntegral[T: Generated : Integral](min: T,
-                                                        max: T): Generated[T] =
-    summon[Generated[T]].map(d => min + (d emod (max - min)))
+  /**
+   * Range is left opened and right closed, i.e. generates in range [minBound;maxBound[
+   */
+  def generatedBetweenIntegral[T: Generated : Integral](bound1: T,
+                                                        bound2: T): Generated[T] =
+    val min = Integral[T].min(bound1, bound2)
+    val max = Integral[T].max(bound1, bound2) + 1
+    summon[Generated[T]].map(i => min + (i emod (max - min)))
 
 
   object Generated:

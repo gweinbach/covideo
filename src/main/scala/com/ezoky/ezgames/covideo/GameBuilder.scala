@@ -42,12 +42,12 @@ case class DemographyBuilder(area: Box,
         Population(people),
         birth = PopulationDynamics.RandomBirth(
           demographyConfig.birthRate,
-          PopulationDynamicsStrategy.Flat,
+          PopulationDynamicsProfile.Flat,
           PersonBuilder(area, demographyConfig.populationConfig).build
         ),
         death = PopulationDynamics.RandomDeath(
           demographyConfig.deathRate,
-          PopulationDynamicsStrategy.Flat
+          PopulationDynamicsProfile.Flat
         )
       )
 

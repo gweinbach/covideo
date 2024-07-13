@@ -74,6 +74,10 @@ trait Entities[I: Identifiable]:
           map + (entity.id -> entity)
       }
 
+    def apply[T <: Entity](entities: T*): Population[T] =
+      apply(entities)
+
+    @targetName("applyTuples")
     def apply[T](keyValues: (I, T)*): Population[T] =
       Map.from(keyValues)
 

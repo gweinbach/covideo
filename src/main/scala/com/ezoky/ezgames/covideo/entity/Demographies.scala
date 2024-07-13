@@ -9,21 +9,39 @@ import spire.math.*
 trait Demographies[I: Identifiable]
   extends Entities[I]:
 
-  trait PopulationDynamicsStrategy:
-    def apply[A](toApply: () => Generated[Population[A]]): (PopulationDynamicsStrategy, Generated[Population[A]])
+  trait PopulationDynamicsProfile:
+    def apply[A](toApply: () => Generated[Population[A]]): (PopulationDynamicsProfile, Generated[Population[A]])
 
-    def reset: PopulationDynamicsStrategy
+    def reset: PopulationDynamicsProfile
 
-  object PopulationDynamicsStrategy:
+    protected lazy val profile: LazyList[Boolean]
+
+    infix def +(other: PopulationDynamicsProfile): PopulationDynamicsProfile =
+      PopulationDynamicsProfile.add(this, other)
+
+    infix def *(other: PopulationDynamicsProfile): PopulationDynamicsProfile =
+      PopulationDynamicsProfile.mult(this, other)
+
+  object PopulationDynamicsProfile:
 
     /**
      * No population evolution
      */
-    case object Zero extends PopulationDynamicsStrategy:
+    case object Zero extends PopulationDynamicsProfile:
       def apply[A](toApply: () => Generated[Population[A]]): (Zero.type, Generated[Population[A]]) =
         (this, Generated.unit(Population.empty[A]))
 
       override def reset: Zero.type = this
+
+      override protected lazy val profile: LazyList[Boolean] = LazyList()
+
+    def add(profile1: PopulationDynamicsProfile,
+            profile2: PopulationDynamicsProfile): PopulationDynamicsProfile =
+      Variable.once(profile1.profile.zipAll(profile2.profile, false, false).map(p => p._1 || p._2))
+
+    def mult(profile1: PopulationDynamicsProfile,
+             profile2: PopulationDynamicsProfile): PopulationDynamicsProfile =
+      Variable.once(profile1.profile.zipAll(profile2.profile, false, false).map(p => p._1 && p._2))
 
     /**
      * Population evolves once then nothing happens until reset.
@@ -31,7 +49,7 @@ trait Demographies[I: Identifiable]
      * @param armed
      */
     case class OneShot(armed: Boolean = true)
-      extends PopulationDynamicsStrategy:
+      extends PopulationDynamicsProfile:
 
       override def apply[A](toApply: () => Generated[Population[A]]): (OneShot, Generated[Population[A]]) =
         armed match
@@ -43,43 +61,151 @@ trait Demographies[I: Identifiable]
       override def reset: OneShot =
         OneShot(armed = true)
 
+      override protected lazy val profile: LazyList[Boolean] =
+        true #:: LazyList.continually(false)
+
+
     /**
      * Always evolving.
      */
-    case object Flat extends PopulationDynamicsStrategy:
+    case object Flat extends PopulationDynamicsProfile:
       override def apply[A](toApply: () => Generated[Population[A]]): (Flat.type, Generated[Population[A]]) =
         (this, toApply())
 
       override def reset: Flat.type =
         this
 
+      override protected lazy val profile: LazyList[Boolean] =
+        LazyList.continually(true)
 
-  case class PopulationDynamics[E <: Entity](strategy: PopulationDynamicsStrategy,
+
+    case class Variable private(currentProfile: LazyList[Boolean],
+                                initialProfile: LazyList[Boolean],
+                                autoResetOnEnd: Boolean) extends PopulationDynamicsProfile:
+      override def apply[A](toApply: () => Generated[Population[A]]): (Variable, Generated[Population[A]]) =
+        currentProfile match
+          case true #:: profileTail =>
+            (Variable(profileTail, initialProfile, autoResetOnEnd), toApply())
+          case false #:: profileTail =>
+            (Variable(profileTail, initialProfile, autoResetOnEnd), Generated.unit(Population.empty[A]))
+          case LazyList() =>
+            if (!autoResetOnEnd) || initialProfile.isEmpty then
+              (this, Generated.unit(Population.empty[A]))
+            else
+              reset.apply(toApply)
+
+      override def reset: Variable =
+        Variable(initialProfile, initialProfile, autoResetOnEnd)
+
+      override protected lazy val profile: LazyList[Boolean] =
+        if autoResetOnEnd then
+          LazyList.continually(initialProfile).flatten
+        else
+          initialProfile
+
+    object Variable:
+
+      def apply(initialProfile: LazyList[Boolean]): Variable =
+        repeat(initialProfile)
+
+      def repeat(initialProfile: LazyList[Boolean]): Variable =
+        new Variable(initialProfile, initialProfile, autoResetOnEnd = true)
+
+      def once(initialProfile: LazyList[Boolean]): Variable =
+        new Variable(initialProfile, initialProfile, autoResetOnEnd = false)
+
+  
+  
+  /**
+   *
+   * @param profile
+   * @param populationSelection
+   * @tparam E
+   */
+  case class PopulationDynamics[E <: Entity](profile: PopulationDynamicsProfile,
                                              populationSelection: Generated[Population[E]] => Generated[Population[E]]):
 
+//    def evolve(population: Generated[Population[E]]): (PopulationDynamics[E], Generated[Population[E]]) =
+//      val selected = selectForEvolution(population)
+//      (
+//        selected._1,
+//        for
+//          initialPopulation <- population
+//          selectedPopulation <- selected._2
+//        yield
+//          selectedPopulation._1 match
+//            case Birth =>
+//              initialPopulation ++ selectedPopulation
+//            case Death =>
+//              initialPopulation -- selectedPopulation
+//      )
+        
     def evolve(population: Generated[Population[E]]): (PopulationDynamics[E], Generated[Population[E]]) =
-      val evolution = strategy(() => populationSelection(population))
-      (copy(strategy = evolution._1), evolution._2)
+      val evolution = profile(() => populationSelection(population))
+      (withProfile(evolution._1), evolution._2)
 
-    def withStrategy(newStrategy: PopulationDynamicsStrategy): PopulationDynamics[E] =
-      copy(strategy = newStrategy)
+    def resetProfile: PopulationDynamics[E] =
+      withProfile(profile.reset)
+      
+    def withProfile(newProfile: PopulationDynamicsProfile): PopulationDynamics[E] =
+      copy(profile = newProfile)
 
-    def resetStrategy: PopulationDynamics[E] =
-      copy(strategy = strategy.reset)
+
+//    infix def +(other: PopulationDynamics[E]): PopulationDynamics[E] =
+//      PopulationDynamics.Add(this, other)
+//
+//    infix def -(other: PopulationDynamics[E]): PopulationDynamics[E] =
+//      PopulationDynamics.Substract(this, other)
+//
+//    def unary_- : PopulationDynamics[E] =
+//      PopulationDynamics.Minus(this)
+
 
   object PopulationDynamics:
 
     def NoEvolution[E <: Entity]: PopulationDynamics[E] =
       PopulationDynamics(
-        strategy = PopulationDynamicsStrategy.Zero,
+        profile = PopulationDynamicsProfile.Zero,
         populationSelection = _ => Generated.unit(Population.empty[E])
       )
 
+//    def Add[E <: Entity](dynamics1: PopulationDynamics[E],
+//                         dynamics2: PopulationDynamics[E]): PopulationDynamics[E] =
+//      PopulationDynamics(
+//        profile = dynamics1.profile + dynamics2.profile,
+//        populationSelection =
+//          (genPopulation: Generated[Population[E]]) =>
+//            for
+//              populationSelection1 <- dynamics1.populationSelection(genPopulation)
+//              populationSelection2 <- dynamics2.populationSelection(genPopulation)
+//            yield
+//              populationSelection1 ++ populationSelection2
+//      )
+//
+//    def Substract[E <: Entity](dynamics1: PopulationDynamics[E],
+//                               dynamics2: PopulationDynamics[E]): PopulationDynamics[E] =
+//      PopulationDynamics(
+//        profile = dynamics1.profile + dynamics2.profile,
+//        populationSelection =
+//          (genPopulation: Generated[Population[E]]) =>
+//            for
+//              populationSelection1 <- dynamics1.populationSelection(genPopulation)
+//              populationSelection2 <- dynamics2.populationSelection(genPopulation)
+//            yield
+//              populationSelection1 -- populationSelection2
+//      )
+//
+//    def Minus[E <: Entity](dynamics: PopulationDynamics[E]): PopulationDynamics[E] =
+//      Substract(
+//        NoEvolution[E],
+//        dynamics
+//      )
+
     def RandomBirth[E <: Entity](birthRate: Rate,
-                                 strategy: PopulationDynamicsStrategy,
+                                 profile: PopulationDynamicsProfile,
                                  beBorn: => Generated[E]): PopulationDynamics[E] =
       PopulationDynamics(
-        strategy = strategy,
+        profile = profile,
         populationSelection =
           (genPopulation: Generated[Population[E]]) =>
             for
@@ -90,9 +216,11 @@ trait Demographies[I: Identifiable]
       )
 
     def RandomDeath[E <: Entity](deathRate: Rate,
-                                 strategy: PopulationDynamicsStrategy): PopulationDynamics[E] =
+                                 profile: PopulationDynamicsProfile): PopulationDynamics[E] =
+      //      Substract(
+      //        NoEvolution[E],
       PopulationDynamics(
-        strategy = strategy,
+        profile = profile,
         populationSelection =
           (genPopulation: Generated[Population[E]]) =>
             for
@@ -101,6 +229,7 @@ trait Demographies[I: Identifiable]
             yield
               Population(deadSet.map(deadIndex => population.indexOf(deadIndex)))
       )
+  //      )
 
 
   case class Demography[E <: Entity](population: Population[E],
@@ -119,21 +248,21 @@ trait Demographies[I: Identifiable]
           birth = afterBirth._1,
           death = afterDeath._1
         )
-        
+
     def withPopulation(population: Population[E]): Demography[E] =
       copy(population = population)
-      
-    def withBirthStrategy(birthStrategy: PopulationDynamicsStrategy): Demography[E] =
-      copy(birth = birth.withStrategy(birthStrategy))
 
-    def withDeathStrategy(deathStrategy: PopulationDynamicsStrategy): Demography[E] =
-      copy(death = death.withStrategy(deathStrategy))
+    def withBirthProfile(birthProfile: PopulationDynamicsProfile): Demography[E] =
+      copy(birth = birth.withProfile(birthProfile))
 
-    def resetBirthStrategy: Demography[E] =
-      copy(birth = birth.resetStrategy)
+    def withDeathProfile(deathProfile: PopulationDynamicsProfile): Demography[E] =
+      copy(death = death.withProfile(deathProfile))
 
-    def resetDeathStrategy: Demography[E] =
-      copy(death = death.resetStrategy)
+    def resetBirthProfile: Demography[E] =
+      copy(birth = birth.resetProfile)
+
+    def resetDeathProfile: Demography[E] =
+      copy(death = death.resetProfile)
 
   case class DemographyConfig[C](populationSize: Int,
                                  populationConfig: C,
