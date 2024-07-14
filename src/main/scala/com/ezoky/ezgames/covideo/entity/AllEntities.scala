@@ -14,6 +14,6 @@ trait AllEntities[I: Identifiable, D: Dimension]
     with Games[I, D]
     with Persons[I, D]
     with Viewables[I, D]
-    with Demographies[I]
+    with Demographics[I]
     with AllComponents[D]
   

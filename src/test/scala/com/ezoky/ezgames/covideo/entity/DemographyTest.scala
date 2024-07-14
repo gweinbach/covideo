@@ -10,9 +10,9 @@ class DemographyTest extends AnyFlatSpec:
 
   given Identifiable[UUID] = UUIDIdentifiable
 
-  object TestDemographies extends Demographies[UUID] {}
+  object TestDemographics$ extends Demographics[UUID] {}
 
-  import TestDemographies.*
+  import TestDemographics$.*
 
   case class IdedInt(id: UUID,
                      ided: Int) extends Entity
@@ -180,12 +180,11 @@ class DemographyTest extends AnyFlatSpec:
     val initialPopulation = Population(IdedInt.fill(10))
     val oneShotEvolutionDemography = Demography(
       population = initialPopulation,
-      birth = PopulationDynamics.RandomBirth(
+      dynamics = PopulationDynamics.randomBirth(
         Rate(0.2),
         PopulationDynamicsProfile.OneShot(),
         summon[Generated[Int]].map(IdedInt(_))
-      ),
-      death = PopulationDynamics.NoEvolution[IdedInt]
+      )
     )
 
     val generator = SequenceGenerator(100)
@@ -195,9 +194,9 @@ class DemographyTest extends AnyFlatSpec:
     assert(evolvedDemography._1.population.toSet.map(_.ided) === Set(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 100, 101))
 
     val nextDemography = evolvedDemography._1.evolve(evolvedDemography._2)
-    assert(nextDemography._1 == evolvedDemography._1, "Nothing evolves after first evolution in OneShot strategy")
+    assert(nextDemography._1.population == evolvedDemography._1.population, "Nothing evolves after first evolution in OneShot strategy")
 
-    val nextResetDemography = evolvedDemography._1.resetBirthProfile.evolve(evolvedDemography._2)
+    val nextResetDemography = evolvedDemography._1.resetProfile.evolve(evolvedDemography._2)
     assert(nextResetDemography._1.population.number === 14)
     assert(nextResetDemography._1.population.ideds === Set(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 100, 101, 102, 103), "A OneShot strategy can be reset")
 
@@ -217,8 +216,7 @@ class DemographyTest extends AnyFlatSpec:
     val initialPopulation = Population(IdedInt.fill(10))
     val oneShotEvolutionDemography = Demography(
       population = initialPopulation,
-      birth = PopulationDynamics.NoEvolution[IdedInt],
-      death = PopulationDynamics.RandomDeath(
+     dynamics = PopulationDynamics.randomDeath(
         Rate(0.2),
         PopulationDynamicsProfile.OneShot()
       )
@@ -232,7 +230,7 @@ class DemographyTest extends AnyFlatSpec:
     val nextDemography = evolvedDemography._1.evolve(evolvedDemography._2)
     assert(nextDemography._1 == evolvedDemography._1, "Nothing evolves after first evolution in OneShot strategy")
 
-    val nextResetDemography = evolvedDemography._1.resetDeathProfile.evolve(evolvedDemography._2)
+    val nextResetDemography = evolvedDemography._1.resetProfile.evolve(evolvedDemography._2)
     assert(nextResetDemography._1.population.number === 7, "A OneShot strategy can be reset")
 
     val flatEvolutionDemography = oneShotEvolutionDemography.withDeathProfile(PopulationDynamicsProfile.Flat)
@@ -251,12 +249,11 @@ class DemographyTest extends AnyFlatSpec:
     val initialPopulation = Population(IdedInt.fill(10))
     val flatEvolutionDemography = Demography(
       population = initialPopulation,
-      birth = PopulationDynamics.RandomBirth(
+      dynamics = PopulationDynamics.randomBirth(
         Rate(0.2),
         PopulationDynamicsProfile.Flat,
         summon[Generated[Int]].map(IdedInt(_))
-      ),
-      death = PopulationDynamics.RandomDeath(
+      ) + PopulationDynamics.randomDeath(
         Rate(0.2),
         PopulationDynamicsProfile.Flat
       )

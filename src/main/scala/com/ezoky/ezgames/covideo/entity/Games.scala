@@ -13,7 +13,7 @@ import com.ezoky.ezgames.covideo.component.{AllComponents, Dimension, Identifiab
 trait Games[I: Identifiable, D: Dimension]
   extends Worlds[I, D]
     with Persons[I, D]
-    with Demographies[I]
+    with Demographics[I]
     with Entities[I]
     with AllComponents[D]:
 
