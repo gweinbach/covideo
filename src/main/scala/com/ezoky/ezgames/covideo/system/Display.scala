@@ -131,7 +131,7 @@ trait Displays[I: Identifiable, D: Dimension : Numeric]
         for
           controlModel <- displaySystem.popControlModel(ControlledItem.Game)
           displayedGameControl =
-            controlModel.updateControl(ControlledItem.Game, _.withPopulationSize(demography.population.number))
+            controlModel.updateControl(ControlledItem.Game, _.withPopulationSize(demography.population.size))
 
           // side effects
           _ <- displaySystem.updateControlModel(displayedGameControl)

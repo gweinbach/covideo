@@ -190,14 +190,14 @@ class DemographyTest extends AnyFlatSpec:
     val generator = SequenceGenerator(100)
 
     val evolvedDemography = oneShotEvolutionDemography.evolve(generator)
-    assert(evolvedDemography._1.population.number === 12)
+    assert(evolvedDemography._1.population.size === 12)
     assert(evolvedDemography._1.population.toSet.map(_.ided) === Set(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 100, 101))
 
     val nextDemography = evolvedDemography._1.evolve(evolvedDemography._2)
     assert(nextDemography._1.population == evolvedDemography._1.population, "Nothing evolves after first evolution in OneShot strategy")
 
     val nextResetDemography = evolvedDemography._1.resetProfile.evolve(evolvedDemography._2)
-    assert(nextResetDemography._1.population.number === 14)
+    assert(nextResetDemography._1.population.size === 14)
     assert(nextResetDemography._1.population.ideds === Set(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 100, 101, 102, 103), "A OneShot strategy can be reset")
 
     val flatEvolutionDemography = oneShotEvolutionDemography.withBirthProfile(PopulationDynamicsProfile.Flat)
@@ -225,23 +225,23 @@ class DemographyTest extends AnyFlatSpec:
     val generator = SequenceGenerator(5)
 
     val evolvedDemography = oneShotEvolutionDemography.evolve(generator)
-    assert(evolvedDemography._1.population.number === 8)
+    assert(evolvedDemography._1.population.size === 8)
 
     val nextDemography = evolvedDemography._1.evolve(evolvedDemography._2)
     assert(nextDemography._1 == evolvedDemography._1, "Nothing evolves after first evolution in OneShot strategy")
 
     val nextResetDemography = evolvedDemography._1.resetProfile.evolve(evolvedDemography._2)
-    assert(nextResetDemography._1.population.number === 7, "A OneShot strategy can be reset")
+    assert(nextResetDemography._1.population.size === 7, "A OneShot strategy can be reset")
 
     val flatEvolutionDemography = oneShotEvolutionDemography.withDeathProfile(PopulationDynamicsProfile.Flat)
     val evolvedFlatDemography = flatEvolutionDemography.evolve(generator)
-    assert(evolvedFlatDemography._1.population.number === nextDemography._1.population.number, "At first step, Flat strategy and OneShot strategies are the same")
+    assert(evolvedFlatDemography._1.population.size === nextDemography._1.population.size, "At first step, Flat strategy and OneShot strategies are the same")
     val nextFlatDemography = evolvedFlatDemography._1.evolve(evolvedFlatDemography._2)
-    assert(nextFlatDemography._1.population.number === nextResetDemography._1.population.number, "At second step a Flat strategy still evolves")
+    assert(nextFlatDemography._1.population.size === nextResetDemography._1.population.size, "At second step a Flat strategy still evolves")
 
     val zeroEvolutionDemography = oneShotEvolutionDemography.withDeathProfile(PopulationDynamicsProfile.Zero)
     val evolvedZeroEvolutionDemography = zeroEvolutionDemography.evolve(generator)
-    assert(evolvedZeroEvolutionDemography._1.population.number === initialPopulation.number, "A Zero strategy never evolves")
+    assert(evolvedZeroEvolutionDemography._1.population.size === initialPopulation.size, "A Zero strategy never evolves")
   }
 
   "equivalent birth rate and death rate with Flat evolution strategy" should "keep population size stable" in {
@@ -264,13 +264,13 @@ class DemographyTest extends AnyFlatSpec:
 
     val step1Demography = flatEvolutionDemography.evolve(generator)
     println(step1Demography._1.population.ideds)
-    assert(step1Demography._1.population.number === initialPopulation.number)
+    assert(step1Demography._1.population.size === initialPopulation.size)
 
     val step2Demography = step1Demography._1.evolve(step1Demography._2)
     println(step2Demography._1.population.ideds)
-    assert(step2Demography._1.population.number == initialPopulation.number)
+    assert(step2Demography._1.population.size == initialPopulation.size)
 
     val step3Demography = step2Demography._1.evolve(step2Demography._2)
     println(step3Demography._1.population.ideds)
-    assert(step3Demography._1.population.number == initialPopulation.number)
+    assert(step3Demography._1.population.size == initialPopulation.size)
   }

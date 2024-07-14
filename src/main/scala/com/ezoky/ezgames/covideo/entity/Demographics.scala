@@ -142,7 +142,7 @@ trait Demographics[I: Identifiable]
               val combinedPopulation = populationCombinator(population1, population2)
               //              println(s"pop1(${population1.number})=${population1.values}")
               //              println(s"pop2(${population2.number})=${population2.values}")
-              //              println(s"popC(${combinedPopulation.number})=${combinedPopulation.values}")
+              //              println(s"popC(${combinedPopulation.size})=${combinedPopulation.values}")
               combinedPopulation
           )
 
@@ -267,7 +267,7 @@ trait Demographics[I: Identifiable]
           (genPopulation: Generated[Population[E]]) =>
             for
               population <- genPopulation
-              newBorn <- Generated.setOf(beBorn)(birthRate(population.number))
+              newBorn <- Generated.setOf(beBorn)(birthRate(population.size))
             yield
               Population(newBorn)
       )
@@ -280,7 +280,7 @@ trait Demographics[I: Identifiable]
           (genPopulation: Generated[Population[E]]) =>
             for
               population <- genPopulation
-              deadSet <- Generated.setOf(Generate.generatedBetweenIntegral(0, population.number - 1))(deathRate(population.number))
+              deadSet <- Generated.setOf(Generate.generatedBetweenIntegral(0, population.size - 1))(deathRate(population.size))
             yield
               Population(deadSet.map(deadIndex => population.indexOf(deadIndex)))
       )

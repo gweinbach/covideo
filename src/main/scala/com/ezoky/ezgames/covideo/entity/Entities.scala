@@ -5,21 +5,21 @@ import com.ezoky.ezgames.covideo.component.Identifiable
 import scala.annotation.targetName
 
 trait Entities[I: Identifiable]:
-  
+
   trait Entity:
     val id: I
-  
+
     override def equals(obj: Any): Boolean =
       obj match
         case that: Entity =>
           (that != null) && (that.id == this.id)
-        case default =>
+        case _ =>
           false
-     
+
     override def hashCode(): Int =
       id.hashCode()
 
-  
+
   opaque type Population[+E] = Map[I, E]
 
   /**
@@ -30,12 +30,12 @@ trait Entities[I: Identifiable]:
     @targetName("addEntity")
     infix def +(v: A): Population[A] =
       population + (v.id -> v)
-    
-  
+
+
   extension [A](population: Population[A])
 
     @targetName("populationSize")
-    def number: Int =
+    def size: Int =
       population.size
 
     def toSet: Set[A] =
@@ -45,7 +45,7 @@ trait Entities[I: Identifiable]:
       population.values
 
     def indexOf(n: Int): A =
-      population.drop(n).take(1).head._2
+      population.slice(n, n + 1).head._2
 
     @targetName("add")
     infix def +(kv: (I, A)): Population[A] =
@@ -65,7 +65,7 @@ trait Entities[I: Identifiable]:
     def foldLeft[B](z: B)(op: (B, (I, A)) => B): B =
       Population.foldLeft(population)(z)(op)
 
-  
+
   object Population:
 
     def apply[T <: Entity](entities: Iterable[T]): Population[T] =
