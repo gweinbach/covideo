@@ -50,17 +50,16 @@ trait Demographics[I: Identifiable]
     /**
      * Population evolves once then nothing happens until reset.
      *
-     * @param armed
+     * @param armed if true transformation will work, if false not
      */
     case class OneShot(armed: Boolean = true)
       extends PopulationDynamicsProfile:
 
       override def apply[A](toApply: () => Generated[Population[A]]): (OneShot, Generated[Population[A]]) =
-        armed match
-          case true =>
-            (OneShot(false), toApply())
-          case false =>
-            (this, Generated.unit(Population.empty[A]))
+        if armed then
+          (OneShot(false), toApply())
+        else
+          (this, Generated.unit(Population.empty[A]))
 
       override def reset: OneShot =
         OneShot(armed = true)
@@ -118,15 +117,15 @@ trait Demographics[I: Identifiable]
       def once(initialProfile: LazyList[Boolean]): Variable =
         new Variable(initialProfile, initialProfile, autoResetOnEnd = false)
 
-  protected type PopulationEvolution[E <: Entity] = (Population[E], Population[E]) => Population[E]
+  private type PopulationCombinator[E <: Entity] = (Population[E], Population[E]) => Population[E]
 
   sealed trait PopulationDynamics[E <: Entity]:
 
     final def evolve(initialPopulation: Generated[Population[E]]): (PopulationDynamics[E], Generated[Population[E]]) =
       applyEvolutions(initialPopulation, describeEvolutions(initialPopulation))
 
-    final protected def applyEvolutions(initialPopulation: Generated[Population[E]],
-                                        evolutions: List[(PopulationDynamics[E], Generated[Population[E]], PopulationEvolution[E])]): (PopulationDynamics[E], Generated[Population[E]]) =
+    private def applyEvolutions(initialPopulation: Generated[Population[E]],
+                                        evolutions: List[(PopulationDynamics[E], Generated[Population[E]], PopulationCombinator[E])]): (PopulationDynamics[E], Generated[Population[E]]) =
       evolutions match
         case Nil =>
           (NoEvolution[E](), initialPopulation)
@@ -146,7 +145,7 @@ trait Demographics[I: Identifiable]
               combinedPopulation
           )
 
-    def describeEvolutions(initialPopulation: Generated[Population[E]]): List[(PopulationDynamics[E], Generated[Population[E]], PopulationEvolution[E])]
+    def describeEvolutions(initialPopulation: Generated[Population[E]]): List[(PopulationDynamics[E], Generated[Population[E]], PopulationCombinator[E])]
 
     def resetProfile(): PopulationDynamics[E]
 
@@ -170,11 +169,11 @@ trait Demographics[I: Identifiable]
                                                            populationEvolution: (Population[E], Population[E]) => Population[E])
     extends PopulationDynamics[E]:
 
-    override def describeEvolutions(initialPopulation: Generated[Population[E]]): List[(PopulationDynamics[E], Generated[Population[E]], PopulationEvolution[E])] =
+    override def describeEvolutions(initialPopulation: Generated[Population[E]]): List[(PopulationDynamics[E], Generated[Population[E]], PopulationCombinator[E])] =
       val selection = selectPopulation(initialPopulation)
       List((selection._1, selection._2, populationEvolution))
 
-    protected def selectPopulation(population: Generated[Population[E]]): (PopulationDynamics[E], Generated[Population[E]]) =
+    private def selectPopulation(population: Generated[Population[E]]): (PopulationDynamics[E], Generated[Population[E]]) =
       val evolution = profile(() => populationSelection(population))
       (withProfile(evolution._1), evolution._2)
 
@@ -216,7 +215,7 @@ trait Demographics[I: Identifiable]
   case class NoEvolution[E <: Entity]()
     extends PopulationDynamics[E]:
 
-    override def describeEvolutions(initialPopulation: Generated[Population[E]]): List[(PopulationDynamics[E], Generated[Population[E]], PopulationEvolution[E])] =
+    override def describeEvolutions(initialPopulation: Generated[Population[E]]): List[(PopulationDynamics[E], Generated[Population[E]], PopulationCombinator[E])] =
       Nil
 
     override def resetProfile(): PopulationDynamics[E] =
@@ -233,7 +232,7 @@ trait Demographics[I: Identifiable]
                                            dynamics2: PopulationDynamics[E])
     extends PopulationDynamics[E]:
 
-    override def describeEvolutions(initialPopulation: Generated[Population[E]]): List[(PopulationDynamics[E], Generated[Population[E]], PopulationEvolution[E])] =
+    override def describeEvolutions(initialPopulation: Generated[Population[E]]): List[(PopulationDynamics[E], Generated[Population[E]], PopulationCombinator[E])] =
       dynamics1.describeEvolutions(initialPopulation) ++ dynamics2.describeEvolutions(initialPopulation)
 
     override def resetProfile(): PopulationDynamics[E] =
