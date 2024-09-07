@@ -100,6 +100,12 @@ trait Demographics[I: Identifiable]
       override def reset: Variable =
         Variable(initialProfile, initialProfile, autoResetOnEnd)
 
+      def thenWait(stepNumber: Int): Variable =
+        copy(initialProfile = initialProfile ++ LazyList.fill(stepNumber)(false))
+
+      def thenRestart(stepNumber: Int): Variable =
+        copy(initialProfile = initialProfile ++ LazyList.fill(stepNumber)(true))
+
       override protected lazy val profile: LazyList[Boolean] =
         if autoResetOnEnd then
           LazyList.continually(initialProfile).flatten
@@ -110,6 +116,9 @@ trait Demographics[I: Identifiable]
 
       def apply(initialProfile: LazyList[Boolean]): Variable =
         repeat(initialProfile)
+
+      def apply(n: Int): Variable =
+        apply(LazyList.fill(n)(true))
 
       def repeat(initialProfile: LazyList[Boolean]): Variable =
         new Variable(initialProfile, initialProfile, autoResetOnEnd = true)
@@ -125,7 +134,7 @@ trait Demographics[I: Identifiable]
       applyEvolutions(initialPopulation, describeEvolutions(initialPopulation))
 
     private def applyEvolutions(initialPopulation: Generated[Population[E]],
-                                        evolutions: List[(PopulationDynamics[E], Generated[Population[E]], PopulationCombinator[E])]): (PopulationDynamics[E], Generated[Population[E]]) =
+                                evolutions: List[(PopulationDynamics[E], Generated[Population[E]], PopulationCombinator[E])]): (PopulationDynamics[E], Generated[Population[E]]) =
       evolutions match
         case Nil =>
           (NoEvolution[E](), initialPopulation)
@@ -181,7 +190,6 @@ trait Demographics[I: Identifiable]
       withProfile(profile.reset)
 
     def withProfile(newProfile: PopulationDynamicsProfile): PopulationDynamics[E]
-
 
 
   case class Birth[E <: Entity](profile: PopulationDynamicsProfile,
@@ -322,4 +330,29 @@ trait Demographics[I: Identifiable]
   case class DemographyConfig[C](populationSize: Int,
                                  populationConfig: C,
                                  birthRate: Rate,
-                                 deathRate: Rate)
+                                 deathRate: Rate,
+                                 birthProfileDescription: List[Int],
+                                 deathProfileDescription: List[Int]) {
+
+    val birthProfile = profileFromList(birthProfileDescription)
+
+    val deathProfile = profileFromList(deathProfileDescription)
+
+    private def profileFromList(profileList: List[Int]): PopulationDynamicsProfile =
+      if profileList.isEmpty then
+        PopulationDynamicsProfile.Zero
+      else
+        profileFromListTail(PopulationDynamicsProfile.Variable(profileList.head), profileList.tail, false)
+
+    @tailrec
+    private def profileFromListTail(headProfile: PopulationDynamicsProfile.Variable,
+                                    profileListTail: List[Int],
+                                    on: Boolean): PopulationDynamicsProfile =
+      profileListTail match
+        case Nil =>
+          headProfile
+        case length :: tail if on =>
+          profileFromListTail(headProfile.thenRestart(length), tail, false)
+        case length :: tail if !on =>
+          profileFromListTail(headProfile.thenWait(length), tail, true)
+  }

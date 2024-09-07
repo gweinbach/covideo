@@ -76,7 +76,9 @@ object Config:
       populationSize = PopulationSize,
       Person,
       birthRate = Rate(0.02),
-      deathRate = Rate(0.01)
+      birthProfileDescription = List(1,49),
+      deathRate = Rate(0.02),
+      deathProfileDescription = List(0,33,1,33,1,32),
     )
   val Game =
     GameConfig(
