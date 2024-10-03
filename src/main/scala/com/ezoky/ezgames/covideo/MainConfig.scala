@@ -22,11 +22,12 @@ object MainConfig:
   given Identifiable[UUID] = UUIDIdentifiable
 
   object Everything
-    extends GameBootstrap[UUID, Double]
+    extends SwingGameBootstrap[UUID, Double]
+//    extends JavaFXGameBootstrap[UUID, Double]
 
   import Everything.DisplaySystem
 
-  given DisplaySystem = Everything.SwingDisplaySystem(Config.UserControl)
+  given DisplaySystem = Everything.displaySystem(Config.UserControl)
 
 
 import com.ezoky.ezgames.covideo.MainConfig.Everything.{*, given}

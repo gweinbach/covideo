@@ -7,16 +7,12 @@ package com.ezoky.ezgames.covideo.system.swing
 
 
 import com.ezoky.ez3d.Screen.*
-import com.ezoky.ezcategory.IO
-import com.ezoky.ezgames.covideo.component.Generate.*
-import com.ezoky.ezgames.covideo.component.HealthCondition.*
 import com.ezoky.ezgames.covideo.component.{Dimension, Identifiable}
 import com.ezoky.ezgames.covideo.entity.{*, given}
-import com.ezoky.ezgames.covideo.system.{KeyboardCommand, UserCommands}
+import com.ezoky.ezgames.covideo.system.{ControlModelStateHolder, KeyboardCommand, UserCommands}
 
 import java.awt.event.{InputEvent, KeyEvent, KeyListener}
-import java.awt.image.BufferedImage as AWTImage
-import java.awt.{Graphics2D, GraphicsDevice, GraphicsEnvironment, Color as AWTColor, Dimension as AWTDimension, EventQueue as AWTEventQueue}
+import java.awt.{Color as AWTColor, Dimension as AWTDimension}
 import javax.swing.border.Border
 import javax.swing.{BorderFactory, JFrame, JPanel, WindowConstants}
 import scala.collection.mutable.Map as MutableMap
@@ -39,22 +35,20 @@ extension (awtDimension: AWTDimension)
       (awtDimension.width == 0)
 
 trait SceneWindows[I: Identifiable, D: Dimension]
-  extends SceneControls[I, D]
-    with Scenes[I, D]
+  extends Scenes[I, D]
     with UserCommands[I, D]:
 
-  import CoordsDimension.given
   import CoordsDimension.Ez3D.*
 
   private[swing] class SceneWindow(userControlConfig: UserControlConfig,
-                                   control: SceneControl)
+                                   control: ControlModelStateHolder)
     extends JFrame:
 
     println("Creating a SceneWindow")
 
     private val panel: DrawingPanel = new DrawingPanel()
     private var panelSize: AWTDimension = new AWTDimension()
-    
+
     def resizeScene(size: ScreenDimension): Unit = {
       val awtSize = size.awtDimension
       if (awtSize != panelSize)
@@ -94,7 +88,7 @@ trait SceneWindows[I: Identifiable, D: Dimension]
     def apply(sceneId: I,
               userControlConfig: UserControlConfig): SceneWindow =
       _SceneWindows.getOrElse(sceneId, {
-        val mainWindow = new SceneWindow(userControlConfig, SceneControl)
+        val mainWindow = new SceneWindow(userControlConfig, ControlModelStateHolder)
         _SceneWindows.addOne(sceneId, mainWindow)
         mainWindow
       })
@@ -106,7 +100,7 @@ trait SceneWindows[I: Identifiable, D: Dimension]
    * Drawing Panel
    */
   private class DrawingPanel()
-    extends JPanel :
+    extends JPanel:
 
     println("Creating a DrawingPanel")
     private var optScene: Option[Scene] = None
@@ -126,8 +120,8 @@ trait SceneWindows[I: Identifiable, D: Dimension]
       for
         scene <- optScene
       yield
-        val pipeline3D = new Pipeline3D(scene.camera, scene)
         g2d.setColor(AWTColor.white)
+        val pipeline3D = new Pipeline3D(scene.camera, scene)
         for
           component <- scene.components
         yield
@@ -183,17 +177,18 @@ trait SceneWindows[I: Identifiable, D: Dimension]
 
 
   class KeyHandler(userControlConfig: UserControlConfig,
-                   control: SceneControl) extends KeyListener:
+                   control: ControlModelStateHolder) extends KeyListener:
 
     given GameControlConfig = userControlConfig.gameConfig
+
     given CameraControlConfig = userControlConfig.cameraConfig
 
     def keyTyped(e: KeyEvent): Unit = {
-  //    displayInfo(e, "KEY TYPED: ")
+      //    displayInfo(e, "KEY TYPED: ")
     }
 
     def keyPressed(e: KeyEvent): Unit = {
-//      displayInfo(e, "KEY PRESSED: ")
+      //      displayInfo(e, "KEY PRESSED: ")
       e.getKeyCode() match
         case KeyEvent.VK_UP =>
           println("UP")
@@ -213,7 +208,7 @@ trait SceneWindows[I: Identifiable, D: Dimension]
     }
 
     def keyReleased(e: KeyEvent): Unit = {
-  //    displayInfo(e, "KEY RELEASED: ")
+      //    displayInfo(e, "KEY RELEASED: ")
     }
 
     private def displayInfo(e: KeyEvent,

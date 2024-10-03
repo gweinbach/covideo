@@ -30,6 +30,8 @@ lazy val root = project
     libraryDependencies += Dependencies.spire,
     // libraryDependencies += Dependencies.`refined-mini`,
 
+    libraryDependencies ++= Dependencies.javafx,
+
     libraryDependencies += Dependencies.Test.`junit-interface`,
     libraryDependencies += Dependencies.Test.scalatest,
     libraryDependencies += Dependencies.Test.scalacheck,

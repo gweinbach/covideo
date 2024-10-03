@@ -1,6 +1,7 @@
 
 package com.ezoky.ezgames.covideo.component.swing
 
+import com.ezoky.ezgames.covideo.assets.Asset
 import com.ezoky.ezgames.covideo.component.{Dimension, Sprites}
 
 import java.awt.Rectangle
@@ -17,14 +18,13 @@ trait SwingSprites[D: Dimension]
   
   import CoordsDimension.*
   
-  case class SwingSprite(asset: AWTImage,
+  case class SwingSprite(image: AWTImage,
+                         definition: SpriteDefinition,
                          position: Position = Position.Zero,
                          previousPosition: Option[Position] = None)
     extends Sprite:
   
     override type ImageType = AWTImage
-  
-    override val image: ImageType = asset
     
     override def moveTo(position: Position): SwingSprite =
       copy(
@@ -33,10 +33,18 @@ trait SwingSprites[D: Dimension]
       )
   
   object SwingSprite:
-  
-    val SmileySunglasses = SwingSprite(Assets.SmileySunglasses)
-    val SmileySick = SwingSprite(Assets.SmileySick)
-  
+
+    def apply(origin: Sprite): SwingSprite =
+      origin match
+        case swingSprite: SwingSprite =>
+          swingSprite
+        case _ =>
+          new SwingSprite(
+            ImageIO.read(origin.definition.image.url),
+            origin.definition,
+            origin.position,
+            origin.previousPosition
+          )
   
     def getNonTransparentArea(image: AWTImage): Area =
       val area = new Area
@@ -50,9 +58,3 @@ trait SwingSprites[D: Dimension]
   
     private def isTransparent(pixel: Int): Boolean =
       (pixel & 0xff000000) != 0
-
-
-private object Assets:
-
-  val SmileySunglasses = ImageIO.read(getClass().getResource("smiley-sunglasses-33x33.png"))
-  val SmileySick = ImageIO.read(getClass().getResource("sick-emoji-33x33.png"))

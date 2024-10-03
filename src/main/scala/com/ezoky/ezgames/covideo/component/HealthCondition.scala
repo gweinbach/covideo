@@ -8,7 +8,7 @@ package com.ezoky.ezgames.covideo.component
  * @author gweinbach on 14/11/2020
  * @since 0.1.0
  */
-trait HealthCondition 
+trait HealthCondition
 
 object HealthCondition:
   

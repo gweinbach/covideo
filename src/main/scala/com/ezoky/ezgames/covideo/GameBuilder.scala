@@ -10,6 +10,7 @@ import MainConfig.{*, given}
 import MainConfig.Everything.{*, given}
 import MainConfig.Everything.CoordsDimension.{*, given}
 import MainConfig.Everything.CoordsDimension.Ez3D.*
+import com.ezoky.ezgames.covideo.assets.Asset
 
 /**
 * @author gweinbach on 03/01/2022
@@ -178,8 +179,13 @@ case class PersonBuilder(area: Box,
       Person(
         solid = solid,
         healthCondition = Healthy,
-        sprite = displaySystem.spriteByHealthCondition(Healthy),
+        sprite = SpriteDefinition(AssetByHealthCondition(Healthy)),
         shape = shape
       )
 
+def AssetByHealthCondition(healthCondition: HealthCondition): Asset =
+  healthCondition match
+    case HealthCondition.Healthy => Asset.SmileySunglasses
+    case HealthCondition.Sick => Asset.SmileySick
+    case _ => Asset.SmileySunglasses
 

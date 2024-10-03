@@ -1,5 +1,6 @@
 package com.ezoky.ezgames.covideo.system
 
+import com.ezoky.ezcategory.IO
 import com.ezoky.ezgames.covideo.component.{Coords, Dimension, Identifiable}
 import spire.*
 import spire.implicits.*
@@ -94,6 +95,52 @@ case class ControlModel(private val controllers: Map[ControlledItem, Controller]
         )
     }
 
+/**
+ * Holds current control model state.
+ * Should be used as a simgleton intialized with initial value of ControlModel.
+ * It should be thread safe (which it is not!)
+ * 
+ * This is not pure at all as iti is aimed to support side effects. 
+ * Every method should be wrapped with IO.
+ * 
+ * @param initialModel
+ */
+class ControlModelStateHolder(initialModel: ControlModel):
+  self =>
+
+  private var model: ControlModel = initialModel
+
+  private case class Callback(notifyMethod: () => Unit):
+    def notifySubscriber: Unit =
+      notifyMethod()
+
+  private var subscribersToUpdate: List[Callback] =
+    List.empty
+
+  def subscribeToUpdates(notifyMethod: () => Unit): Unit =
+    subscribersToUpdate = Callback(notifyMethod) :: subscribersToUpdate
+
+  def getControl(controlledItem: ControlledItem): controlledItem.ItemControlType =
+    model.getControl(controlledItem)
+
+  def updateControl(controlledItem: ControlledItem,
+                    update: controlledItem.ItemControlType => controlledItem.ItemControlType): Unit =
+    self.model = model.updateControl(controlledItem, update)
+       
+  def popModel(item: ControlledItem): IO[ControlModel] =
+    IO {
+      val currentModel = self.model
+      self.model = currentModel.acknowledgeUpdates(item)
+      currentModel
+    }
+    
+  def updateModel(newModel: ControlModel): IO[Unit] =
+    IO {
+      if !newModel.equalsState(self.model) then
+        self.model = newModel
+        subscribersToUpdate.foreach(_.notifySubscriber)
+    }
+
 trait UserCommands[I: Identifiable, D: Dimension : Numeric]
   extends Coords[D]:
 
@@ -132,6 +179,7 @@ trait UserCommands[I: Identifiable, D: Dimension : Numeric]
          _cameraUserControl: UserControl[CameraControl],
          _gameUserControl: UserControl[GameControl]): UserControl[ControlModel] with
     extension (entityControl: ControlModel)
+
       def control(userCommand: UserCommand): ControlModel =
         given GameControlConfig = config.gameConfig
 
@@ -139,9 +187,11 @@ trait UserCommands[I: Identifiable, D: Dimension : Numeric]
 
         given ViewFrustumControlConfig = config.viewFrustumConfig
 
+        // applies user command on every existing control
         val viewFrustumControl = entityControl.getControl(ControlledItem.ViewFrustum).control(userCommand)
         val cameraControl = entityControl.getControl(ControlledItem.Camera).control(userCommand)
         val gameControl = entityControl.getControl(ControlledItem.Game).control(userCommand)
+
         ControlModel(
           gameControl,
           viewFrustumControl,
@@ -196,6 +246,7 @@ trait UserCommands[I: Identifiable, D: Dimension : Numeric]
       override def control(userCommand: UserCommand): ViewFrustumControl =
         userCommand match
           case LifeCycleEvent.DisplayControls =>
+            // this only enforces config
             entityControl
               .withMinNear(config.minNear)
               .withMaxNear(config.maxNear)
@@ -366,3 +417,13 @@ trait UserCommands[I: Identifiable, D: Dimension : Numeric]
           ControlledItem.Camera -> Controller(ControlledItem.Camera, camera)
         )
       )
+      
+    lazy val Initial: ControlModel =
+      ControlModel(
+        GameControl(),
+        ViewFrustumControl(),
+        CameraControl()
+      )
+
+  object ControlModelStateHolder
+    extends ControlModelStateHolder(ControlModel.Initial)

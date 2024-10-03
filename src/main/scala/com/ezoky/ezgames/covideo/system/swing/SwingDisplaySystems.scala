@@ -14,7 +14,6 @@ import com.ezoky.ezgames.covideo.system.{Displays, LifeCycleEvent, ControlledIte
 trait SwingDisplaySystems[I: Identifiable, D: Dimension]
   extends SceneWindows[I, D]
     with ControlWindows[I, D]
-    with SceneControls[I, D]
     with Displays[I, D]
     with Scenes[I, D]
     with Entities[I]
@@ -33,23 +32,12 @@ trait SwingDisplaySystems[I: Identifiable, D: Dimension]
 
       ScreenDimension(screenWidth, screenHeight)
 
-
-    override def popControlModel(item: ControlledItem): IO[ControlModel] =
-      IO {
-        SceneControl.popModel(item)
-      }
-
-    override def updateControlModel(model: ControlModel): IO[Unit] =
-      IO {
-        SceneControl.updateModel(model)
-      }
-
     override def displayControls(): IO[Unit] =
       IO {
         val controlWindow = ControlWindow()
         if !controlWindow.isVisible then
           given ViewFrustumControlConfig = userControlConfig.viewFrustumConfig
-          SceneControl.updateControl(ControlledItem.ViewFrustum, _.control(LifeCycleEvent.DisplayControls))
+          ControlModelStateHolder.updateControl(ControlledItem.ViewFrustum, _.control(LifeCycleEvent.DisplayControls))
 
           controlWindow.display()
       }
@@ -59,7 +47,7 @@ trait SwingDisplaySystems[I: Identifiable, D: Dimension]
         val sceneWindow = SceneWindow(scene.id, userControlConfig)
         if !sceneWindow.isVisible then
           given ViewFrustumControlConfig = userControlConfig.viewFrustumConfig
-          SceneControl.updateControl(ControlledItem.ViewFrustum, _.control(LifeCycleEvent.DisplayScene))
+          ControlModelStateHolder.updateControl(ControlledItem.ViewFrustum, _.control(LifeCycleEvent.DisplayScene))
 
           sceneWindow.display()
           
@@ -75,15 +63,9 @@ trait SwingDisplaySystems[I: Identifiable, D: Dimension]
 
           given ViewFrustumControlConfig = userControlConfig.viewFrustumConfig
 
-          SceneControl.updateControl(ControlledItem.ViewFrustum, _.control(LifeCycleEvent.DisposeControls))
+          ControlModelStateHolder.updateControl(ControlledItem.ViewFrustum, _.control(LifeCycleEvent.DisposeControls))
           ControlWindow().dispose()
 
-          SceneControl.updateControl(ControlledItem.ViewFrustum, _.control(LifeCycleEvent.DisplayScene))
+          ControlModelStateHolder.updateControl(ControlledItem.ViewFrustum, _.control(LifeCycleEvent.DisplayScene))
           SceneWindow.all().map(_.dispose())
       }
-
-    override def spriteByHealthCondition(healthCondition: HealthCondition): Sprite =
-      healthCondition match
-        case HealthCondition.Healthy => SwingSprite.SmileySunglasses
-        case HealthCondition.Sick => SwingSprite.SmileySick
-        case _ => SwingSprite.SmileySunglasses

@@ -6,7 +6,7 @@
 package com.ezoky.ezgames.covideo.system.swing
 
 import com.ezoky.ezgames.covideo.component.{Dimension, Identifiable}
-import com.ezoky.ezgames.covideo.system.Displays
+import com.ezoky.ezgames.covideo.system.{Displays, ControlModelStateHolder}
 import spire.*
 import spire.implicits.*
 import spire.math.{*, given}
@@ -21,12 +21,11 @@ import javax.swing.event.{ChangeEvent, ChangeListener}
  * @author gweinbach on 30/06/2022
  */
 trait ControlWindows[I: Identifiable, D: Dimension : Numeric]
-  extends SceneControls[I, D]
-    with Displays[I, D]:
+  extends Displays[I, D]:
 
   import CoordsDimension.{*, given}
 
-  private[swing] class ControlWindow(control: SceneControl)
+  private[swing] class ControlWindow(control: ControlModelStateHolder)
     extends JFrame:
 
     self =>
@@ -139,7 +138,7 @@ trait ControlWindows[I: Identifiable, D: Dimension : Numeric]
 
   private[swing] object ControlWindow:
 
-    lazy val _ControlWindow = new ControlWindow(SceneControl)
+    lazy val _ControlWindow = new ControlWindow(ControlModelStateHolder)
 
     def apply(): ControlWindow = _ControlWindow
 

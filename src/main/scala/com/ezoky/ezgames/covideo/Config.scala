@@ -23,7 +23,7 @@ object Config:
   private val CameraType = ProjectionType.Perspective
 
   // Population
-  private val PopulationSize = 100
+  private val PopulationSize = 1000
 
   val Area =
     AreaConfig(

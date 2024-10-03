@@ -43,25 +43,15 @@ trait Displays[I: Identifiable, D: Dimension : Numeric]
 
     def displayControls(): IO[Unit]
 
-    def popControlModel(item: ControlledItem): IO[ControlModel]
-
-    def updateControlModel(model: ControlModel): IO[Unit]
-
     def displayScene(scene: Scene): IO[Unit]
 
     def dispose(doDispose: Boolean): IO[Unit]
-
-    /**
-     * Game specific
-     * TODO: extract this to a specific package
-     */
-    def spriteByHealthCondition(healthCondition: HealthCondition): Sprite
-
+  
 
   given (using displaySystem: DisplaySystem): Display[ViewFrustum] with
     extension (viewFrustum: ViewFrustum)
       override def display: IO[ViewFrustum] =
-        displaySystem.popControlModel(ControlledItem.ViewFrustum).flatMap {
+        ControlModelStateHolder.popModel(ControlledItem.ViewFrustum).flatMap {
           controlModel =>
             if !controlModel.isUpdated(ControlledItem.ViewFrustum) then
               IO(viewFrustum)
@@ -88,14 +78,14 @@ trait Displays[I: Identifiable, D: Dimension : Numeric]
                 else
                   controlModelWithNear
 
-              displaySystem.updateControlModel(controlModelWithFar).map(_ => viewFrustumWithFar)
+              ControlModelStateHolder.updateModel(controlModelWithFar).map(_ => viewFrustumWithFar)
         }
 
   given (using DisplaySystem, Display[ViewFrustum]): Display[Camera] with
     extension (camera: Camera)
       override def display: IO[Camera] =
         for
-          controlModel <- summon[DisplaySystem].popControlModel(ControlledItem.Camera)
+          controlModel <- ControlModelStateHolder.popModel(ControlledItem.Camera)
           cameraControl = controlModel.getControl(ControlledItem.Camera)
           movedCamera = camera.move(cameraControl.dx, cameraControl.dy)
           displayedViewFrustum <- movedCamera.viewFrustum.display
@@ -129,12 +119,12 @@ trait Displays[I: Identifiable, D: Dimension : Numeric]
 
         val displaySystem = summon[DisplaySystem]
         for
-          controlModel <- displaySystem.popControlModel(ControlledItem.Game)
+          controlModel <- ControlModelStateHolder.popModel(ControlledItem.Game)
           displayedGameControl =
             controlModel.updateControl(ControlledItem.Game, _.withPopulationSize(demography.population.size))
 
           // side effects
-          _ <- displaySystem.updateControlModel(displayedGameControl)
+          _ <- ControlModelStateHolder.updateModel(displayedGameControl)
         yield
           demography // is not altered by "display"
 
@@ -145,7 +135,7 @@ trait Displays[I: Identifiable, D: Dimension : Numeric]
 
         val displaySystem = summon[DisplaySystem]
         for
-          controlModel <- displaySystem.popControlModel(ControlledItem.Game)
+          controlModel <- ControlModelStateHolder.popModel(ControlledItem.Game)
           gameControl = controlModel.getControl(ControlledItem.Game)
           controlledGame = if gameControl.doExit then
             game.terminate()
