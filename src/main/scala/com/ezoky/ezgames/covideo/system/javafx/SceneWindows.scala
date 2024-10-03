@@ -9,6 +9,7 @@ import javafx.scene.canvas.{Canvas, GraphicsContext}
 import javafx.scene.layout.StackPane
 import javafx.scene.paint.Color
 
+import scala.collection.immutable
 import scala.collection.mutable.Map as MutableMap
 
 
@@ -94,9 +95,9 @@ trait SceneWindows[I: Identifiable, D: Dimension]
 
     private def doDrawing(gc: GraphicsContext): Unit =
 
-//      gc.clearRect(0, 0, getWidth, getHeight)
-//      gc.setFill(Color.BLACK)
-//      gc.fillRect(0, 0, getWidth, getHeight)
+      gc.clearRect(0, 0, getWidth, getHeight)
+      gc.setFill(Color.BLACK)
+      gc.fillRect(0, 0, getWidth, getHeight)
 
       for
         scene <- _optScene

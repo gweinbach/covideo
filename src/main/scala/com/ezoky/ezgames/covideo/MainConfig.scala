@@ -22,28 +22,28 @@ object MainConfig:
   given Identifiable[UUID] = UUIDIdentifiable
 
   object Everything
-    extends SwingGameBootstrap[UUID, Double]
-//    extends JavaFXGameBootstrap[UUID, Double]
+//    extends SwingGameBootstrap[UUID, Double]
+    extends JavaFXGameBootstrap[UUID, Double]
 
   import Everything.DisplaySystem
 
   given DisplaySystem = Everything.displaySystem(Config.UserControl)
 
 
-import com.ezoky.ezgames.covideo.MainConfig.Everything.{*, given}
-import com.ezoky.ezgames.covideo.MainConfig.{*, given}
 
 @main def main: Unit =
   println(msg)
+
+  import com.ezoky.ezgames.covideo.MainConfig.Everything.{*, given}
+  import com.ezoky.ezgames.covideo.MainConfig.{*, given}
 
   val generator = new RandomGenerator()
   val game = GameBuilder(Config.Game).build
 
   new GameLoop(game, step, generator, Config.Loop).start()
-  
 
-def step(game: Generated[Game]): Generated[IO[Game]] =
-  for
-    nextGame <- game.beBornAndDie.evolve
-  yield
-    nextGame.move.accelerate.rotate.angularAccelerate.display
+  def step(game: Generated[Game]): Generated[IO[Game]] =
+    for
+      nextGame <- game.beBornAndDie.evolve
+    yield
+      nextGame.move.accelerate.rotate.angularAccelerate.display
