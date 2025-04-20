@@ -3,6 +3,7 @@ package com.ezoky.ezgames.covideo
 import com.ezoky.ezcategory.IO
 import com.ezoky.ezgames.covideo.component.Generate.*
 import com.ezoky.ezgames.covideo.component.double.DoubleDimension
+import com.ezoky.ezgames.covideo.component.float.FloatDimension
 import com.ezoky.ezgames.covideo.component.{Dimension, Identifiable, UUIDIdentifiable}
 import spire.implicits.*
 
@@ -15,7 +16,7 @@ import java.util.UUID
 
 def msg = s"I was compiled by scala 3 but using scala ${util.Properties.versionNumberString} stdlib :)"
 
-object MainConfig:
+trait DoubleConfig:
 
   given Dimension[Double] = DoubleDimension
 
@@ -23,12 +24,21 @@ object MainConfig:
 
   object Everything
 //    extends SwingGameBootstrap[UUID, Double]
-    extends JavaFXGameBootstrap[UUID, Double]
+      extends JavaFXGameBootstrap[UUID, Double]
 
-  import Everything.DisplaySystem
 
-  given DisplaySystem = Everything.displaySystem(Config.UserControl)
+trait FloatConfig:
 
+  given Dimension[Float] = FloatDimension
+
+  given Identifiable[UUID] = UUIDIdentifiable
+
+  object Everything
+    extends SwingGameBootstrap[UUID, Float]
+  //    extends JavaFXGameBootstrap[UUID, Float]
+
+
+object MainConfig extends DoubleConfig
 
 
 @main def main: Unit =
@@ -36,6 +46,8 @@ object MainConfig:
 
   import com.ezoky.ezgames.covideo.MainConfig.Everything.{*, given}
   import com.ezoky.ezgames.covideo.MainConfig.{*, given}
+
+  given DisplaySystem = Everything.displaySystem(Config.UserControl)
 
   val generator = new RandomGenerator()
   val game = GameBuilder(Config.Game).build

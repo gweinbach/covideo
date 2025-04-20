@@ -152,27 +152,27 @@ class DemographyTest extends AnyFlatSpec:
     assert(iterate(variableOnceProfile, 11) === List(false, true, false, false, true, false, false, false, false, false, false))
     assert(iterate(variableRepeatProfile, 11) === List(false, true, false, false, true, false, true, false, false, true, false))
 
-    assert(iterate(variableOnceProfile + zeroProfile, 11) === List(false, true, false, false, true, false, false, false, false, false, false))
-    assert(iterate(variableOnceProfile + oneShotProfile, 11) === List(true, true, false, false, true, false, false, false, false, false, false))
-    assert(iterate(variableOnceProfile + flatProfile, 11) === List(true, true, true, true, true, true, true, true, true, true, true))
+    assert(iterate(variableOnceProfile or zeroProfile, 11) === List(false, true, false, false, true, false, false, false, false, false, false))
+    assert(iterate(variableOnceProfile or oneShotProfile, 11) === List(true, true, false, false, true, false, false, false, false, false, false))
+    assert(iterate(variableOnceProfile or flatProfile, 11) === List(true, true, true, true, true, true, true, true, true, true, true))
 
-    assert(iterate(variableRepeatProfile + zeroProfile, 11) === List(false, true, false, false, true, false, true, false, false, true, false))
-    assert(iterate(variableRepeatProfile + oneShotProfile, 11) === List(true, true, false, false, true, false, true, false, false, true, false))
-    assert(iterate(variableRepeatProfile + flatProfile, 11) === List(true, true, true, true, true, true, true, true, true, true, true))
+    assert(iterate(variableRepeatProfile or zeroProfile, 11) === List(false, true, false, false, true, false, true, false, false, true, false))
+    assert(iterate(variableRepeatProfile or oneShotProfile, 11) === List(true, true, false, false, true, false, true, false, false, true, false))
+    assert(iterate(variableRepeatProfile or flatProfile, 11) === List(true, true, true, true, true, true, true, true, true, true, true))
 
-    assert(iterate(variableOnceProfile + variableRepeatProfile, 11) === List(false, true, false, false, true, false, true, false, false, true, false))
-    assert(iterate(variableOnceProfile + variableRepeatProfile + oneShotProfile, 11) === List(true, true, false, false, true, false, true, false, false, true, false))
+    assert(iterate(variableOnceProfile or variableRepeatProfile, 11) === List(false, true, false, false, true, false, true, false, false, true, false))
+    assert(iterate(variableOnceProfile or variableRepeatProfile or oneShotProfile, 11) === List(true, true, false, false, true, false, true, false, false, true, false))
 
-    assert(iterate(variableOnceProfile * zeroProfile, 11) === List(false, false, false, false, false, false, false, false, false, false, false))
-    assert(iterate(variableOnceProfile * oneShotProfile, 11) === List(false, false, false, false, false, false, false, false, false, false, false))
-    assert(iterate(variableOnceProfile * flatProfile, 11) === List(false, true, false, false, true, false, false, false, false, false, false))
+    assert(iterate(variableOnceProfile and zeroProfile, 11) === List(false, false, false, false, false, false, false, false, false, false, false))
+    assert(iterate(variableOnceProfile and oneShotProfile, 11) === List(false, false, false, false, false, false, false, false, false, false, false))
+    assert(iterate(variableOnceProfile and flatProfile, 11) === List(false, true, false, false, true, false, false, false, false, false, false))
 
-    assert(iterate(variableRepeatProfile * zeroProfile, 11) === List(false, false, false, false, false, false, false, false, false, false, false))
-    assert(iterate(variableRepeatProfile * oneShotProfile, 11) === List(false, false, false, false, false, false, false, false, false, false, false))
-    assert(iterate(variableRepeatProfile * flatProfile, 11) === List(false, true, false, false, true, false, true, false, false, true, false))
+    assert(iterate(variableRepeatProfile and zeroProfile, 11) === List(false, false, false, false, false, false, false, false, false, false, false))
+    assert(iterate(variableRepeatProfile and oneShotProfile, 11) === List(false, false, false, false, false, false, false, false, false, false, false))
+    assert(iterate(variableRepeatProfile and flatProfile, 11) === List(false, true, false, false, true, false, true, false, false, true, false))
 
-    assert(iterate(variableOnceProfile * variableRepeatProfile, 11) === List(false, true, false, false, true, false, false, false, false, false, false))
-    assert(iterate(variableOnceProfile * variableRepeatProfile * oneShotProfile, 11) === List(false, false, false, false, false, false, false, false, false, false, false))
+    assert(iterate(variableOnceProfile and variableRepeatProfile, 11) === List(false, true, false, false, true, false, false, false, false, false, false))
+    assert(iterate(variableOnceProfile and variableRepeatProfile and oneShotProfile, 11) === List(false, false, false, false, false, false, false, false, false, false, false))
   }
 
   "birth" should "generate new entities" in {

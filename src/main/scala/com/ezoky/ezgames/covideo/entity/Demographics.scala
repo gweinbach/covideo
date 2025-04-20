@@ -18,13 +18,13 @@ trait Demographics[I: Identifiable]
 
     protected lazy val profile: LazyList[Boolean]
 
-    @targetName("addProfile")
-    infix def +(other: PopulationDynamicsProfile): PopulationDynamicsProfile =
-      PopulationDynamicsProfile.add(this, other)
+    @targetName("orProfile")
+    infix def or(other: PopulationDynamicsProfile): PopulationDynamicsProfile =
+      PopulationDynamicsProfile.or(this, other)
 
-    @targetName("multiplyProfile")
-    infix def *(other: PopulationDynamicsProfile): PopulationDynamicsProfile =
-      PopulationDynamicsProfile.multiply(this, other)
+    @targetName("andProfile")
+    infix def and(other: PopulationDynamicsProfile): PopulationDynamicsProfile =
+      PopulationDynamicsProfile.and(this, other)
 
   object PopulationDynamicsProfile:
 
@@ -39,12 +39,12 @@ trait Demographics[I: Identifiable]
 
       override protected lazy val profile: LazyList[Boolean] = LazyList()
 
-    def add(profile1: PopulationDynamicsProfile,
-            profile2: PopulationDynamicsProfile): PopulationDynamicsProfile =
+    def or(profile1: PopulationDynamicsProfile,
+           profile2: PopulationDynamicsProfile): PopulationDynamicsProfile =
       Variable.once(profile1.profile.zipAll(profile2.profile, false, false).map(p => p._1 || p._2))
 
-    def multiply(profile1: PopulationDynamicsProfile,
-                 profile2: PopulationDynamicsProfile): PopulationDynamicsProfile =
+    def and(profile1: PopulationDynamicsProfile,
+            profile2: PopulationDynamicsProfile): PopulationDynamicsProfile =
       Variable.once(profile1.profile.zipAll(profile2.profile, false, false).map(p => p._1 && p._2))
 
     /**
