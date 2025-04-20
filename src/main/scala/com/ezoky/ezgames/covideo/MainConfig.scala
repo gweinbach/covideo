@@ -23,8 +23,8 @@ trait DoubleConfig:
   given Identifiable[UUID] = UUIDIdentifiable
 
   object Everything
-//    extends SwingGameBootstrap[UUID, Double]
-      extends JavaFXGameBootstrap[UUID, Double]
+    extends SwingGameBootstrap[UUID, Double]
+//      extends JavaFXGameBootstrap[UUID, Double]
 
 
 trait FloatConfig:
@@ -58,4 +58,5 @@ object MainConfig extends DoubleConfig
     for
       nextGame <- game.beBornAndDie.evolve
     yield
+//      nextGame.move.rotate.display
       nextGame.move.accelerate.rotate.angularAccelerate.display
